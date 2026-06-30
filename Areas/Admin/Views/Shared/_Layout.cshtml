@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin TVT PC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+    <script>
+        tailwind.config = {
+        theme: {
+        extend: {
+        colors: {
+        brand: {
+        50: '#F0F4FF',
+        100: '#D9E2FF',
+        200: '#A6C1FF',
+        300: '#598BFF',
+        400: '#3366FF',
+        500: '#1A4BFF',
+        600: '#0033CC',
+        700: '#002699',
+        800: '#001A66',
+        900: '#000D33',
+        },
+        admin: {
+        50: '#F8FAFC',
+        100: '#F1F5F9',
+        200: '#E2E8F0',
+        300: '#CBD5E1',
+        400: '#94A3B8',
+        500: '#64748B',
+        600: '#475569',
+        700: '#334155',
+        800: '#1E293B',
+        900: '#0F172A',
+        }
+        },
+        fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        }
+        }
+        }
+        }
+    </script>
+</head>
+
+<body class="flex h-screen bg-admin-50 overflow-hidden font-sans">
+
+    @await Html.PartialAsync("_ToastNotification")
+
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="hidden lg:flex lg:flex-col w-64 bg-admin-900 text-admin-100 flex-shrink-0">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-admin-700">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-bold text-base">TVT PC</span>
+                    <span class="text-xs text-admin-400 font-medium block leading-tight">Admin Panel</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <!-- Dashboard -->
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Tổng quan
+            </a>
+
+            <!-- Products -->
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Sản phẩm
+            </a>
+
+            <!-- Create Product -->
+            <a asp-area="Admin" asp-controller="Product" asp-action="Create"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Thêm sản phẩm
+            </a>
+
+            <!-- Categories -->
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Danh mục
+            </a>
+
+            <!-- Divider -->
+            <hr class="border-admin-700 my-4" />
+
+            <!-- Back to site -->
+            <a asp-area="" asp-controller="Home" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Về trang chủ
+            </a>
+        </nav>
+
+        <!-- User info bottom -->
+        <div class="px-4 py-4 border-t border-admin-700">
+            <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+                <button type="submit"
+                        class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-red-400 hover:bg-admin-700 transition-all duration-200 cursor-pointer">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ====== MAIN AREA ====== -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+        <!-- Top bar (mobile) -->
+        <header class="lg:hidden bg-white border-b border-admin-200 px-4 h-16 flex items-center justify-between">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <span class="font-bold text-admin-800">TVT PC Admin</span>
+            </a>
+            <button id="mobile-sidebar-toggle" type="button"
+                    class="p-2 rounded-lg text-admin-500 hover:text-admin-700 hover:bg-admin-100 transition-all duration-200 cursor-pointer"
+                    aria-label="Mở menu">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobile-sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black/50 lg:hidden"></div>
+        <aside id="mobile-sidebar"
+               class="fixed top-0 left-0 z-50 h-full w-72 bg-admin-900 text-admin-100 transform -translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+            <div class="h-16 flex items-center justify-between px-6 border-b border-admin-700">
+                <span class="font-bold text-base">TVT PC Admin</span>
+                <button id="mobile-sidebar-close" type="button"
+                        class="p-1 rounded-lg text-admin-400 hover:text-white transition-colors cursor-pointer"
+                        aria-label="Đóng menu">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <nav class="py-4 px-3 space-y-1">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                    Tổng quan
+                </a>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                    Sản phẩm
+                </a>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Create"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                    Thêm sản phẩm
+                </a>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                    Danh mục
+                </a>
+                <hr class="border-admin-700 my-3" />
+                <a asp-area="" asp-controller="Home" asp-action="Index"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
+                    Về trang chủ
+                </a>
+                <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+                    <button type="submit"
+                            class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-red-400 hover:bg-admin-700 transition-all duration-200 cursor-pointer">
+                        Đăng xuất
+                    </button>
+                </form>
+            </nav>
+        </aside>
+
+        <!-- Page content -->
+        <main class="flex-1 overflow-y-auto bg-admin-50">
+            <div class="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Mobile sidebar toggle
+        var toggleBtn = document.getElementById('mobile-sidebar-toggle');
+        var closeBtn = document.getElementById('mobile-sidebar-close');
+        var sidebar = document.getElementById('mobile-sidebar');
+        var overlay = document.getElementById('mobile-sidebar-overlay');
+
+        function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        }
+
+        toggleBtn?.addEventListener('click', openSidebar);
+        closeBtn?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+    </script>
+</body>
+
+</html>
