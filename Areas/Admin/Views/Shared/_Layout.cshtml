@@ -139,7 +139,7 @@
 
         <!-- User info bottom -->
         <div class="px-4 py-4 border-t border-admin-700">
-            <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+            <form action="/Auth/Logout" method="post">
                 <button type="submit"
                         class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-red-400 hover:bg-admin-700 transition-all duration-200 cursor-pointer">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -213,7 +213,7 @@
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-white hover:bg-admin-700 transition-all duration-200">
                     Về trang chủ
                 </a>
-                <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+                <form action="/Auth/Logout" method="post">
                     <button type="submit"
                             class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-admin-300 hover:text-red-400 hover:bg-admin-700 transition-all duration-200 cursor-pointer">
                         Đăng xuất

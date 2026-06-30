@@ -31,11 +31,12 @@ public class AuthController : Controller
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
-            if (User.IsInRole("Admin"))
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", new { area = "" });
         }
         TempData["ToastType"] = "error";
         TempData["ToastMessage"] = "Email hoặc mật khẩu không đúng. Vui lòng thử lại.";
@@ -66,7 +67,7 @@ public class AuthController : Controller
         {
             TempData["ToastType"] = "success";
             TempData["ToastMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
-            return RedirectToAction("Login", "Auth");
+            return RedirectToAction("Login", "Auth", new { area = "" });
         }
         foreach (var error in result.Errors)
         {
@@ -76,13 +77,19 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Logout()
     {
-        // Handle logout logic here
         await _signInManager.SignOutAsync();
         TempData["ToastType"] = "info";
         TempData["ToastMessage"] = "Bạn đã đăng xuất thành công.";
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Home", new { area = "" });
+    }
+
+    [HttpGet]
+    public IActionResult LogoutGet()
+    {
+        return RedirectToAction("Login", "Auth", new { area = "" });
     }
 
     public IActionResult ForgotPassword() => View();
@@ -110,7 +117,7 @@ public class AuthController : Controller
             <p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>
             """);
         }
-        return RedirectToAction("ForgotPasswordConfirmation", "Auth");
+        return RedirectToAction("ForgotPasswordConfirmation", "Auth", new { area = "" });
     }
 
     public IActionResult ForgotPasswordConfirmation() => View();
@@ -120,7 +127,7 @@ public class AuthController : Controller
     {
         if (token == null || email == null)
         {
-            return RedirectToAction("Login", "Auth");
+            return RedirectToAction("Login", "Auth", new { area = "" });
         }
 
         var model = new ResetPasswordViewModels
@@ -140,13 +147,13 @@ public class AuthController : Controller
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
         {
-            return RedirectToAction("ResetPasswordConfirmation", "Auth");
+            return RedirectToAction("ResetPasswordConfirmation", "Auth", new { area = "" });
         }
 
         var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
         if (result.Succeeded)
         {
-            return RedirectToAction("ResetPasswordConfirmation", "Auth");
+            return RedirectToAction("ResetPasswordConfirmation", "Auth", new { area = "" });
         }
 
         foreach (var error in result.Errors)
