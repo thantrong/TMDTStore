@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace TMDTStore.Models;
 
-public partial class StoreDbContext : DbContext
+public partial class StoreDbContext : IdentityDbContext<User>
 {
     public StoreDbContext()
     {
@@ -35,14 +36,16 @@ public partial class StoreDbContext : DbContext
 
     public virtual DbSet<Review> Reviews { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
+    public new virtual DbSet<Role> Roles { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public new virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Voucher> Vouchers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder
             .HasPostgresEnum("discount_type", new[] { "fixed", "percentage" })
             .HasPostgresEnum("order_status", new[] { "pending", "paid", "shipping", "completed", "cancelled_auto", "cancelled_by_user" })
@@ -366,97 +369,7 @@ public partial class StoreDbContext : DbContext
                 .HasConstraintName("fk_reviews_users_user_id");
         });
 
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("pk_roles");
-
-            entity.ToTable("roles");
-
-            entity.Property(e => e.Id)
-                .HasMaxLength(20)
-                .HasDefaultValueSql("('ROLE_'::text || lpad((nextval('role_id_seq'::regclass))::text, 2, '0'::text))")
-                .HasColumnName("id");
-            entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Name).HasColumnName("name");
-
-            entity.HasMany(d => d.Permissions).WithMany(p => p.Roles)
-                .UsingEntity<Dictionary<string, object>>(
-                    "RolePermission",
-                    r => r.HasOne<Permission>().WithMany()
-                        .HasForeignKey("PermissionId")
-                        .HasConstraintName("fk_role_permissions_permissions_permission_id"),
-                    l => l.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .HasConstraintName("fk_role_permissions_roles_role_id"),
-                    j =>
-                    {
-                        j.HasKey("RoleId", "PermissionId").HasName("pk_role_permissions");
-                        j.ToTable("role_permissions");
-                        j.HasIndex(new[] { "PermissionId" }, "ix_role_permissions_permission_id");
-                        j.IndexerProperty<string>("RoleId")
-                            .HasMaxLength(20)
-                            .HasColumnName("role_id");
-                        j.IndexerProperty<string>("PermissionId")
-                            .HasMaxLength(20)
-                            .HasColumnName("permission_id");
-                    });
-        });
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("pk_users");
-
-            entity.ToTable("users");
-
-            entity.HasIndex(e => e.Email, "ix_users_email").IsUnique();
-
-            entity.Property(e => e.Id)
-                .HasMaxLength(20)
-                .HasDefaultValueSql("('USER_'::text || lpad((nextval('user_id_seq'::regclass))::text, 3, '0'::text))")
-                .HasColumnName("id");
-            entity.Property(e => e.AvatarUrl).HasColumnName("avatar_url");
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.Email).HasColumnName("email");
-            entity.Property(e => e.EmailConfirmationToken)
-                .HasMaxLength(200)
-                .HasColumnName("email_confirmation_token");
-            entity.Property(e => e.EmailConfirmationTokenExpiresAt).HasColumnName("email_confirmation_token_expires_at");
-            entity.Property(e => e.EmailConfirmed)
-                .HasDefaultValue(false)
-                .HasColumnName("email_confirmed");
-            entity.Property(e => e.FailedLoginAttempts)
-                .HasDefaultValue(0)
-                .HasColumnName("failed_login_attempts");
-            entity.Property(e => e.FullName).HasColumnName("full_name");
-            entity.Property(e => e.IsActive)
-                .HasDefaultValue(true)
-                .HasColumnName("is_active");
-            entity.Property(e => e.LockoutEnd).HasColumnName("lockout_end");
-            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
-            entity.Property(e => e.PhoneNumber).HasColumnName("phone_number");
-
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserRole",
-                    r => r.HasOne<Role>().WithMany()
-                        .HasForeignKey("RoleId")
-                        .HasConstraintName("fk_user_roles_roles_role_id"),
-                    l => l.HasOne<User>().WithMany()
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_user_roles_users_user_id"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId").HasName("pk_user_roles");
-                        j.ToTable("user_roles");
-                        j.HasIndex(new[] { "RoleId" }, "ix_user_roles_role_id");
-                        j.IndexerProperty<string>("UserId")
-                            .HasMaxLength(20)
-                            .HasColumnName("user_id");
-                        j.IndexerProperty<string>("RoleId")
-                            .HasMaxLength(20)
-                            .HasColumnName("role_id");
-                    });
-        });
+        // User & Role configuration handled by IdentityDbContext
 
         modelBuilder.Entity<Voucher>(entity =>
         {

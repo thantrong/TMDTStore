@@ -1,29 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Microsoft.AspNetCore.Identity;
 namespace TMDTStore.Models;
 
-public partial class User
+public partial class User : IdentityUser
 {
-    public string Id { get; set; } = null!;
-
-    public string Email { get; set; } = null!;
-
-    public string PasswordHash { get; set; } = null!;
 
     public string FullName { get; set; } = null!;
-
-    public string? PhoneNumber { get; set; }
 
     public string? AvatarUrl { get; set; }
 
     public bool? IsActive { get; set; }
-
-    public bool EmailConfirmed { get; set; }
-
-    public int FailedLoginAttempts { get; set; }
-
-    public DateTime? LockoutEnd { get; set; }
 
     public string? EmailConfirmationToken { get; set; }
 
@@ -37,5 +24,4 @@ public partial class User
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 }
