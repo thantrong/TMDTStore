@@ -1,4 +1,5 @@
 namespace TMDTStore.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
 using TMDTStore.Models;
 using TMDTStore.Models.ViewModels.Product;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Identity;
 public class ProductController : Controller
 {
     private readonly ICloudinaryService _cloudinaryService;
-    private readonly  StoreDbContext _context;
+    private readonly StoreDbContext _context;
 
     public ProductController(ICloudinaryService cloudinaryService, StoreDbContext context)
     {
@@ -20,7 +21,7 @@ public class ProductController : Controller
 
     // GET: /Product
     [HttpGet]
-    public async Task<IActionResult> Index( ProductListViewModels model)
+    public async Task<IActionResult> Index(ProductListViewModels model)
     {
         model.Categories = await _context.Categories.ToListAsync();
 
@@ -40,7 +41,7 @@ public class ProductController : Controller
         {
             query = query.Where(p => p.Name.Contains(model.SearchQuery));
         }
-        if(string.IsNullOrEmpty(model.BrandName) == false)
+        if (string.IsNullOrEmpty(model.BrandName) == false)
         {
             query = query.Where(p => p.BrandName.Contains(model.BrandName));
         }
@@ -70,5 +71,20 @@ public class ProductController : Controller
 
     // GET: /Product/Details/{id}
     [HttpGet]
-    public async Task<IActionResult> Details(string id) => View(await _context.Products.FirstOrDefaultAsync(p => p.Id == id));
+    public async Task<IActionResult> Details(string id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Inventory)
+            .Include(p => p.ProductBadges)
+            .Include(p => p.Reviews)
+            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+        return View(product);
+    }
+
 }
