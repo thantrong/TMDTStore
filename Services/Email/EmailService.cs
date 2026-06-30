@@ -1,4 +1,4 @@
-namespace TMDTStore.Services;
+namespace TMDTStore.Services.Email;
 using System.Net;
 using System.Net.Mail;
 

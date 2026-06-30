@@ -41,7 +41,6 @@ public class AccountController : Controller
             Email = user.Email ?? "",
             PhoneNumber = user.PhoneNumber,
             AvatarUrl = user.AvatarUrl,
-            CreatedAt = user.CreatedAt
         };
         return View(model);
     }

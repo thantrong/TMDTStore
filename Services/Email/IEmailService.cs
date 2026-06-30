@@ -1,4 +1,4 @@
-namespace TMDTStore.Services;
+namespace TMDTStore.Services.Email;
 
 public interface IEmailService
 {

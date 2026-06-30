@@ -20,8 +20,4 @@ public class ProfileViewModels
     [Display(Name = "Ảnh đại diện (URL)")]
     [Url(ErrorMessage = "URL không hợp lệ.")]
     public string? AvatarUrl { get; set; }
-
-    [Display(Name = "Ngày tham gia")]
-    [DataType(DataType.DateTime)]
-    public DateTime? CreatedAt { get; set; }
 }
