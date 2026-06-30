@@ -1,4 +1,5 @@
 namespace TMDTStore.Services.Cloudinary;
+
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +19,7 @@ public class CloudinaryService : ICloudinaryService
         _cloudinary = new Cloudinary(account);
     }
 
-    public async Task<string> UploadImageAsync(IFormFile file)
+    public async Task<string> UploadImageAsync(IFormFile file, string? folder = null)
     {
         if (file.Length > 0)
         {
@@ -26,11 +27,12 @@ public class CloudinaryService : ICloudinaryService
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, stream),
+                Folder = folder,
                 Transformation = new Transformation().Quality("auto").FetchFormat("auto")
             };
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            return uploadResult.SecureUrl.ToString();
+            return uploadResult.SecureUrl?.ToString() ?? string.Empty;
         }
         return string.Empty;
     }

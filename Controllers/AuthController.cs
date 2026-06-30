@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using TMDTStore.Models;
 using Microsoft.AspNetCore.Identity;
 using TMDTStore.Models.ViewModels;
-using TMDTStore.Services;
+using TMDTStore.Services.Email;
 using System.Threading.Tasks;
 
 public class AuthController : Controller
