@@ -1,0 +1,4 @@
+/* Custom styles - Tailwind CSS handles the rest */
+html {
+  scroll-behavior: smooth;
+}
