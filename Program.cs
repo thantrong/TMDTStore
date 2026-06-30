@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using TMDTStore.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<StoreDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
