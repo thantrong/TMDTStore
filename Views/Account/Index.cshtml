@@ -1,0 +1,77 @@
+@model TMDTStore.Models.User
+
+@{
+    ViewData["Title"] = "Tài khoản của tôi";
+}
+
+<div class="max-w-4xl mx-auto py-8">
+    <!-- Header -->
+    <div class="flex items-center gap-6 mb-8">
+        <div
+            class="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-3xl font-bold text-indigo-600 overflow-hidden flex-shrink-0">
+            @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+            {
+                <img src="@Model.AvatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+            }
+            else
+            {
+                @Model.FullName[..1].ToUpper()
+            }
+        </div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Xin chào, @Model.FullName</h1>
+            <p class="text-gray-500">@Model.Email</p>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a asp-action="Profile"
+           class="block bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition">
+            <div class="text-3xl mb-3">👤</div>
+            <h3 class="font-semibold text-gray-900">Thông tin cá nhân</h3>
+            <p class="text-sm text-gray-500 mt-1">Cập nhật họ tên, số điện thoại, ảnh đại diện</p>
+        </a>
+
+        <a asp-action="ChangePassword"
+           class="block bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition">
+            <div class="text-3xl mb-3">🔒</div>
+            <h3 class="font-semibold text-gray-900">Đổi mật khẩu</h3>
+            <p class="text-sm text-gray-500 mt-1">Thay đổi mật khẩu đăng nhập</p>
+        </a>
+
+        <a href="#"
+           class="block bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition opacity-60 cursor-not-allowed">
+            <div class="text-3xl mb-3">📦</div>
+            <h3 class="font-semibold text-gray-900">Đơn hàng của tôi</h3>
+            <p class="text-sm text-gray-500 mt-1">Xem lịch sử mua hàng (sắp ra mắt)</p>
+        </a>
+    </div>
+
+    <!-- Thông tin nhanh -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Thông tin nhanh</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-gray-500">Số điện thoại:</span>
+                <span class="ml-2 text-gray-900">@(Model.PhoneNumber ?? "Chưa cập nhật")</span>
+            </div>
+            <div>
+                <span class="text-gray-500">Email xác nhận:</span>
+                <span class="ml-2 @(Model.EmailConfirmed ? "text-green-600" : "text-yellow-600")">
+                    @(Model.EmailConfirmed ? "Đã xác nhận" : "Chưa xác nhận")
+                </span>
+            </div>
+            <div>
+                <span class="text-gray-500">Ngày tham gia:</span>
+                <span class="ml-2 text-gray-900">@(Model.CreatedAt?.ToString("dd/MM/yyyy") ?? "---")</span>
+            </div>
+            <div>
+                <span class="text-gray-500">Trạng thái:</span>
+                <span class="ml-2 @(Model.IsActive == true ? "text-green-600" : "text-red-600")">
+                    @(Model.IsActive == true ? "Hoạt động" : "Đã khoá")
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

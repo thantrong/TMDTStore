@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body class="flex flex-col min-h-screen bg-gray-50">
 
     @await Html.PartialAsync("_ToastNotification")
@@ -17,61 +19,151 @@
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <a class="text-2xl font-bold text-indigo-600 tracking-tight" asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="text-2xl font-bold text-indigo-600 tracking-tight" asp-area="" asp-controller="Home"
+                   asp-action="Index">
                     TMDTStore
                 </a>
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a class="text-gray-700 hover:text-indigo-600 font-medium transition-colors" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    <a class="text-gray-700 hover:text-indigo-600 font-medium transition-colors" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    <a class="text-gray-700 hover:text-indigo-600 font-medium transition-colors" asp-area=""
+                       asp-controller="Home" asp-action="Index">Home</a>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <!-- User dropdown -->
+                        <div class="relative" id="user-dropdown-container">
+                            <button id="user-dropdown-btn"
+                                    class="flex items-center gap-2 text-gray-700 hover:text-indigo-600 font-medium transition-colors">
+                                <span
+                                    class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                                    @(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpper() : "?")
+                                </span>
+                                <span class="max-w-[120px] truncate">@(User.Identity?.Name ?? "User")</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="user-dropdown-menu"
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden z-50">
+                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                   asp-controller="Account" asp-action="Index">
+                                    👤 Tài khoản của tôi
+                                </a>
+                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                   asp-controller="Account" asp-action="Profile">
+                                    ⚙️ Thông tin cá nhân
+                                </a>
+                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                   asp-controller="Account" asp-action="ChangePassword">
+                                    🔒 Đổi mật khẩu
+                                </a>
+                                <hr class="my-2 border-gray-100" />
+                                <form asp-controller="Auth" asp-action="Logout" method="post" class="block">
+                                    <button type="submit"
+                                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        🚪 Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="text-gray-700 hover:text-indigo-600 font-medium transition-colors" asp-controller="Auth"
+                           asp-action="Register">Đăng ký</a>
+                        <a class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                           asp-controller="Auth" asp-action="Login">Đăng nhập</a>
+                    }
                 </div>
 
                 <!-- Mobile menu button -->
-                <button id="menu-toggle" type="button" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none" aria-label="Toggle navigation">
+                <button id="menu-toggle" type="button"
+                        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none"
+                        aria-label="Toggle navigation">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
             </div>
 
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="hidden md:hidden pb-4 space-y-2">
-                <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-            </div>
-        </nav>
-    </header>
+                <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                   asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                       asp-controller="Account" asp-action="Index">👤 Tài khoản</a>
+                    <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                       asp-controller="Account" asp-action="Profile">⚙️ Thông tin</a>
+                    <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                       asp-controller="Account" asp-action="ChangePassword">🔒 Đổi mật khẩu</a>
+                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                        <button type="submit"
+                                class="w-full text-left px-3 py-2 rounded-md text-red-600 hover:bg-red-50 font-medium transition-colors">🚪
+                            Đăng xuất</button>
+                        </form>
+                    }
+                else
+                    {
+                        <a class="block px-3 py-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 font-medium transition-colors"
+                           asp-controller="Auth" asp-action="Register">Đăng ký</a>
+                        <a class="block px-3 py-2 rounded-md text-indigo-600 hover:bg-indigo-50 font-medium transition-colors"
+                           asp-controller="Auth" asp-action="Login">Đăng nhập</a>
+                    }
+                </div>
+            </nav>
+        </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        @RenderBody()
-    </main>
+        <!-- Main Content -->
+        <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+            @RenderBody()
+        </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-gray-500 text-sm">
-                    &copy; 2026 TMDTStore. All rights reserved.
-                </p>
-                <div class="flex space-x-6 text-sm">
-                    <a class="text-gray-500 hover:text-indigo-600 transition-colors" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    <a class="text-gray-500 hover:text-indigo-600 transition-colors" href="#">Terms</a>
-                    <a class="text-gray-500 hover:text-indigo-600 transition-colors" href="#">Contact</a>
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-gray-500 text-sm">
+                        &copy; 2026 TMDTStore. All rights reserved.
+                    </p>
+                    <div class="flex space-x-6 text-sm">
+                        <a class="text-gray-500 hover:text-indigo-600 transition-colors" asp-area="" asp-controller="Home"
+                           asp-action="Privacy">Privacy</a>
+                        <a class="text-gray-500 hover:text-indigo-600 transition-colors" href="#">Terms</a>
+                        <a class="text-gray-500 hover:text-indigo-600 transition-colors" href="#">Contact</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
 
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @await RenderSectionAsync("Scripts", required: false)
 
-    <!-- Mobile menu toggle script -->
-    <script>
-        document.getElementById('menu-toggle')?.addEventListener('click', function () {
+        <!-- Mobile menu toggle script -->
+        <script>
+            document.getElementById('menu-toggle')?.addEventListener('click', function () {
             document.getElementById('mobile-menu')?.classList.toggle('hidden');
-        });
-    </script>
-</body>
+            });
+
+            // User dropdown toggle
+            document.getElementById('user-dropdown-btn')?.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.getElementById('user-dropdown-menu')?.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+            var container = document.getElementById('user-dropdown-container');
+            var menu = document.getElementById('user-dropdown-menu');
+            if (container && menu && !container.contains(e.target)) {
+            menu.classList.add('hidden');
+            }
+            });
+        </script>
+    </body>
+
 </html>
