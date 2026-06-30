@@ -3,6 +3,8 @@ using TMDTStore.Models;
 using Microsoft.AspNetCore.Identity;
 using TMDTStore.Services.Email;
 using TMDTStore.Services.Cloudinary;
+using TMDTStore.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<StoreDbContext>(options =>
@@ -39,7 +41,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Product}/{action=Index}/{id?}");
+
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+    await DbInitializer.InitializeAsync(userManager, roleManager);
+}
 
 app.Run();
