@@ -31,10 +31,19 @@ public class AuthController : Controller
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+            }
             return RedirectToAction("Index", "Home");
         }
         TempData["ToastType"] = "error";
         TempData["ToastMessage"] = "Email hoặc mật khẩu không đúng. Vui lòng thử lại.";
+        if (result.IsLockedOut)
+        {
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Tài khoản của bạn đã bị khóa. Vui lòng thử lại sau.";
+        }
         return View(model);
     }
     public IActionResult Register() => View();
