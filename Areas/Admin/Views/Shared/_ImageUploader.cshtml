@@ -1,0 +1,131 @@
+@{
+    var existingImagesJson = ViewBag.ExistingImageUrlsJson as string ?? "[]";
+    var fieldName = ViewBag.ImageFieldName as string ?? "ImageFiles";
+}
+
+<div id="image-uploader" class="space-y-3">
+    <label class="block text-sm font-medium text-admin-700 mb-1">Ảnh sản phẩm</label>
+    <p class="text-xs text-admin-400 mb-2">Chọn nhiều ảnh cùng lúc. Kéo thả để sắp xếp thứ tự.</p>
+
+    <!-- Drop zone -->
+    <label for="image-input"
+           class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-admin-200 rounded-xl bg-admin-50 hover:bg-admin-100 hover:border-brand-400 cursor-pointer transition-all duration-200">
+        <svg class="w-8 h-8 text-admin-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+             stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <p class="text-sm text-admin-400 font-medium">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+        <p class="text-xs text-admin-300 mt-0.5">JPG, PNG, WebP — tối đa 10MB/ảnh</p>
+        <input id="image-input" type="file" name="@fieldName" multiple accept="image/jpeg,image/png,image/webp"
+               class="hidden" />
+    </label>
+
+    <!-- Preview grid -->
+    <div id="image-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3"
+         data-existing='@existingImagesJson'>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var previewGrid = document.getElementById('image-preview-grid');
+        var fileInput = document.getElementById('image-input');
+        var newFiles = [];
+
+        // Render existing images
+        var existingImages = [];
+        try {
+            existingImages = JSON.parse(previewGrid.getAttribute('data-existing') || '[]');
+        } catch (e) { existingImages = []; }
+
+        function renderAll() {
+            // Xoá hết preview cũ trừ existing
+            previewGrid.querySelectorAll('.preview-item').forEach(function (el) { el.remove(); });
+
+            // Render ảnh đã upload trước đó (existing)
+            existingImages.forEach(function (url, index) {
+                var div = document.createElement('div');
+                div.className = 'preview-item relative group rounded-lg overflow-hidden border border-admin-200 bg-admin-50 aspect-square';
+                div.innerHTML = `
+                    <img src="${escapeHtml(url)}" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
+                        <span class="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ảnh cũ</span>
+                    </div>
+                    <div class="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold shadow-md">✓</div>
+                `;
+                previewGrid.appendChild(div);
+            });
+
+            // Render ảnh mới chọn (chưa upload)
+            newFiles.forEach(function (file, index) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var div = document.createElement('div');
+                    div.className = 'preview-item relative group rounded-lg overflow-hidden border-2 border-brand-300 bg-brand-50 aspect-square';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-full object-cover" />
+                        <button type="button" onclick="removeNewFile(${index})"
+                                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600 transition-colors cursor-pointer">
+                            ✕
+                        </button>
+                        <div class="absolute bottom-1 left-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded truncate text-center">
+                            ${escapeHtml(file.name)}
+                        </div>
+                    `;
+                    previewGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function escapeHtml(str) {
+            var d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        window.removeNewFile = function (index) {
+            newFiles.splice(index, 1);
+            // Cập nhật lại FileList proxy
+            updateFileInput();
+            renderAll();
+        };
+
+        function updateFileInput() {
+            // Tạo DataTransfer để cập nhật files
+            var dt = new DataTransfer();
+            newFiles.forEach(function (f) { dt.items.add(f); });
+            fileInput.files = dt.files;
+        }
+
+        fileInput.addEventListener('change', function () {
+            for (var i = 0; i < this.files.length; i++) {
+                newFiles.push(this.files[i]);
+            }
+            renderAll();
+            // Reset input để có thể chọn lại cùng file
+            this.value = '';
+        });
+
+        // Kéo thả
+        var dropZone = fileInput.closest('label');
+        dropZone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('border-brand-500', 'bg-brand-50');
+        });
+        dropZone.addEventListener('dragleave', function () {
+            this.classList.remove('border-brand-500', 'bg-brand-50');
+        });
+        dropZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('border-brand-500', 'bg-brand-50');
+            for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                newFiles.push(e.dataTransfer.files[i]);
+            }
+            renderAll();
+        });
+
+        renderAll();
+    })();
+</script>
