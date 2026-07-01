@@ -7,10 +7,11 @@
     {
         try { imageList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.ImageUrls); } catch { }
     }
-    if (string.IsNullOrEmpty(Model.ImageUrl) == false && imageList.Contains(Model.ImageUrl) == false)
+    if (!string.IsNullOrEmpty(Model.ImageUrl) && !imageList.Contains(Model.ImageUrl))
     {
         imageList.Insert(0, Model.ImageUrl);
     }
+    var hasMultipleImages = imageList.Count > 1;
 }
 
 <!-- Breadcrumb -->
@@ -27,13 +28,43 @@
     <!-- ====== LEFT COLUMN: Image + Actions ====== -->
     <div class="xl:col-span-1 space-y-4">
 
-        <!-- Image Gallery -->
+        <!-- Image Gallery with Auto Slideshow -->
         <div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
             <div class="aspect-square bg-admin-50 relative group">
                 @if (imageList.Count > 0)
                 {
+                    <!-- Main display -->
                     <img id="main-image" src="@imageList[0]" alt="@Model.Name"
                          class="w-full h-full object-contain p-4 transition-all duration-300" />
+
+                    <!-- Counter badge -->
+                    <div
+                        class="absolute top-3 right-3 bg-black/50 text-white text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm">
+                        <span id="slide-current">1</span>/@imageList.Count
+                    </div>
+
+                    <!-- Prev / Next arrows -->
+                    @if (hasMultipleImages)
+                    {
+                        <button type="button" id="slide-prev"
+                                class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-center text-admin-600 hover:bg-white hover:text-admin-800 transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button type="button" id="slide-next"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-center text-admin-600 hover:bg-white hover:text-admin-800 transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+
+                        <!-- Pause indicator -->
+                        <div id="slide-pause-indicator"
+                             class="absolute bottom-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm hidden">
+                            ⏸ Đã tạm dừng
+                        </div>
+                    }
                 }
                 else
                 {
@@ -47,20 +78,98 @@
                 }
             </div>
 
-            @if (imageList.Count > 1)
+            @if (hasMultipleImages)
             {
-                <div class="flex gap-2 p-3 border-t border-admin-100 overflow-x-auto">
+                <!-- Thumbnails -->
+                <div class="flex gap-2 p-3 border-t border-admin-100 overflow-x-auto" id="thumbnails-container">
                     @for (int i = 0; i < imageList.Count; i++)
                     {
-                        <button type="button"
-                                onclick="document.getElementById('main-image').src='@imageList[i]'; this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('ring-brand-500')); this.classList.add('ring-brand-500');"
-                                class="w-14 h-14 rounded-lg overflow-hidden border border-admin-200 flex-shrink-0 @(i == 0 ? "ring-2 ring-brand-500" : "") hover:ring-2 hover:ring-brand-300 transition-all cursor-pointer">
+                        <button type="button" data-index="@i"
+                                class="slide-thumb w-14 h-14 rounded-lg overflow-hidden border border-admin-200 flex-shrink-0 @(i == 0 ? "ring-2 ring-brand-500" : "") hover:ring-2 hover:ring-brand-300 transition-all cursor-pointer">
                             <img src="@imageList[i]" alt="" class="w-full h-full object-cover" />
                         </button>
                     }
                 </div>
             }
         </div>
+
+        @if (hasMultipleImages)
+        {
+            <script>
+                        (function () {
+                            var images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
+                            var current = 0;
+                            var timer = null;
+                            var interval = 3000;
+
+                            var mainImg = document.getElementById('main-image');
+                            var currentLabel = document.getElementById('slide-current');
+                            var thumbs = document.querySelectorAll('.slide-thumb');
+                            var prevBtn = document.getElementById('slide-prev');
+                            var nextBtn = document.getElementById('slide-next');
+                            var pauseIndicator = document.getElementById('slide-pause-indicator');
+
+                            function goTo(index) {
+                                if (index < 0) index = images.length - 1;
+                                if (index >= images.length) index = 0;
+                                current = index;
+                                mainImg.style.opacity = '0.5';
+                                setTimeout(function () {
+                                    mainImg.src = images[current];
+                                    mainImg.style.opacity = '1';
+                                }, 150);
+                                if (currentLabel) currentLabel.textContent = (current + 1);
+                                thumbs.forEach(function (t, i) {
+                                    t.classList.toggle('ring-2', i === current);
+                                    t.classList.toggle('ring-brand-500', i === current);
+                                    t.classList.toggle('ring-0', i !== current);
+                                });
+                            }
+
+                            function startAuto() {
+                                stopAuto();
+                                timer = setInterval(function () {
+                                    goTo(current + 1);
+                                }, interval);
+                                if (pauseIndicator) pauseIndicator.classList.add('hidden');
+                            }
+
+                            function stopAuto() {
+                                if (timer) { clearInterval(timer); timer = null; }
+                                if (pauseIndicator) pauseIndicator.classList.remove('hidden');
+                            }
+
+                            function toggleAuto() {
+                                if (timer) stopAuto(); else startAuto();
+                            }
+
+                            // Click thumbnails
+                            thumbs.forEach(function (t) {
+                                t.addEventListener('click', function () {
+                                    var idx = parseInt(this.getAttribute('data-index'));
+                                    goTo(idx);
+                                    stopAuto();
+                                });
+                            });
+
+                            // Prev / Next
+                            if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current - 1); stopAuto(); });
+                            if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current + 1); stopAuto(); });
+
+                            // Click image to toggle auto
+                            mainImg.addEventListener('click', toggleAuto);
+
+                            // Keyboard
+                            document.addEventListener('keydown', function (e) {
+                                if (e.key === 'ArrowLeft') { goTo(current - 1); stopAuto(); }
+                                if (e.key === 'ArrowRight') { goTo(current + 1); stopAuto(); }
+                            });
+
+                            // Start slideshow
+                            startAuto();
+                        })();
+            </script>
+        }
 
         <!-- Quick Actions -->
         <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 space-y-3">
@@ -72,6 +181,13 @@
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
                 Chỉnh sửa sản phẩm
+            </a>
+            <a asp-area="Admin" asp-controller="Variant" asp-action="Index" asp-route-productId="@Model.Id"
+               class="flex items-center gap-3 w-full px-4 py-2.5 border border-admin-200 text-admin-600 rounded-xl text-sm font-semibold hover:bg-admin-50 transition-all duration-200 cursor-pointer">
+                <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Quản lý biến thể
             </a>
             <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post">
                 <button type="submit"
@@ -174,11 +290,11 @@
                     <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                         <dt class="text-admin-500">Bảo hành</dt>
                         <dd class="font-medium text-admin-800">@(Model.WarrantyMonths.HasValue? Model.WarrantyMonths +
-                                      " tháng" : "---")</dd>
+                                                                  " tháng" : "---")</dd>
                         </div>
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Đổi trả</dt>
-                            <dd class="font-medium text-admin-800">@(Model.ReturnDays.HasValue ? Model.ReturnDays + " ngày"                         : "---")</dd>
+                            <dd class="font-medium text-admin-800">@(Model.ReturnDays.HasValue ? Model.ReturnDays + " ngày"                           : "---")</dd>
                         </div>
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Ngày tạo</dt>
@@ -302,7 +418,7 @@
                 </div>
             }
 
-            <!-- Description -->
+            <!-- Description with Xem thêm -->
             @if (!string.IsNullOrEmpty(Model.Description))
             {
                 <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
@@ -312,10 +428,33 @@
                         </svg>
                         Mô tả sản phẩm
                     </h3>
-                    <div class="text-sm text-admin-600 leading-relaxed whitespace-pre-line bg-admin-50 rounded-xl p-4">
-                        @Model.Description
+                    <div>
+                        <div id="desc-content"
+                             class="text-sm text-admin-600 leading-relaxed whitespace-pre-line bg-admin-50 rounded-xl p-4 overflow-hidden transition-all duration-300"
+                             style="max-height: 150px;">
+                            @Model.Description
+                        </div>
+                        <button id="desc-toggle" type="button"
+                                class="mt-2 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors cursor-pointer"
+                                onclick="toggleDescription()">
+                            Xem thêm ↓
+                        </button>
                     </div>
                 </div>
+
+                <script>
+                    function toggleDescription() {
+                        var content = document.getElementById('desc-content');
+                        var btn = document.getElementById('desc-toggle');
+                        if (content.style.maxHeight === '150px' || content.style.maxHeight === '') {
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                            btn.textContent = 'Thu gọn ↑';
+                        } else {
+                            content.style.maxHeight = '150px';
+                            btn.textContent = 'Xem thêm ↓';
+                        }
+                    }
+                </script>
             }
 
         </div>

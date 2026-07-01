@@ -36,6 +36,8 @@ public partial class StoreDbContext : IdentityDbContext<User>
 
     public virtual DbSet<ProductEmbedding> ProductEmbeddings { get; set; }
 
+    public virtual DbSet<ProductVariant> ProductVariants { get; set; }
+
     public virtual DbSet<Review> Reviews { get; set; }
 
     public new virtual DbSet<Role> Roles { get; set; }
@@ -336,6 +338,55 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasConstraintName("fk_product_badges_products_product_id");
         });
 
+        modelBuilder.Entity<ProductVariant>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_product_variants");
+
+            entity.ToTable("product_variants");
+
+            entity.HasIndex(e => e.ProductId, "ix_product_variants_product_id");
+
+            entity.HasIndex(e => e.Sku, "ix_product_variants_sku").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('VAR_'::text || lpad((nextval('var_id_seq'::regclass))::text, 3, '0'::text))")
+                .HasColumnName("id");
+            entity.Property(e => e.ProductId)
+                .HasMaxLength(20)
+                .HasColumnName("product_id");
+            entity.Property(e => e.Sku)
+                .HasMaxLength(50)
+                .HasColumnName("sku");
+            entity.Property(e => e.Name)
+                .HasMaxLength(200)
+                .HasColumnName("name");
+            entity.Property(e => e.Price)
+                .HasPrecision(18, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.ListPrice)
+                .HasPrecision(18, 2)
+                .HasColumnName("list_price");
+            entity.Property(e => e.StockQuantity)
+                .HasDefaultValue(0)
+                .HasColumnName("stock_quantity");
+            entity.Property(e => e.ImageUrl).HasColumnName("image_url");
+            entity.Property(e => e.Attributes)
+                .HasColumnType("jsonb")
+                .HasColumnName("attributes");
+            entity.Property(e => e.SortOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("sort_order");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductVariants)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("fk_product_variants_products_product_id");
+        });
+
         modelBuilder.Entity<ProductEmbedding>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("pk_product_embeddings");
@@ -443,6 +494,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
         modelBuilder.HasSequence<int>("rev_id_seq");
         modelBuilder.HasSequence<int>("role_id_seq");
         modelBuilder.HasSequence<int>("user_id_seq");
+        modelBuilder.HasSequence<int>("var_id_seq");
         modelBuilder.HasSequence<int>("vou_id_seq");
 
         OnModelCreatingPartial(modelBuilder);
