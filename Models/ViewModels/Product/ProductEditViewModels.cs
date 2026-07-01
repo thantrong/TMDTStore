@@ -38,8 +38,8 @@ public class ProductEditViewModels
     [Display(Name = "Tồn kho")]
     public int InventoryQuantity { get; set; }
 
-    [StringLength(100, ErrorMessage = "Tên thương hiệu không được vượt quá 100 ký tự.")]
-    public string? BrandName { get; set; }
+    [Display(Name = "Thương hiệu")]
+    public string? BrandId { get; set; }
 
     [Required(ErrorMessage = "Vui lòng chọn danh mục.")]
     public string CategoryId { get; set; } = null!;
@@ -58,4 +58,5 @@ public class ProductEditViewModels
     public List<string>? SelectedBadgeIds { get; set; }
     public List<ProductBadge>? AvailableBadges { get; set; }
     public List<Category> Categories { get; set; } = new();
+    public List<Brand> Brands { get; set; } = new();
 }

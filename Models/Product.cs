@@ -35,6 +35,8 @@ public partial class Product
 
     public List<string>? BadgeLabels { get; set; }
 
+    public string? BrandId { get; set; }
+
     public string? BrandName { get; set; }
 
     public decimal RatingAvg { get; set; }
@@ -50,6 +52,8 @@ public partial class Product
     public DateTime? CreatedAt { get; set; }
 
     public virtual Category? Category { get; set; }
+
+    public virtual Brand? Brand { get; set; }
 
     public virtual Inventory? Inventory { get; set; }
 

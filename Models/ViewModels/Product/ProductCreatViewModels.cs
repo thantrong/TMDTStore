@@ -36,8 +36,8 @@ public class ProductCreatViewModels
     [Display(Name = "Tồn kho")]
     public int Quantity { get; set; }
 
-    [StringLength(100, ErrorMessage = "Tên thương hiệu không được vượt quá 100 ký tự.")]
-    public string? BrandName { get; set; }
+    [Display(Name = "Thương hiệu")]
+    public string? BrandId { get; set; }
 
     [Required(ErrorMessage = "Vui lòng chọn danh mục.")]
     public string CategoryId { get; set; } = null!;
@@ -56,4 +56,5 @@ public class ProductCreatViewModels
     public List<ProductBadge> ProductBadges { get; set; } = new List<ProductBadge>();
     public List<string> SelectedBadgeIds { get; set; } = new List<string>();
     public List<Category> Categories { get; set; } = new List<Category>();
+    public List<Brand> Brands { get; set; } = new List<Brand>();
 }
