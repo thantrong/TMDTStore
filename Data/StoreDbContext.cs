@@ -32,6 +32,8 @@ public partial class StoreDbContext : IdentityDbContext<User>
 
     public virtual DbSet<ProductBadge> ProductBadges { get; set; }
 
+    public virtual DbSet<Brand> Brands { get; set; }
+
     public virtual DbSet<ProductEmbedding> ProductEmbeddings { get; set; }
 
     public virtual DbSet<Review> Reviews { get; set; }
@@ -236,6 +238,9 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasDefaultValueSql("('PROD_'::text || lpad((nextval('prod_id_seq'::regclass))::text, 3, '0'::text))")
                 .HasColumnName("id");
             entity.Property(e => e.BadgeLabels).HasColumnName("badge_labels");
+            entity.Property(e => e.BrandId)
+                .HasMaxLength(20)
+                .HasColumnName("brand_id");
             entity.Property(e => e.BrandName)
                 .HasMaxLength(120)
                 .HasColumnName("brand_name");
@@ -279,6 +284,35 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_products_categories_category_id");
+
+            entity.HasOne(d => d.Brand).WithMany(p => p.Products)
+                .HasForeignKey(d => d.BrandId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("fk_products_brands_brand_id");
+        });
+
+        modelBuilder.Entity<Brand>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("pk_brands");
+
+            entity.ToTable("brands");
+
+            entity.HasIndex(e => e.Slug, "ix_brands_slug").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('BRA_'::text || lpad((nextval('bra_id_seq'::regclass))::text, 3, '0'::text))")
+                .HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(120)
+                .HasColumnName("name");
+            entity.Property(e => e.Slug).HasColumnName("slug");
+            entity.Property(e => e.LogoUrl).HasColumnName("logo_url");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
         });
 
         modelBuilder.Entity<ProductBadge>(entity =>
@@ -400,6 +434,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.UsageLimit).HasColumnName("usage_limit");
             entity.Property(e => e.UsedCount).HasColumnName("used_count");
         });
+        modelBuilder.HasSequence<int>("bra_id_seq");
         modelBuilder.HasSequence<int>("cat_id_seq");
         modelBuilder.HasSequence<int>("order_id_seq");
         modelBuilder.HasSequence<int>("perm_id_seq");
