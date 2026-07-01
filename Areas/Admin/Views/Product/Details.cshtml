@@ -128,14 +128,20 @@
             <!-- Price Row -->
             <div class="flex flex-wrap items-baseline gap-3 p-4 bg-admin-50 rounded-xl">
                 <span class="text-2xl font-bold text-red-500">@Model.Price.ToString("#,###")₫</span>
-                @if (Model.ListPrice > Model.Price)
+                @{
+                    var hasListPrice = Model.ListPrice.HasValue && Model.ListPrice > Model.Price;
+                    var hasSalePrice = Model.SalePrice.HasValue && Model.SalePrice < Model.Price;
+                    var discountPercent = hasListPrice ? (int)(((Model.ListPrice.Value - Model.Price) /
+                Model.ListPrice.Value) * 100) : 0;
+                }
+                @if (hasListPrice)
                 {
                     <span class="text-sm text-admin-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
                     <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                        -@(((Model.ListPrice - Model.Price) / Model.ListPrice * 100)?.ToString("F0"))%
+                        -@discountPercent%
                     </span>
                 }
-                @if (Model.SalePrice.HasValue && Model.SalePrice < Model.Price)
+                @if (hasSalePrice)
                 {
                     <span class="text-sm font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
                         KM: @Model.SalePrice?.ToString("#,###")₫
@@ -167,142 +173,150 @@
                     </div>
                     <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                         <dt class="text-admin-500">Bảo hành</dt>
-                        <dd class="font-medium text-admin-800">@(Model.WarrantyMonths?.ToString() ?? "0") tháng</dd>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Đổi trả</dt>
-                        <dd class="font-medium text-admin-800">@(Model.ReturnDays?.ToString() ?? "0") ngày</dd>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Ngày tạo</dt>
-                        <dd class="font-medium text-admin-800">@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "---")
-                        </dd>
-                    </div>
-                </dl>
+                        <dd class="font-medium text-admin-800">@(Model.WarrantyMonths.HasValue? Model.WarrantyMonths +
+                                      " tháng" : "---")</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Đổi trả</dt>
+                            <dd class="font-medium text-admin-800">@(Model.ReturnDays.HasValue ? Model.ReturnDays + " ngày"                         : "---")</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Ngày tạo</dt>
+                            <dd class="font-medium text-admin-800">
+                                @{
+                                    var vnTime = Model.CreatedAt.HasValue
+                                        ? TimeZoneInfo.ConvertTimeFromUtc(Model.CreatedAt.Value,
+                                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("dd/MM/yyyy HH:mm")
+                                        : "---";
+                                }
+                                @vnTime
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Inventory & Rating -->
+                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                    <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        Tồn kho & Đánh giá
+                    </h3>
+                    <dl class="space-y-2.5 text-sm">
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Tồn kho</dt>
+                            <dd class="font-medium">
+                                <span
+                                    class="@(Model.Inventory?.StockQuantity > 10 ? "text-emerald-600" : Model.Inventory?.StockQuantity > 0 ? "text-amber-600" : "text-red-500")">
+                                    @(Model.Inventory?.StockQuantity ?? 0)
+                                </span>
+                            </dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Đã đặt trước</dt>
+                            <dd class="font-medium text-admin-800">@(Model.Inventory?.ReservedQuantity ?? 0)</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Đánh giá TB</dt>
+                            <dd class="font-medium text-admin-800">
+                                <span class="text-yellow-500">★</span> @Model.RatingAvg.ToString("F1")
+                                <span class="text-admin-400 font-normal">(@Model.RatingCount)</span>
+                            </dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Badge</dt>
+                            <dd>
+                                @if (Model.ProductBadges.Count > 0)
+                                {
+                                    <div class="flex flex-wrap gap-1 justify-end">
+                                        @foreach (var badge in Model.ProductBadges)
+                                        {
+                                            <span
+                                            class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">@badge.Label</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-admin-400">---</span>
+                                }
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
             </div>
 
-            <!-- Inventory & Rating -->
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-                <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    Tồn kho & Đánh giá
-                </h3>
-                <dl class="space-y-2.5 text-sm">
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Tồn kho</dt>
-                        <dd class="font-medium">
-                            <span
-                                class="@(Model.Inventory?.StockQuantity > 10 ? "text-emerald-600" : Model.Inventory?.StockQuantity > 0 ? "text-amber-600" : "text-red-500")">
-                                @(Model.Inventory?.StockQuantity ?? 0)
-                            </span>
-                        </dd>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Đã đặt trước</dt>
-                        <dd class="font-medium text-admin-800">@(Model.Inventory?.ReservedQuantity ?? 0)</dd>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Đánh giá TB</dt>
-                        <dd class="font-medium text-admin-800">
-                            <span class="text-yellow-500">★</span> @Model.RatingAvg.ToString("F1")
-                            <span class="text-admin-400 font-normal">(@Model.RatingCount)</span>
-                        </dd>
-                    </div>
-                    <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
-                        <dt class="text-admin-500">Badge</dt>
-                        <dd>
-                            @if (Model.ProductBadges.Count > 0)
-                            {
-                                <div class="flex flex-wrap gap-1 justify-end">
-                                    @foreach (var badge in Model.ProductBadges)
+            <!-- Short Description -->
+            @if (!string.IsNullOrEmpty(Model.ShortDescription))
+            {
+                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                    <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Mô tả ngắn
+                    </h3>
+                    <p class="text-sm text-admin-600 leading-relaxed">@Model.ShortDescription</p>
+                </div>
+            }
+
+            <!-- Technical Specs -->
+            @if (!string.IsNullOrEmpty(Model.TechnicalSpecs))
+            {
+                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                    <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Thông số kỹ thuật
+                    </h3>
+                    @{
+                        var specs = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string,
+                string>>>(Model.TechnicalSpecs);
+                    }
+                    @if (specs != null && specs.Count > 0)
+                    {
+                        <div class="bg-admin-50 rounded-xl overflow-hidden">
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    @foreach (var item in specs)
                                     {
-                                        <span
-                                        class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">@badge.Label</span>
+                                        <tr class="border-b border-admin-200 last:border-0 hover:bg-admin-100/50 transition-colors">
+                                            <td class="py-2.5 px-4 font-medium text-admin-500 w-1/3 bg-admin-50/50">@item["key"]</td>
+                                            <td class="py-2.5 px-4 text-admin-800">@item["value"]</td>
+                                        </tr>
                                     }
-                                </div>
-                            }
-                            else
-                            {
-                                <span class="text-admin-400">---</span>
-                            }
-                        </dd>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-admin-600 whitespace-pre-line">@Model.TechnicalSpecs</p>
+                    }
+                </div>
+            }
+
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                    <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                        </svg>
+                        Mô tả sản phẩm
+                    </h3>
+                    <div class="text-sm text-admin-600 leading-relaxed whitespace-pre-line bg-admin-50 rounded-xl p-4">
+                        @Model.Description
                     </div>
-                </dl>
-            </div>
+                </div>
+            }
 
         </div>
-
-        <!-- Short Description -->
-        @if (!string.IsNullOrEmpty(Model.ShortDescription))
-        {
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-                <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Mô tả ngắn
-                </h3>
-                <p class="text-sm text-admin-600 leading-relaxed">@Model.ShortDescription</p>
-            </div>
-        }
-
-        <!-- Technical Specs -->
-        @if (!string.IsNullOrEmpty(Model.TechnicalSpecs))
-        {
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-                <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Thông số kỹ thuật
-                </h3>
-                @{
-                    var specs = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string,
-            string>>>(Model.TechnicalSpecs);
-                }
-                @if (specs != null && specs.Count > 0)
-                {
-                    <div class="bg-admin-50 rounded-xl overflow-hidden">
-                        <table class="w-full text-sm">
-                            <tbody>
-                                @foreach (var item in specs)
-                                {
-                                    <tr class="border-b border-admin-200 last:border-0 hover:bg-admin-100/50 transition-colors">
-                                        <td class="py-2.5 px-4 font-medium text-admin-500 w-1/3 bg-admin-50/50">@item["key"]</td>
-                                        <td class="py-2.5 px-4 text-admin-800">@item["value"]</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <p class="text-sm text-admin-600 whitespace-pre-line">@Model.TechnicalSpecs</p>
-                }
-            </div>
-        }
-
-        <!-- Description -->
-        @if (!string.IsNullOrEmpty(Model.Description))
-        {
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-                <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-                    </svg>
-                    Mô tả sản phẩm
-                </h3>
-                <div class="text-sm text-admin-600 leading-relaxed whitespace-pre-line bg-admin-50 rounded-xl p-4">
-                    @Model.Description
-                </div>
-            </div>
-        }
-
     </div>
-</div>

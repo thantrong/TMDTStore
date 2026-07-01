@@ -6,7 +6,7 @@ using TMDTStore.Models.ViewModels.Product;
 using TMDTStore.Services.Cloudinary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-
+using System.Text;
 [Area("Admin")]
 public class ProductController : Controller
 {
@@ -72,7 +72,24 @@ public class ProductController : Controller
         };
         return View(model);
     }
+    private string GenerateSlug(string name)
+    {
+        // Chuẩn hoá Unicode → tách dấu khỏi chữ
+        var normalized = name.Normalize(NormalizationForm.FormD);
+        var chars = normalized
+            .Where(c => char.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark)
+            .ToArray();
+        var slug = new string(chars).Normalize(NormalizationForm.FormC);
 
+        // Chuyển về chữ thường, thay khoảng trắng bằng dấu gạch ngang
+        return slug.ToLower()
+            .Replace(",", " ")
+            .Replace("đ", "d")
+            .Replace(" ", "-")
+            .Replace("--", "-")
+            .Replace("/", "-")
+            .Trim('-');
+    }
     // POST: /Admin/Product/Create
     [HttpPost]
     [Authorize(Roles = "Admin")]
@@ -90,7 +107,7 @@ public class ProductController : Controller
         var product = new Product
         {
             Name = model.Name,
-            Slug = model.Name.ToLower().Replace(" ", "-").Replace("đ", "d").Replace("--", "-").Trim('-'),
+            Slug = GenerateSlug(model.Name),
             ShortDescription = model.ShortDescription,
             Description = model.Description,
             TechnicalSpecs = model.TechnicalSpecs,
@@ -106,14 +123,11 @@ public class ProductController : Controller
         };
 
         // Tạo Inventory
-        if (model.Quantity > 0)
+        product.Inventory = new Inventory
         {
-            product.Inventory = new Inventory
-            {
-                StockQuantity = model.Quantity,
-                UpdatedAt = DateTime.UtcNow
-            };
-        }
+            StockQuantity = model.Quantity,
+            UpdatedAt = DateTime.UtcNow
+        };
 
         // Upload hình ảnh nếu có
         if (model.ImageFile != null && model.ImageFile.Count > 0)
@@ -180,7 +194,8 @@ public class ProductController : Controller
     {
         var product = await _context.Products
             .Include(p => p.ProductBadges)
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
+            .Include(p => p.Inventory)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product == null)
         {
@@ -191,9 +206,15 @@ public class ProductController : Controller
         {
             Id = product.Id,
             Name = product.Name,
+            ShortDescription = product.ShortDescription,
             Description = product.Description,
             TechnicalSpecs = product.TechnicalSpecs,
             Price = product.Price,
+            ListPrice = product.ListPrice,
+            SalePrice = product.SalePrice,
+            InventoryQuantity = product.Inventory?.StockQuantity ?? 0,
+            WarrantyMonths = product.WarrantyMonths,
+            ReturnDays = product.ReturnDays,
             BrandId = product.BrandId,
             CategoryId = product.CategoryId,
             ExistingImageUrls = product.ImageUrls,
@@ -229,7 +250,7 @@ public class ProductController : Controller
         if (product == null) return NotFound();
 
         product.Name = model.Name;
-        product.Slug = model.Name.ToLower().Replace(" ", "-").Replace("đ", "d").Replace("--", "-").Trim('-');
+        product.Slug = GenerateSlug(model.Name);
         product.Price = model.Price;
         product.ShortDescription = model.ShortDescription;
         product.Description = model.Description;
@@ -247,6 +268,15 @@ public class ProductController : Controller
         {
             inventory.StockQuantity = model.InventoryQuantity;
             inventory.UpdatedAt = DateTime.UtcNow;
+        }
+        else if (model.InventoryQuantity > 0)
+        {
+            _context.Inventories.Add(new Inventory
+            {
+                ProductId = id,
+                StockQuantity = model.InventoryQuantity,
+                UpdatedAt = DateTime.UtcNow
+            });
         }
 
         // Upload ảnh mới nếu có
