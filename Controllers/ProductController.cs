@@ -23,7 +23,24 @@ public class ProductController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(ProductListViewModels model)
     {
-        model.Categories = await _context.Categories.ToListAsync();
+        model.Categories = await _context.Categories
+            .Include(c => c.Parent)
+            .Include(c => c.InverseParent)
+            .ToListAsync();
+
+        // Build flat tree for category navigation
+        var flatTree = new List<(TMDTStore.Models.Category Cat, int Level)>();
+        void AddNode(List<TMDTStore.Models.Category> source, string? parentId, int level)
+        {
+            var children = source.Where(c => c.ParentId == parentId).OrderBy(c => c.Name);
+            foreach (var cat in children)
+            {
+                flatTree.Add((cat, level));
+                AddNode(source, cat.Id, level + 1);
+            }
+        }
+        AddNode(model.Categories, null, 0);
+        ViewBag.CategoryTree = flatTree;
 
         var query = _context.Products
         .Include(p => p.Category)
@@ -36,7 +53,20 @@ public class ProductController : Controller
         // Filter theo CategoryId
         if (!string.IsNullOrEmpty(model.CategoryId))
         {
-            query = query.Where(p => p.CategoryId == model.CategoryId);
+            // Lấy tất cả ID danh mục con (đệ quy)
+            var categoryIds = new List<string> { model.CategoryId };
+            void GetChildIds(string parentId)
+            {
+                var children = model.Categories.Where(c => c.ParentId == parentId).ToList();
+                foreach (var child in children)
+                {
+                    categoryIds.Add(child.Id);
+                    GetChildIds(child.Id);
+                }
+            }
+            GetChildIds(model.CategoryId);
+
+            query = query.Where(p => p.CategoryId != null && categoryIds.Contains(p.CategoryId));
         }
         if (!string.IsNullOrEmpty(model.SearchQuery))
         {

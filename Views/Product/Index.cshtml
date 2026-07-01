@@ -2,13 +2,44 @@
 
 @{
     ViewData["Title"] = "Sản phẩm";
+
+    var allCats = Model.Categories;
+    var selectedCat = allCats.FirstOrDefault(c => c.Id == Model.CategoryId);
+    var categoryTree = ViewBag.CategoryTree as List<(TMDTStore.Models.Category Cat, int Level)> ?? new();
 }
 
 <!-- Breadcrumb -->
-<div class="text-sm text-brand-500 mb-6">
+<div class="text-sm text-brand-500 mb-6 flex items-center gap-2 flex-wrap">
     <a asp-controller="Home" asp-action="Index" class="hover:text-brand-600">Trang chủ</a>
-    <span class="mx-2">/</span>
-    <span class="text-brand-700 font-medium">Sản phẩm</span>
+    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+    @if (selectedCat != null)
+    {
+        // Breadcrumb từ gốc đến hiện tại
+        var breadcrumbCats = new List<Category>();
+        var bc = selectedCat;
+        while (bc != null) { breadcrumbCats.Insert(0, bc); bc = allCats.FirstOrDefault(c => c.Id == bc.ParentId); }
+        for (int i = 0; i < breadcrumbCats.Count; i++)
+        {
+            var b = breadcrumbCats[i];
+            if (i < breadcrumbCats.Count - 1)
+            {
+                <a asp-action="Index" asp-route-categoryId="@b.Id" class="hover:text-brand-600">@b.Name</a>
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            }
+            else
+            {
+                <span class="text-brand-700 font-medium">@b.Name</span>
+            }
+        }
+    }
+    else
+    {
+        <span class="text-brand-700 font-medium">Tất cả sản phẩm</span>
+    }
 </div>
 
 <div class="flex flex-col lg:flex-row gap-8">
@@ -16,23 +47,91 @@
     <!-- ====== SIDEBAR FILTER ====== -->
     <aside class="w-full lg:w-64 flex-shrink-0">
 
-        <!-- Danh mục -->
-        <div class="bg-white rounded-xl shadow-sm border border-brand-100 p-5 mb-4">
-            <h3 class="font-heading font-bold text-brand-800 mb-3">Danh mục</h3>
-            <ul class="space-y-2">
+        <!-- Danh mục dạng hover dropdown -->
+        <div class="bg-white rounded-xl shadow-sm border border-brand-100 mb-4">
+            <h3 class="font-heading font-bold text-brand-800 px-5 pt-5 pb-3 border-b border-brand-100">Danh mục</h3>
+            <ul class="py-2">
                 <li>
                     <a asp-action="Index"
-                       class="text-sm text-brand-600 hover:text-brand-700 @(string.IsNullOrEmpty(Model.CategoryId) ? "font-semibold text-brand-700" : "")">
+                       class="flex items-center gap-2 px-5 py-2.5 text-sm transition-colors @(string.IsNullOrEmpty(Model.CategoryId) ? "text-brand-700 font-semibold bg-brand-50 border-r-2 border-brand-600" : "text-brand-600 hover:text-brand-700 hover:bg-brand-50")">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
                         Tất cả sản phẩm
                     </a>
                 </li>
-                @foreach (var cat in Model.Categories)
+                @foreach (var item in categoryTree.Where(t => t.Level == 0))
                 {
-                    <li>
-                        <a asp-action="Index" asp-route-categoryId="@cat.Id" asp-route-sortBy="@Model.SortBy"
-                           class="text-sm text-brand-600 hover:text-brand-700 @(Model.CategoryId == cat.Id ? "font-semibold text-brand-700" : "")">
-                            @cat.Name
+                    var cat = item.Cat;
+                    var isActive = Model.CategoryId == cat.Id;
+                    var children = categoryTree.Where(t => t.Cat.ParentId == cat.Id).OrderBy(t => t.Cat.Name).ToList();
+                    var grandchildren = children.SelectMany(c => categoryTree.Where(t => t.Cat.ParentId == c.Cat.Id)).ToList();
+
+                    <li class="relative group">
+                        <a asp-action="Index" asp-route-categoryId="@cat.Id"
+                           class="flex items-center justify-between px-5 py-2.5 text-sm transition-colors @(isActive ? "text-brand-700 font-semibold bg-brand-50 border-r-2 border-brand-600" : "text-brand-600 hover:text-brand-700 hover:bg-brand-50")">
+                            <span>@cat.Name</span>
+                            @if (children.Count > 0)
+                            {
+                                <svg class="w-3.5 h-3.5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            }
                         </a>
+
+                        @if (children.Count > 0)
+                        {
+                            <div class="absolute left-full top-0 ml-2 w-64 bg-white rounded-xl shadow-xl border border-brand-100 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20">
+                                <div class="px-4 pb-2 mb-1 border-b border-brand-100">
+                                    <p class="text-xs font-semibold text-brand-400 uppercase tracking-wider">@cat.Name</p>
+                                </div>
+                                <ul class="space-y-0.5 px-2">
+                                    @foreach (var child in children)
+                                    {
+                                        var isChildActive = Model.CategoryId == child.Cat.Id;
+                                        var childGrandchildren = categoryTree.Where(t => t.Cat.ParentId == child.Cat.Id).OrderBy(t => t.Cat.Name).ToList();
+
+                                        <li class="relative group/sub">
+                                            <a asp-action="Index" asp-route-categoryId="@child.Cat.Id"
+                                               class="flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors @(isChildActive ? "text-brand-700 font-semibold bg-brand-50" : "text-brand-600 hover:text-brand-700 hover:bg-brand-50")">
+                                                <span>@child.Cat.Name</span>
+                                                @if (childGrandchildren.Count > 0)
+                                                {
+                                                    <svg class="w-3 h-3 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                }
+                                            </a>
+
+                                            @if (childGrandchildren.Count > 0)
+                                            {
+                                                <div class="absolute left-full top-0 ml-2 w-56 bg-white rounded-xl shadow-xl border border-brand-100 py-2 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-30">
+                                                    <div class="px-3 pb-1.5 mb-1 border-b border-brand-100">
+                                                        <p class="text-xs font-semibold text-brand-400">@child.Cat.Name</p>
+                                                    </div>
+                                                    <ul class="space-y-0.5 px-2">
+                                                        @foreach (var gc in childGrandchildren)
+                                                        {
+                                                            var isGcActive = Model.CategoryId == gc.Cat.Id;
+                                                            <li>
+                                                                <a asp-action="Index" asp-route-categoryId="@gc.Cat.Id"
+                                                                   class="block px-3 py-2 text-sm rounded-md transition-colors @(isGcActive ? "text-brand-700 font-semibold bg-brand-50" : "text-brand-500 hover:text-brand-700 hover:bg-brand-50")">
+                                                                    @gc.Cat.Name
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                                <a asp-action="Index" asp-route-categoryId="@cat.Id"
+                                   class="block px-4 pt-2 mt-1 text-xs font-medium text-brand-500 hover:text-brand-600 border-t border-brand-100">
+                                    Xem tất cả @cat.Name →
+                                </a>
+                            </div>
+                        }
                     </li>
                 }
             </ul>
