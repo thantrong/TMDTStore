@@ -88,6 +88,7 @@ public class ProductController : Controller
         {
             Name = model.Name,
             Description = model.Description,
+            TechnicalSpecs = model.TechnicalSpecs,
             Price = model.Price,
             BrandName = model.BrandName,
             CategoryId = model.CategoryId,
@@ -107,7 +108,8 @@ public class ProductController : Controller
                     imageUrls.Add(imageUrl);
                 }
             }
-            product.ImageUrl = string.Join(";", imageUrls);
+            product.ImageUrls = System.Text.Json.JsonSerializer.Serialize(imageUrls);
+            product.ImageUrl = imageUrls.FirstOrDefault();
         }
 
         // Thêm ProductBadges nếu có
@@ -170,14 +172,17 @@ public class ProductController : Controller
             Id = product.Id,
             Name = product.Name,
             Description = product.Description,
+            TechnicalSpecs = product.TechnicalSpecs,
             Price = product.Price,
             BrandName = product.BrandName,
             CategoryId = product.CategoryId,
-            ExistingImageUrl = product.ImageUrl,
+            ExistingImageUrls = product.ImageUrls,
             Categories = await _context.Categories.ToListAsync(),
             AvailableBadges = await _context.ProductBadges.ToListAsync(),
             SelectedBadgeIds = product.ProductBadges.Select(b => b.Label).ToList()
         };
+
+        ViewBag.TechnicalSpecsJson = product.TechnicalSpecs ?? "[]";
 
         return View(model);
     }
@@ -204,6 +209,7 @@ public class ProductController : Controller
         product.Name = model.Name;
         product.Price = model.Price;
         product.Description = model.Description;
+        product.TechnicalSpecs = model.TechnicalSpecs;
         product.BrandName = model.BrandName;
         product.CategoryId = model.CategoryId;
 
@@ -216,22 +222,30 @@ public class ProductController : Controller
         }
 
         // Upload ảnh mới nếu có
-        if (model.ImageFile != null && model.ImageFile.Length > 0)
+        if (model.ImageFiles != null && model.ImageFiles.Count > 0)
         {
-            try
+            var imageUrls = new List<string>();
+            foreach (var image in model.ImageFiles)
             {
-                var imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "products");
-                if (!string.IsNullOrEmpty(imageUrl))
+                try
                 {
-                    product.ImageUrl = imageUrl;
+                    var imageUrl = await _cloudinaryService.UploadImageAsync(image, "products");
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        imageUrls.Add(imageUrl);
+                    }
+                }
+                catch (Exception)
+                {
+                    TempData["ToastType"] = "error";
+                    TempData["ToastMessage"] = "Không thể tải ảnh lên.";
+                    return View(model);
                 }
             }
-            catch (Exception)
-            {
-                TempData["ToastType"] = "error";
-                TempData["ToastMessage"] = "Không thể tải ảnh lên.";
-                return View(model);
-            }
+            // Lưu danh sách ảnh dưới dạng JSON
+            product.ImageUrls = System.Text.Json.JsonSerializer.Serialize(imageUrls);
+            // Ảnh đầu tiên làm ảnh đại diện
+            product.ImageUrl = imageUrls.FirstOrDefault();
         }
 
         // Cập nhật badges
