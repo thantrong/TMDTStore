@@ -1,11 +1,12 @@
 namespace TMDTStore.Data;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
 
 public static class DbInitializer
 {
-    public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<Role> roleManager)
+    public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<Role> roleManager, StoreDbContext context)
     {
         // Create roles if they don't exist
         string[] roles = new[] { "Admin", "Customer" };
@@ -37,6 +38,25 @@ public static class DbInitializer
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
+        }
+
+        // Seed brands
+        if (!await context.Brands.AnyAsync())
+        {
+            var brands = new[]
+            {
+                new Brand { Id = "BRA_001", Name = "ASUS", Slug = "asus", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_002", Name = "Lenovo", Slug = "lenovo", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_003", Name = "Logitech", Slug = "logitech", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_004", Name = "Dell", Slug = "dell", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_005", Name = "Samsung", Slug = "samsung", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_006", Name = "Apple", Slug = "apple", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_007", Name = "Kingston", Slug = "kingston", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_008", Name = "Intel", Slug = "intel", IsActive = true, CreatedAt = DateTime.UtcNow },
+                new Brand { Id = "BRA_009", Name = "AMD", Slug = "amd", IsActive = true, CreatedAt = DateTime.UtcNow },
+            };
+            context.Brands.AddRange(brands);
+            await context.SaveChangesAsync();
         }
     }
 }

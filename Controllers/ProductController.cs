@@ -27,6 +27,7 @@ public class ProductController : Controller
 
         var query = _context.Products
         .Include(p => p.Category)
+        .Include(p => p.Brand)
         .Include(p => p.Inventory)
         .Include(p => p.ProductBadges)
         .Where(p => p.IsActive == true)

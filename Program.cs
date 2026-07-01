@@ -52,7 +52,8 @@ using (var scope = app.Services.CreateScope())
 {
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-    await DbInitializer.InitializeAsync(userManager, roleManager);
+    var context = scope.ServiceProvider.GetRequiredService<StoreDbContext>();
+    await DbInitializer.InitializeAsync(userManager, roleManager, context);
 }
 
 app.Run();
