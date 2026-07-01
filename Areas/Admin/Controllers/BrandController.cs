@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
+using TMDTStore.Services.Cloudinary;
 
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 public class BrandController : Controller
 {
     private readonly StoreDbContext _context;
+    
 
     public BrandController(StoreDbContext context)
     {
