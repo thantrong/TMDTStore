@@ -22,11 +22,51 @@ public class CategoryController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var categories = await _context.Categories
-            .Include(c => c.Parent)
+        var allCategories = await _context.Categories
+            .Include(c => c.Products)
             .OrderBy(c => c.Name)
             .ToListAsync();
-        return View(categories);
+
+        // Build tree: gán level và sắp xếp theo cấp bậc
+        var flatTree = new List<(Category Cat, int Level)>();
+        void AddNode(List<Category> source, string? parentId, int level)
+        {
+            var children = source.Where(c => c.ParentId == parentId).OrderBy(c => c.Name);
+            foreach (var cat in children)
+            {
+                flatTree.Add((cat, level));
+                AddNode(source, cat.Id, level + 1);
+            }
+        }
+        AddNode(allCategories, null, 0);
+
+        return View(flatTree);
+    }
+
+    // Helper: đệ quy lấy tất cả ID con cháu của một category
+    private HashSet<string> GetDescendantIds(List<Category> allCategories, string parentId)
+    {
+        var ids = new HashSet<string>();
+        var children = allCategories.Where(c => c.ParentId == parentId).ToList();
+        foreach (var child in children)
+        {
+            ids.Add(child.Id);
+            ids.UnionWith(GetDescendantIds(allCategories, child.Id));
+        }
+        return ids;
+    }
+
+    // Helper: breadcrumb cho category (trả về list tên từ gốc đến hiện tại)
+    private List<Category> GetBreadcrumb(List<Category> allCategories, string? categoryId)
+    {
+        var breadcrumb = new List<Category>();
+        var current = allCategories.FirstOrDefault(c => c.Id == categoryId);
+        while (current != null)
+        {
+            breadcrumb.Insert(0, current);
+            current = allCategories.FirstOrDefault(c => c.Id == current.ParentId);
+        }
+        return breadcrumb;
     }
 
     // GET: /Admin/Category/Create
@@ -89,21 +129,32 @@ public class CategoryController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
-        var category = await _context.Categories.FindAsync(id);
+        var allCategories = await _context.Categories.OrderBy(c => c.Name).ToListAsync();
+        var category = allCategories.FirstOrDefault(c => c.Id == id);
         if (category == null) return NotFound();
 
-        ViewBag.ParentCategories = await _context.Categories
-            .Where(c => c.Id != id)
-            .OrderBy(c => c.Name)
-            .ToListAsync();
+        // Loại trừ chính nó + tất cả con cháu khỏi danh sách cha
+        var excludeIds = GetDescendantIds(allCategories, id);
+        excludeIds.Add(id);
+        ViewBag.ParentCategories = allCategories.Where(c => !excludeIds.Contains(c.Id)).ToList();
 
-        return View(category);
+        // Breadcrumb
+        ViewBag.Breadcrumb = GetBreadcrumb(allCategories, id);
+
+        var model = new CategoryEditViewModels
+        {
+            Id = category.Id,
+            Name = category.Name,
+            ParentId = category.ParentId,
+        };
+
+        return View(model);
     }
 
     // POST: /Admin/Category/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(string id, Category model)
+    public async Task<IActionResult> Edit(string id, CategoryEditViewModels model)
     {
         if (!ModelState.IsValid)
         {
@@ -111,6 +162,8 @@ public class CategoryController : Controller
                 .Where(c => c.Id != id)
                 .OrderBy(c => c.Name)
                 .ToListAsync();
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Vui lòng kiểm tra lại thông tin nhập vào";
             return View(model);
         }
 
@@ -118,7 +171,7 @@ public class CategoryController : Controller
         if (category == null) return NotFound();
 
         category.Name = model.Name;
-        category.Slug = model.Name.ToLower().Replace(" ", "-");
+        category.Slug = GenerateSlug(model.Name);
         category.ParentId = model.ParentId;
 
         await _context.SaveChangesAsync();
