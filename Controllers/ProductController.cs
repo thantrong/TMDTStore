@@ -76,6 +76,7 @@ public class ProductController : Controller
     {
         var product = await _context.Products
             .Include(p => p.Category)
+            .Include(p => p.Brand)
             .Include(p => p.Inventory)
             .Include(p => p.ProductBadges)
             .Include(p => p.Reviews)

@@ -1,9 +1,233 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model TMDTStore.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Trang chủ";
 }
 
-<div class="text-center py-12">
-    <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome</h1>
-    <p class="text-lg text-gray-600">Learn about <a href="https://learn.microsoft.com/aspnet/core"
-                                                        class="text-indigo-600 hover:text-indigo-800 underline">building Web apps with ASP.NET Core</a>.</p>
+<!-- ====== HERO SECTION ====== -->
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 mb-10 sm:mb-14">
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-300 rounded-full blur-3xl"></div>
     </div>
+    <div class="relative px-6 sm:px-10 lg:px-14 py-12 sm:py-16 lg:py-20">
+        <div class="max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-sm mb-4">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Khuyến mãi cực sốc - Giảm đến 50%
+            </span>
+            <h1 class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                Linh kiện chính hãng<br />
+                <span class="text-brand-200">Giá tốt mỗi ngày</span>
+            </h1>
+            <p class="text-brand-100 text-base sm:text-lg mb-8 max-w-lg leading-relaxed">
+                TVT PC - Hệ thống bán lẻ linh kiện máy tính, laptop & thiết bị công nghệ chính hãng. Cam kết giá tốt, bảo hành chu đáo.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <a asp-controller="Product" asp-action="Index"
+                   class="inline-flex items-center gap-2 bg-white text-brand-700 px-6 py-3 rounded-xl font-bold hover:bg-brand-50 hover:shadow-xl hover:shadow-black/20 active:scale-[0.98] transition-all duration-200 cursor-pointer">
+                    Mua ngay
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+                <a href="#categories"
+                   class="inline-flex items-center gap-2 border border-white/30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-200 cursor-pointer">
+                    Danh mục
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== CATEGORIES ====== -->
+<section id="categories" class="mb-10 sm:mb-14">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-heading text-2xl sm:text-3xl font-bold text-brand-900">Danh mục</h2>
+            <p class="text-brand-500 mt-1">Chọn danh mục sản phẩm bạn quan tâm</p>
+        </div>
+        <a asp-controller="Product" asp-action="Index"
+           class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer">
+            Xem tất cả
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    @if (Model.Categories.Count == 0)
+    {
+        <div class="text-center py-12 text-brand-300">
+            <p class="text-lg">Chưa có danh mục nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            @foreach (var cat in Model.Categories)
+            {
+                <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@cat.Id"
+                   class="group bg-white rounded-xl border border-brand-100 p-4 sm:p-5 text-center hover:border-brand-300 hover:shadow-lg hover:shadow-brand-100/50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-brand-50 flex items-center justify-center mx-auto mb-3 group-hover:bg-brand-100 transition-colors">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold text-sm sm:text-base text-brand-800 group-hover:text-brand-700 transition-colors">@cat.Name</h3>
+                    @if (cat.InverseParent.Count > 0)
+                    {
+                        <p class="text-xs text-brand-400 mt-0.5">@cat.InverseParent.Count danh mục</p>
+                    }
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<!-- ====== FEATURED PRODUCTS ====== -->
+<section class="mb-10 sm:mb-14">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-heading text-2xl sm:text-3xl font-bold text-brand-900">Sản phẩm nổi bật</h2>
+            <p class="text-brand-500 mt-1">Sản phẩm được đánh giá cao nhất</p>
+        </div>
+        <a asp-controller="Product" asp-action="Index" asp-route-sortBy="rating"
+           class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer">
+            Xem tất cả
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    @if (Model.FeaturedProducts.Count == 0)
+    {
+        <div class="text-center py-12 text-brand-300">
+            <p class="text-lg">Chưa có sản phẩm nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <partial name="_ProductCard" model="product" />
+            }
+        </div>
+    }
+</section>
+
+<!-- ====== DIVIDER ====== -->
+<div class="mb-10 sm:mb-14">
+    <div class="h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent"></div>
+</div>
+
+<!-- ====== NEW PRODUCTS ====== -->
+<section class="mb-10 sm:mb-14">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-heading text-2xl sm:text-3xl font-bold text-brand-900">Hàng mới về</h2>
+            <p class="text-brand-500 mt-1">Sản phẩm mới nhất vừa cập bến</p>
+        </div>
+        <a asp-controller="Product" asp-action="Index" asp-route-sortBy="newest"
+           class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer">
+            Xem tất cả
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    @if (Model.NewProducts.Count == 0)
+    {
+        <div class="text-center py-12 text-brand-300">
+            <p class="text-lg">Chưa có sản phẩm nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            @foreach (var product in Model.NewProducts)
+            {
+                <partial name="_ProductCard" model="product" />
+            }
+        </div>
+    }
+</section>
+
+<!-- ====== STATS BANNER ====== -->
+<section class="mb-10 sm:mb-14">
+    <div class="bg-gradient-to-r from-brand-800 to-brand-900 rounded-2xl px-6 sm:px-10 py-8 sm:py-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
+            <div>
+                <div class="text-3xl sm:text-4xl font-bold text-white">100%</div>
+                <p class="text-brand-200 text-sm mt-1">Chính hãng</p>
+            </div>
+            <div>
+                <div class="text-3xl sm:text-4xl font-bold text-white">1000+</div>
+                <p class="text-brand-200 text-sm mt-1">Sản phẩm</p>
+            </div>
+            <div>
+                <div class="text-3xl sm:text-4xl font-bold text-white">24/7</div>
+                <p class="text-brand-200 text-sm mt-1">Hỗ trợ</p>
+            </div>
+            <div>
+                <div class="text-3xl sm:text-4xl font-bold text-white">30 ngày</div>
+                <p class="text-brand-200 text-sm mt-1">Đổi trả</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ====== BRANDS ====== -->
+<section class="mb-10 sm:mb-14">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-heading text-2xl sm:text-3xl font-bold text-brand-900">Thương hiệu</h2>
+            <p class="text-brand-500 mt-1">Các thương hiệu đối tác của TVT PC</p>
+        </div>
+    </div>
+
+    @if (Model.Brands.Count == 0)
+    {
+        <div class="text-center py-8 text-brand-300">
+            <p>Chưa có thương hiệu nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
+            @foreach (var brand in Model.Brands)
+            {
+                <a asp-controller="Product" asp-action="Index"
+                   class="px-5 sm:px-6 py-3 bg-white border border-brand-100 rounded-xl text-brand-700 font-semibold text-sm hover:border-brand-300 hover:shadow-md hover:shadow-brand-100/50 hover:text-brand-800 transition-all duration-200 cursor-pointer">
+                    @brand.Name
+                </a>
+            }
+        </div>
+    }
+</section>
+
+<!-- ====== CTA SECTION ====== -->
+<section class="mb-10">
+    <div class="bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl px-6 sm:px-10 py-10 sm:py-12 text-center">
+        <h2 class="font-heading text-2xl sm:text-3xl font-bold text-white mb-3">Bạn cần tư vấn?</h2>
+        <p class="text-brand-100 text-base mb-6 max-w-lg mx-auto">Đội ngũ TVT PC luôn sẵn sàng hỗ trợ bạn chọn sản phẩm phù hợp nhất.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="tel:1900999988"
+               class="inline-flex items-center gap-2 bg-white text-brand-700 px-6 py-3 rounded-xl font-bold hover:bg-brand-50 hover:shadow-xl transition-all duration-200 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                1900 999 88
+            </a>
+            <a asp-controller="Product" asp-action="Index"
+               class="inline-flex items-center gap-2 border border-white/30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-200 cursor-pointer">
+                Xem sản phẩm
+            </a>
+        </div>
+    </div>
+</section>
