@@ -1,0 +1,75 @@
+@model List<TMDTStore.Models.Category>
+
+@{
+    ViewData["Title"] = "Danh mục";
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-admin-800">Danh mục</h1>
+        <p class="text-sm text-admin-500 mt-1">Quản lý danh mục sản phẩm</p>
+    </div>
+    <a asp-action="Create"
+       class="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Thêm danh mục
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-admin-50 border-b border-admin-200">
+            <tr>
+                <th class="text-left px-4 py-3 font-semibold text-admin-600">Tên danh mục</th>
+                <th class="text-left px-4 py-3 font-semibold text-admin-600">Slug</th>
+                <th class="text-left px-4 py-3 font-semibold text-admin-600">Danh mục cha</th>
+                <th class="text-center px-4 py-3 font-semibold text-admin-600">Sản phẩm</th>
+                <th class="text-center px-4 py-3 font-semibold text-admin-600">Hành động</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-admin-100">
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="px-4 py-12 text-center text-admin-400">Chưa có danh mục nào.</td>
+                </tr>
+            }
+            @foreach (var cat in Model)
+            {
+                <tr class="hover:bg-admin-50 transition-colors">
+                    <td class="px-4 py-3 font-medium text-admin-800">@cat.Name</td>
+                    <td class="px-4 py-3 text-admin-500">@cat.Slug</td>
+                    <td class="px-4 py-3 text-admin-600">@(cat.Parent?.Name ?? "---")</td>
+                    <td class="px-4 py-3 text-center text-admin-600">@cat.Products.Count</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center justify-center gap-2">
+                            <a asp-action="Edit" asp-route-id="@cat.Id"
+                               class="p-2 text-admin-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200 cursor-pointer"
+                               title="Sửa">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@cat.Id" method="post"
+                                  onsubmit="return confirm('Xoá danh mục @cat.Name?')">
+                                <button type="submit"
+                                        class="p-2 text-admin-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 cursor-pointer"
+                                        title="Xoá">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
