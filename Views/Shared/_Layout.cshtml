@@ -181,6 +181,16 @@
                                         </svg>
                                         Đổi mật khẩu
                                     </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-brand-700 hover:bg-brand-50 hover:text-brand-600 transition-colors duration-150 cursor-pointer"
+                                           asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                            <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Quản trị
+                                        </a>
+                                    }
                                     <hr class="my-1 border-brand-100" />
                                     <form asp-controller="Auth" asp-action="Logout" method="post">
                                         <button type="submit"
@@ -271,6 +281,16 @@
                             </svg>
                             Đổi mật khẩu
                         </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
+                               asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Quản trị
+                            </a>
+                        }
                         <form asp-controller="Auth" asp-action="Logout" method="post">
                             <button type="submit"
                                     class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors duration-150 cursor-pointer">
