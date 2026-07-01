@@ -85,9 +85,11 @@ public class ProductController : Controller
         return slug.ToLower()
             .Replace(",", " ")
             .Replace("đ", "d")
-            .Replace(" ", "-")
             .Replace("--", "-")
-            .Replace("/", "-")
+            .Replace("/", "")
+            .Replace("(", "")
+            .Replace(")", "")
+            .Replace(" ", "-")
             .Trim('-');
     }
     // POST: /Admin/Product/Create
@@ -279,31 +281,41 @@ public class ProductController : Controller
             });
         }
 
-        // Upload ảnh mới nếu có
+        // Upload ảnh mới nếu có — giữ nguyên ảnh cũ, thêm ảnh mới vào cuối
         if (model.ImageFiles != null && model.ImageFiles.Count > 0)
         {
-            var imageUrls = new List<string>();
+            // Lấy danh sách ảnh cũ
+            var existingUrls = new List<string>();
+            if (!string.IsNullOrEmpty(product.ImageUrls))
+            {
+                try { existingUrls = System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.ImageUrls) ?? new(); } catch { }
+            }
+
+            // Upload ảnh mới
             foreach (var image in model.ImageFiles)
             {
-                try
+                if (image.Length > 0)
                 {
-                    var imageUrl = await _cloudinaryService.UploadImageAsync(image, "products");
-                    if (!string.IsNullOrEmpty(imageUrl))
+                    try
                     {
-                        imageUrls.Add(imageUrl);
+                        var imageUrl = await _cloudinaryService.UploadImageAsync(image, "products");
+                        if (!string.IsNullOrEmpty(imageUrl))
+                        {
+                            existingUrls.Add(imageUrl);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        TempData["ToastType"] = "error";
+                        TempData["ToastMessage"] = "Không thể tải ảnh lên.";
+                        return View(model);
                     }
                 }
-                catch (Exception)
-                {
-                    TempData["ToastType"] = "error";
-                    TempData["ToastMessage"] = "Không thể tải ảnh lên.";
-                    return View(model);
-                }
             }
-            // Lưu danh sách ảnh dưới dạng JSON
-            product.ImageUrls = System.Text.Json.JsonSerializer.Serialize(imageUrls);
-            // Ảnh đầu tiên làm ảnh đại diện
-            product.ImageUrl = imageUrls.FirstOrDefault();
+
+            // Lưu danh sách ảnh (cũ + mới)
+            product.ImageUrls = System.Text.Json.JsonSerializer.Serialize(existingUrls);
+            product.ImageUrl = existingUrls.FirstOrDefault();
         }
 
         // Cập nhật badges
