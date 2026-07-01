@@ -28,6 +28,7 @@ public class ProductController : Controller
 
         var query = _context.Products
         .Include(p => p.Category)
+        .Include(p => p.Brand)
         .Include(p => p.Inventory)
         .Include(p => p.ProductBadges)
         .Where(p => p.IsActive == true)
@@ -66,6 +67,7 @@ public class ProductController : Controller
         var model = new ProductCreatViewModels
         {
             Categories = await _context.Categories.ToListAsync(),
+            Brands = await _context.Brands.ToListAsync(),
             ProductBadges = await _context.ProductBadges.ToListAsync()
         };
         return View(model);
@@ -80,6 +82,7 @@ public class ProductController : Controller
         if (!ModelState.IsValid)
         {
             model.Categories = await _context.Categories.ToListAsync();
+            model.Brands = await _context.Brands.ToListAsync();
             model.ProductBadges = await _context.ProductBadges.ToListAsync();
             return View(model);
         }
@@ -90,7 +93,7 @@ public class ProductController : Controller
             Description = model.Description,
             TechnicalSpecs = model.TechnicalSpecs,
             Price = model.Price,
-            BrandName = model.BrandName,
+            BrandId = model.BrandId,
             CategoryId = model.CategoryId,
             CreatedAt = DateTime.UtcNow,
             IsActive = true
@@ -174,10 +177,11 @@ public class ProductController : Controller
             Description = product.Description,
             TechnicalSpecs = product.TechnicalSpecs,
             Price = product.Price,
-            BrandName = product.BrandName,
+            BrandId = product.BrandId,
             CategoryId = product.CategoryId,
             ExistingImageUrls = product.ImageUrls,
             Categories = await _context.Categories.ToListAsync(),
+            Brands = await _context.Brands.ToListAsync(),
             AvailableBadges = await _context.ProductBadges.ToListAsync(),
             SelectedBadgeIds = product.ProductBadges.Select(b => b.Label).ToList()
         };
@@ -196,6 +200,7 @@ public class ProductController : Controller
         if (!ModelState.IsValid)
         {
             model.Categories = await _context.Categories.ToListAsync();
+            model.Brands = await _context.Brands.ToListAsync();
             model.AvailableBadges = await _context.ProductBadges.ToListAsync();
             return View(model);
         }
@@ -210,7 +215,7 @@ public class ProductController : Controller
         product.Price = model.Price;
         product.Description = model.Description;
         product.TechnicalSpecs = model.TechnicalSpecs;
-        product.BrandName = model.BrandName;
+        product.BrandId = model.BrandId;
         product.CategoryId = model.CategoryId;
 
         // Cập nhật tồn kho
