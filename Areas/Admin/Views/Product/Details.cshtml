@@ -56,11 +56,11 @@
                 <dl class="space-y-3 text-sm">
                     <div class="flex justify-between">
                         <dt class="text-admin-500">Danh mục</dt>
-                        <dd class="font-medium text-admin-800">@Model.Category?.Name ?? "---"</dd>
+                        <dd class="font-medium text-admin-800">@(Model.Category?.Name ?? "---")</dd>
                     </div>
                     <div class="flex justify-between">
                         <dt class="text-admin-500">Thương hiệu</dt>
-                        <dd class="font-medium text-admin-800">@Model.BrandName ?? "---"</dd>
+                        <dd class="font-medium text-admin-800">@(Model.Brand?.Name ?? "---")</dd>
                     </div>
                     <div class="flex justify-between">
                         <dt class="text-admin-500">Giá bán</dt>

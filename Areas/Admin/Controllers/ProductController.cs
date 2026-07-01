@@ -90,14 +90,30 @@ public class ProductController : Controller
         var product = new Product
         {
             Name = model.Name,
+            Slug = model.Name.ToLower().Replace(" ", "-").Replace("đ", "d").Replace("--", "-").Trim('-'),
+            ShortDescription = model.ShortDescription,
             Description = model.Description,
             TechnicalSpecs = model.TechnicalSpecs,
             Price = model.Price,
+            ListPrice = model.ListPrice,
+            SalePrice = model.SalePrice,
             BrandId = model.BrandId,
             CategoryId = model.CategoryId,
+            WarrantyMonths = model.WarrantyMonths,
+            ReturnDays = model.ReturnDays,
             CreatedAt = DateTime.UtcNow,
             IsActive = true
         };
+
+        // Tạo Inventory
+        if (model.Quantity > 0)
+        {
+            product.Inventory = new Inventory
+            {
+                StockQuantity = model.Quantity,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
 
         // Upload hình ảnh nếu có
         if (model.ImageFile != null && model.ImageFile.Count > 0)
@@ -144,6 +160,7 @@ public class ProductController : Controller
     {
         var product = await _context.Products
            .Include(p => p.Category)
+           .Include(p => p.Brand)
            .Include(p => p.Inventory)
            .Include(p => p.ProductBadges)
            .Include(p => p.Reviews)
@@ -212,9 +229,15 @@ public class ProductController : Controller
         if (product == null) return NotFound();
 
         product.Name = model.Name;
+        product.Slug = model.Name.ToLower().Replace(" ", "-").Replace("đ", "d").Replace("--", "-").Trim('-');
         product.Price = model.Price;
+        product.ShortDescription = model.ShortDescription;
         product.Description = model.Description;
         product.TechnicalSpecs = model.TechnicalSpecs;
+        product.ListPrice = model.ListPrice;
+        product.SalePrice = model.SalePrice;
+        product.WarrantyMonths = model.WarrantyMonths;
+        product.ReturnDays = model.ReturnDays;
         product.BrandId = model.BrandId;
         product.CategoryId = model.CategoryId;
 
