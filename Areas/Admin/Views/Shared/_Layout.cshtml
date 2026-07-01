@@ -123,6 +123,18 @@
                 Danh mục
             </a>
 
+            <!-- Brands -->
+            <a asp-area="Admin" asp-controller="Brand" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "Brand" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M16 4h6m0 0v6m0-6L14 12m-1.5 1.5l-5 5m0 0l-3 3m3-3l3-3m-3 3l3 3" />
+                </svg>
+                Thương hiệu
+            </a>
+
             <!-- Divider -->
             <hr class="border-admin-700 my-4" />
 
