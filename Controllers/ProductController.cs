@@ -110,7 +110,7 @@ public class ProductController : Controller
             .Include(p => p.Inventory)
             .Include(p => p.ProductBadges)
             .Include(p => p.Reviews)
-            .Include(p => p.ProductVariants.Where(v => v.IsActive).OrderBy(v => v.SortOrder))
+            .Include(p => p.ProductVariants.Where(v => v.IsActive).OrderBy(v => v.Price))
             .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
 
         if (product == null)

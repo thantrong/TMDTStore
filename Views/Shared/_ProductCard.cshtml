@@ -4,6 +4,7 @@
     var hasPrice = Model.Price.HasValue;
     var hasDiscount = hasPrice && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
     var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price.Value) / Model.ListPrice.Value) * 100) : 0;
+    var hasVariantsLoaded = Model.ProductVariants != null && Model.ProductVariants.Count > 0;
 }
 
 <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id"
@@ -14,6 +15,12 @@
         @if (!string.IsNullOrEmpty(Model.ImageUrl))
         {
             <img src="@Model.ImageUrl" alt="@Model.Name"
+                 class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
+        }
+        else if (hasVariantsLoaded && Model.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
+        {
+            var firstImg = Model.ProductVariants.First(v => !string.IsNullOrEmpty(v.ImageUrl)).ImageUrl;
+            <img src="@firstImg" alt="@Model.Name"
                  class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
         }
         else
@@ -38,6 +45,12 @@
         {
             <span class="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                 @Model.ProductBadges.First().Label
+            </span>
+        }
+        else if (hasVariantsLoaded)
+        {
+            <span class="absolute top-2 right-2 bg-brand-600/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
+                @Model.ProductVariants.Count biến thể
             </span>
         }
     </div>
@@ -72,9 +85,21 @@
                     <span class="text-xs text-brand-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
                 }
             }
+            else if (hasVariantsLoaded)
+            {
+                var minPrice = Model.ProductVariants.Min(v => v.Price);
+                var maxPrice = Model.ProductVariants.Max(v => v.Price);
+                <span class="text-base sm:text-lg font-bold text-red-500">
+                    @(minPrice.ToString("#,###"))₫
+                    @if (maxPrice > minPrice)
+                    {
+                        <span class="text-sm font-normal text-brand-400"> - @(maxPrice.ToString("#,###"))₫</span>
+                    }
+                </span>
+            }
             else
             {
-                <span class="text-base sm:text-lg font-semibold text-brand-500">Liên hệ</span>
+                <span class="text-base sm:text-lg font-semibold text-brand-400">Liên hệ</span>
             }
         </div>
     </div>
