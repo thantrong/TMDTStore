@@ -430,9 +430,9 @@
                     </h3>
                     <div>
                         <div id="desc-content"
-                             class="text-sm text-admin-600 leading-relaxed whitespace-pre-line bg-admin-50 rounded-xl p-4 overflow-hidden transition-all duration-300"
+                             class="text-sm text-admin-600 leading-relaxed bg-admin-50 rounded-xl p-4 overflow-hidden transition-all duration-300"
                              style="max-height: 150px;">
-                            @Model.Description
+                            @Html.Raw(Model.Description)
                         </div>
                         <button id="desc-toggle" type="button"
                                 class="mt-2 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors cursor-pointer"

@@ -64,6 +64,13 @@ public class VariantController : Controller
         model.CreatedAt = DateTime.UtcNow;
         model.IsActive = true;
 
+        // Tự động sinh SKU nếu để trống
+        if (string.IsNullOrWhiteSpace(model.Sku) && !string.IsNullOrWhiteSpace(model.Name))
+        {
+            model.Sku = RemoveVietnameseAccents(model.Name.ToUpperInvariant())
+                .Replace(" ", "-");
+        }
+
         // Upload image nếu có
         if (ImageFile != null && ImageFile.Length > 0)
         {
@@ -116,6 +123,7 @@ public class VariantController : Controller
         variant.Price = model.Price;
         variant.ListPrice = model.ListPrice;
         variant.StockQuantity = model.StockQuantity;
+        variant.Description = model.Description;
         variant.Attributes = model.Attributes;
         variant.SortOrder = model.SortOrder;
         variant.IsActive = model.IsActive;
@@ -142,6 +150,16 @@ public class VariantController : Controller
         TempData["ToastType"] = "success";
         TempData["ToastMessage"] = "Biến thể đã được cập nhật.";
         return RedirectToAction("Index", new { productId = variant.ProductId });
+    }
+
+    private static string RemoveVietnameseAccents(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        // Thay Đ/đ trước vì không bị ảnh hưởng bởi FormD
+        text = text.Replace("Đ", "D").Replace("đ", "d");
+        var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var chars = normalized.Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray();
+        return new string(chars).Normalize(System.Text.NormalizationForm.FormC);
     }
 
     // POST: /Admin/Variant/Delete/{id}

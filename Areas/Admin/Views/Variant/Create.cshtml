@@ -34,7 +34,7 @@
                     <label asp-for="Sku" class="block text-sm font-medium text-admin-700 mb-1"></label>
                     <input asp-for="Sku"
                            class="w-full px-3 py-2.5 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
-                           placeholder="VD: SSD-1TB-XAM" />
+                           placeholder="Để trống để tự động sinh" />
                 </div>
                 <div>
                     <label asp-for="Price" class="block text-sm font-medium text-admin-700 mb-1"></label>
@@ -75,6 +75,11 @@
                 @await Html.PartialAsync("_AttributesEditor")
             </div>
 
+            <div>
+                <label asp-for="Description" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                <textarea asp-for="Description" rows="10" class="w-full" placeholder="Mô tả biến thể..."></textarea>
+            </div>
+
             <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm"></div>
 
             <div class="flex items-center gap-3 pt-4 border-t border-admin-100">
@@ -90,3 +95,45 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        ClassicEditor.create(document.querySelector('#Description'), {
+            toolbar: ['bold', 'italic', 'underline', 'strikethrough', '|', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+            heading: { options: [{ model: 'paragraph', title: 'Paragraph' }] }
+        }).catch(error => console.error(error));
+
+        // Tự động sinh SKU từ tên biến thể
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function generateSku(name) {
+            return removeAccents(name)
+                .toUpperCase()
+                .replace(/[^A-Z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+
+        var nameInput = document.querySelector('#Name');
+        var skuInput = document.querySelector('#Sku');
+
+        nameInput.addEventListener('input', function () {
+            if (!skuInput._userModified) {
+                skuInput.value = generateSku(nameInput.value);
+            }
+        });
+
+        skuInput.addEventListener('input', function () {
+            skuInput._userModified = skuInput.value.trim() !== '';
+        });
+
+        // Reset lại nếu user xoá hết SKU
+        skuInput.addEventListener('blur', function () {
+            if (skuInput.value.trim() === '') {
+                skuInput._userModified = false;
+                skuInput.value = generateSku(nameInput.value);
+            }
+        });
+    </script>
+}
