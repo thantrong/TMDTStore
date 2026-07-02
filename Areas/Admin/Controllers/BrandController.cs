@@ -24,6 +24,7 @@ public class BrandController : Controller
     public async Task<IActionResult> Index()
     {
         var brands = await _context.Brands
+            .Include(b => b.Products)
             .OrderBy(b => b.Name)
             .ToListAsync();
         return View(brands);
@@ -77,6 +78,17 @@ public class BrandController : Controller
         TempData["ToastType"] = "success";
         TempData["ToastMessage"] = "Thương hiệu đã được tạo.";
         return RedirectToAction("Index");
+    }
+
+    // GET: /Admin/Brand/Details/{id}
+    [HttpGet]
+    public async Task<IActionResult> Details(string id)
+    {
+        var brand = await _context.Brands
+            .Include(b => b.Products)
+            .FirstOrDefaultAsync(b => b.Id == id);
+        if (brand == null) return NotFound();
+        return View(brand);
     }
 
     // GET: /Admin/Brand/Edit/{id}
