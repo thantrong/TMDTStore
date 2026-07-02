@@ -31,7 +31,8 @@
             v.SalePrice,
             v.StockQuantity,
             v.ImageUrl,
-            v.Attributes
+            v.Attributes,
+            v.Description
         }), jsonOpts)
         : "[]";
 
@@ -414,17 +415,13 @@
                 </div>
             }
             <div id="tab-description" class="tab-content @(hasSpecGroups ? "hidden" : "")">
-                @{
-                    var firstVariant = Model.ProductVariants?.FirstOrDefault();
-                    var defaultDesc = firstVariant?.Description ?? Model.Description;
-                }
-                @if (!string.IsNullOrEmpty(defaultDesc))
+                @if (!string.IsNullOrEmpty(Model.Description) || hasVariants)
                 {
-                    <div class="relative">
+                    <div class="relative" id="desc-wrapper">
                         <div id="desc-content" class="text-sm text-brand-700 leading-relaxed overflow-hidden transition-all duration-300 [&_img]:max-w-full [&_img]:rounded-lg [&_a]:text-brand-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" style="max-height: 180px;">
-                            @if (hasVariants)
+                            @if (hasVariants && Model.ProductVariants!.First().Description != null)
                             {
-                                @Html.Raw(defaultDesc)
+                                @Html.Raw(Model.ProductVariants!.First().Description)
                             }
                             else
                             {
@@ -504,6 +501,7 @@
         }
 
         var hasVariants = @JsonSerializer.Serialize(hasVariants, jsonOpts);
+        var productDescription = @JsonSerializer.Serialize(Model.Description ?? "", jsonOpts);
 
         if (hasVariants) {
             // ====== VARIANT SELECTOR ======
@@ -574,6 +572,16 @@
                 // Cập nhật thông số kỹ thuật theo variant
                 if (specRows.length > 0 && idx !== undefined) {
                     updateSpecsFromVariant(idx);
+                }
+
+                // Cập nhật mô tả sản phẩm theo variant — fallback về product description
+                var descContent = document.getElementById('desc-content');
+                if (descContent) {
+                    var newDesc = v.description || productDescription || '';
+                    descContent.innerHTML = newDesc || '<p class="text-brand-400">Chưa có mô tả.</p>';
+                    descContent.style.maxHeight = '180px';
+                    var toggleBtn = document.getElementById('desc-toggle');
+                    if (toggleBtn) toggleBtn.textContent = 'Xem thêm ↓';
                 }
             }
 
