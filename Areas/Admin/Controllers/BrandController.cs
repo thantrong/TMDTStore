@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
+using TMDTStore.Models.ViewModels.Brand;
 using TMDTStore.Services.Cloudinary;
 
 [Area("Admin")]
@@ -21,13 +22,30 @@ public class BrandController : Controller
 
     // GET: /Admin/Brand
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(BrandListViewModel model)
     {
-        var brands = await _context.Brands
+        var query = _context.Brands
             .Include(b => b.Products)
+            .AsQueryable();
+
+        // Search
+        if (!string.IsNullOrEmpty(model.SearchQuery))
+        {
+            var keyword = model.SearchQuery.ToLower();
+            query = query.Where(b => b.Name.ToLower().Contains(keyword));
+        }
+
+        // Count
+        model.TotalItems = await query.CountAsync();
+
+        // Paginate
+        model.Brands = await query
             .OrderBy(b => b.Name)
+            .Skip((model.Page - 1) * model.PageSize)
+            .Take(model.PageSize)
             .ToListAsync();
-        return View(brands);
+
+        return View(model);
     }
 
     // GET: /Admin/Brand/Create
