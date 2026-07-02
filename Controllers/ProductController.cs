@@ -78,11 +78,11 @@ public class ProductController : Controller
         }
         if (model.MinPrice.HasValue)
         {
-            query = query.Where(p => p.Price >= model.MinPrice.Value);
+            query = query.Where(p => p.Price.HasValue && p.Price.Value >= model.MinPrice.Value);
         }
         if (model.MaxPrice.HasValue)
         {
-            query = query.Where(p => p.Price <= model.MaxPrice.Value);
+            query = query.Where(p => p.Price.HasValue && p.Price.Value <= model.MaxPrice.Value);
         }
 
         query = model.SortBy switch

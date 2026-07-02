@@ -20,10 +20,9 @@ public class ProductEditViewModels
     [Display(Name = "Thông số kỹ thuật")]
     public string? TechnicalSpecs { get; set; }
 
-    [Required(ErrorMessage = "Vui lòng nhập giá bán.")]
-    [Range(0, double.MaxValue, ErrorMessage = "Giá bán phải là số dương.")]
     [Display(Name = "Giá bán")]
-    public decimal Price { get; set; }
+    [Range(0, double.MaxValue, ErrorMessage = "Giá bán phải là số dương.")]
+    public decimal? Price { get; set; }
 
     [Display(Name = "Giá niêm yết")]
     [Range(0, double.MaxValue, ErrorMessage = "Giá niêm yết phải là số dương.")]
