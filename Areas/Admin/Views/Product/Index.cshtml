@@ -87,7 +87,8 @@
                     var displayImage = product.ImageUrl;
                     if (string.IsNullOrEmpty(displayImage) && pHasVariants)
                     {
-                        var cheapestWithImg = product.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v => v.Price).FirstOrDefault();
+                        var cheapestWithImg = product.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v =>
+                v.Price).FirstOrDefault();
                         if (cheapestWithImg != null) displayImage = cheapestWithImg.ImageUrl;
                     }
                     // Tồn kho: tổng từ variants nếu có, nếu không thì từ Inventory
@@ -115,7 +116,7 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-admin-800 max-w-[250px] truncate">@product.Name</p>
-                                    <p class="text-xs text-admin-400">ID: @product.Id @(pHasVariants ? "· " + product.ProductVariants.Count + " biến thể" : "")</p>
+                                    <p class="text-xs text-admin-400">ID: @product.Id</p>
                                 </div>
                             </div>
                         </td>
@@ -123,7 +124,8 @@
                         <td class="px-4 py-3 text-admin-600">@(product.Brand?.Name ?? product.BrandName)</td>
                         <td class="px-4 py-3 text-right font-semibold text-admin-800">@displayPrice</td>
                         <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium @(totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700")">
+                            <span
+                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium @(totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700")">
                                 @(totalStock > 0 ? "Còn " + totalStock : "Hết hàng")
                             </span>
                         </td>

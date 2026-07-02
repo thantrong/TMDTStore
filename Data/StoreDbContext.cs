@@ -371,6 +371,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasDefaultValue(0)
                 .HasColumnName("stock_quantity");
             entity.Property(e => e.ImageUrl).HasColumnName("image_url");
+            entity.Property(e => e.ImageUrls).HasColumnName("image_urls");
             entity.Property(e => e.Attributes)
                 .HasColumnType("jsonb")
                 .HasColumnName("attributes");

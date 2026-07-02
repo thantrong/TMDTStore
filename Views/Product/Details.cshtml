@@ -15,6 +15,17 @@
     {
         imageList.Insert(0, Model.ImageUrl);
     }
+
+    // Nếu sản phẩm không có ảnh nhưng có biến thể → lấy ảnh từ biến thể
+    if (imageList.Count == 0 && hasVariants)
+    {
+        foreach (var v in Model.ProductVariants!)
+        {
+            if (!string.IsNullOrEmpty(v.ImageUrl) && !imageList.Contains(v.ImageUrl))
+                imageList.Add(v.ImageUrl);
+        }
+    }
+
     var hasMultipleImages = imageList.Count > 1;
     var hasPrice = Model.Price.HasValue;
     var hasDiscount = hasPrice && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
@@ -501,7 +512,7 @@
         }
 
         var hasVariants = @JsonSerializer.Serialize(hasVariants, jsonOpts);
-        var productDescription = @JsonSerializer.Serialize(Model.Description ?? "", jsonOpts);
+        var productDescription = @Html.Raw(JsonSerializer.Serialize(Model.Description ?? "", jsonOpts));
 
         if (hasVariants) {
             // ====== VARIANT SELECTOR ======

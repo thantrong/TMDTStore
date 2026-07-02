@@ -3,7 +3,8 @@
 @{
     var hasPrice = Model.Price.HasValue;
     var hasDiscount = hasPrice && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
-    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price.Value) / Model.ListPrice.Value) * 100) : 0;
+    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price.Value) / Model.ListPrice.Value) * 100) :
+0;
     var hasVariantsLoaded = Model.ProductVariants != null && Model.ProductVariants.Count > 0;
 }
 
@@ -19,7 +20,8 @@
         }
         else if (hasVariantsLoaded && Model.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
         {
-            var cheapest = Model.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v => v.Price).First();
+            var cheapest = Model.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v =>
+        v.Price).First();
             var firstImg = cheapest.ImageUrl;
             <img src="@firstImg" alt="@Model.Name"
                  class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
@@ -46,12 +48,6 @@
         {
             <span class="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                 @Model.ProductBadges.First().Label
-            </span>
-        }
-        else if (hasVariantsLoaded)
-        {
-            <span class="absolute top-2 right-2 bg-brand-600/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                @Model.ProductVariants.Count biến thể
             </span>
         }
     </div>
