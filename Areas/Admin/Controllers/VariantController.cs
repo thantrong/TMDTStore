@@ -62,12 +62,16 @@ public class VariantController : Controller
         // Map ViewModel → Entity
         var variant = new ProductVariant
         {
-            Id = Guid.NewGuid().ToString("N"),
+            // Không set Id — database tự sinh theo sequence VAR_001, VAR_002...
             ProductId = model.ProductId,
             Name = model.Name,
             Price = model.Price,
             ListPrice = model.ListPrice,
+            SalePrice = model.SalePrice,
             StockQuantity = model.StockQuantity,
+            Weight = model.Weight,
+            Barcode = model.Barcode,
+            ManufacturerCode = model.ManufacturerCode,
             SortOrder = model.SortOrder,
             Attributes = model.Attributes,
             Description = model.Description,
@@ -76,15 +80,16 @@ public class VariantController : Controller
             IsActive = true
         };
 
-        // Tự động sinh SKU nếu để trống
+        // Tự động sinh SKU nếu để trống hoặc đảm bảo không trùng
         if (string.IsNullOrWhiteSpace(model.Sku) && !string.IsNullOrWhiteSpace(model.Name))
         {
-            variant.Sku = RemoveVietnameseAccents(model.Name.ToUpperInvariant())
+            var rawSku = RemoveVietnameseAccents(model.Name.ToUpperInvariant())
                 .Replace(" ", "-");
+            variant.Sku = await GenerateUniqueSku(rawSku);
         }
         else
         {
-            variant.Sku = model.Sku!;
+            variant.Sku = await GenerateUniqueSku(TruncateSku(model.Sku!));
         }
 
         // Upload image nếu có
@@ -129,7 +134,11 @@ public class VariantController : Controller
             Sku = variant.Sku,
             Price = variant.Price,
             ListPrice = variant.ListPrice,
+            SalePrice = variant.SalePrice,
             StockQuantity = variant.StockQuantity,
+            Weight = variant.Weight,
+            Barcode = variant.Barcode,
+            ManufacturerCode = variant.ManufacturerCode,
             SortOrder = variant.SortOrder,
             Attributes = variant.Attributes,
             Description = variant.Description,
@@ -151,10 +160,20 @@ public class VariantController : Controller
         if (variant == null) return NotFound();
 
         variant.Name = model.Name;
-        variant.Sku = model.Sku ?? RemoveVietnameseAccents(model.Name.ToUpperInvariant()).Replace(" ", "-");
+
+        // Đảm bảo SKU không trùng (bỏ qua chính nó)
+        var newSku = TruncateSku(model.Sku ?? RemoveVietnameseAccents(model.Name.ToUpperInvariant()).Replace(" ", "-"));
+        if (newSku != variant.Sku)
+        {
+            variant.Sku = await GenerateUniqueSku(newSku);
+        }
         variant.Price = model.Price;
         variant.ListPrice = model.ListPrice;
+        variant.SalePrice = model.SalePrice;
         variant.StockQuantity = model.StockQuantity;
+        variant.Weight = model.Weight;
+        variant.Barcode = model.Barcode;
+        variant.ManufacturerCode = model.ManufacturerCode;
         variant.Description = model.Description;
         variant.Attributes = model.Attributes;
         variant.SortOrder = model.SortOrder;
@@ -192,6 +211,32 @@ public class VariantController : Controller
         var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
         var chars = normalized.Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray();
         return new string(chars).Normalize(System.Text.NormalizationForm.FormC);
+    }
+
+    private static string TruncateSku(string sku, int maxLength = 20)
+    {
+        if (string.IsNullOrEmpty(sku)) return sku;
+        return sku.Length <= maxLength ? sku : sku[..maxLength];
+    }
+
+    private async Task<string> GenerateUniqueSku(string baseSku)
+    {
+        if (string.IsNullOrWhiteSpace(baseSku)) return baseSku;
+
+        // Kiểm tra tồn tại
+        var exists = await _context.ProductVariants.AnyAsync(v => v.Sku == baseSku);
+        if (!exists) return baseSku;
+
+        // Thêm hậu tố số cho đến khi unique
+        for (int i = 1; i <= 999; i++)
+        {
+            var candidate = TruncateSku($"{baseSku}-{i}");
+            exists = await _context.ProductVariants.AnyAsync(v => v.Sku == candidate);
+            if (!exists) return candidate;
+        }
+
+        // Throw nếu không thể sinh unique (rất hiếm)
+        throw new Exception("Không thể sinh SKU duy nhất. Vui lòng nhập tay.");
     }
 
     // POST: /Admin/Variant/Delete/{id}

@@ -40,6 +40,20 @@ public class VariantEditViewModel
     [Display(Name = "Mô tả biến thể")]
     public string? Description { get; set; }
 
+    [Display(Name = "Giá khuyến mãi")]
+    [Range(0, double.MaxValue, ErrorMessage = "Giá khuyến mãi phải là số dương.")]
+    public decimal? SalePrice { get; set; }
+
+    [Display(Name = "Trọng lượng (g)")]
+    [Range(0, 100000, ErrorMessage = "Trọng lượng từ 0-100.000g.")]
+    public int? Weight { get; set; }
+
+    [Display(Name = "Mã vạch")]
+    public string? Barcode { get; set; }
+
+    [Display(Name = "Mã nhà sản xuất")]
+    public string? ManufacturerCode { get; set; }
+
     [Display(Name = "Kích hoạt")]
     public bool IsActive { get; set; }
 
