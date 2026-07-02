@@ -82,24 +82,34 @@ public class VariantController : Controller
 
         // Tự động sinh SKU 10 chữ số nếu để trống
         if (string.IsNullOrWhiteSpace(model.Sku))
-            // Tự động sinh SKU 10 chữ số nếu để trống
-            if (string.IsNullOrWhiteSpace(model.Sku))
-            {
-                variant.Sku = await GenerateSequentialSku();
-            }
-            else
-            {
-                variant.Sku = model.Sku;
-            }
+        {
+            variant.Sku = await GenerateSequentialSku();
+        }
+        else
+        {
+            variant.Sku = model.Sku;
+        }
 
-        // Upload image nếu có
-        if (model.ImageFile != null && model.ImageFile.Length > 0)
+        // Upload images nếu có
+        var uploadedUrls = new List<string>();
+        if (model.ImageFiles != null && model.ImageFiles.Count > 0)
         {
             try
             {
-                var imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "variants");
-                if (!string.IsNullOrEmpty(imageUrl))
-                    variant.ImageUrl = imageUrl;
+                foreach (var image in model.ImageFiles)
+                {
+                    if (image.Length > 0)
+                    {
+                        var url = await _cloudinaryService.UploadImageAsync(image, "variants");
+                        if (!string.IsNullOrEmpty(url))
+                            uploadedUrls.Add(url);
+                    }
+                }
+                if (uploadedUrls.Count > 0)
+                {
+                    variant.ImageUrl = uploadedUrls.First();
+                    variant.ImageUrls = System.Text.Json.JsonSerializer.Serialize(uploadedUrls);
+                }
             }
             catch (Exception)
             {
@@ -142,10 +152,10 @@ public class VariantController : Controller
             SortOrder = variant.SortOrder,
             Attributes = variant.Attributes,
             Description = variant.Description,
-            IsActive = variant.IsActive
+            IsActive = variant.IsActive,
+            ExistingImageUrls = variant.ImageUrls ?? (variant.ImageUrl != null ? "[\"" + variant.ImageUrl + "\"]" : "[]")
         };
 
-        ViewBag.ExistingImageUrl = variant.ImageUrl;
         return View(model);
     }
 
@@ -174,14 +184,33 @@ public class VariantController : Controller
         variant.SortOrder = model.SortOrder;
         variant.IsActive = model.IsActive;
 
-        // Upload image mới nếu có
-        if (model.ImageFile != null && model.ImageFile.Length > 0)
+        // Upload images mới nếu có — giữ ảnh cũ + thêm ảnh mới
+        var existingUrls = new List<string>();
+        if (!string.IsNullOrEmpty(variant.ImageUrls))
+        {
+            try { existingUrls = System.Text.Json.JsonSerializer.Deserialize<List<string>>(variant.ImageUrls) ?? new(); } catch { }
+        }
+        if (!string.IsNullOrEmpty(variant.ImageUrl) && !existingUrls.Contains(variant.ImageUrl))
+            existingUrls.Insert(0, variant.ImageUrl);
+
+        if (model.ImageFiles != null && model.ImageFiles.Count > 0)
         {
             try
             {
-                var imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "variants");
-                if (!string.IsNullOrEmpty(imageUrl))
-                    variant.ImageUrl = imageUrl;
+                foreach (var image in model.ImageFiles)
+                {
+                    if (image.Length > 0)
+                    {
+                        var url = await _cloudinaryService.UploadImageAsync(image, "variants");
+                        if (!string.IsNullOrEmpty(url))
+                            existingUrls.Add(url);
+                    }
+                }
+                if (existingUrls.Count > 0)
+                {
+                    variant.ImageUrl = existingUrls.First();
+                    variant.ImageUrls = System.Text.Json.JsonSerializer.Serialize(existingUrls);
+                }
             }
             catch (Exception)
             {

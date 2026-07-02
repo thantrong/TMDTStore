@@ -76,10 +76,8 @@
 
             <div>
                 @{
-                    ViewBag.ImageFieldName = "ImageFile";
-                    var existingUrl = ViewBag.ExistingImageUrl as string;
-                    var existingUrls = !string.IsNullOrEmpty(existingUrl) ? "[\"" + existingUrl + "\"]" : "[]";
-                    ViewBag.ExistingImageUrlsJson = existingUrls;
+                    ViewBag.ImageFieldName = "ImageFiles";
+                    ViewBag.ExistingImageUrlsJson = Model.ExistingImageUrls ?? "[]";
                 }
                 @await Html.PartialAsync("_ImageUploader")
             </div>

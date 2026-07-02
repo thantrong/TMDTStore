@@ -47,6 +47,7 @@ public class ProductController : Controller
         .Include(p => p.Brand)
         .Include(p => p.Inventory)
         .Include(p => p.ProductBadges)
+        .Include(p => p.ProductVariants.Where(v => v.IsActive))
         .Where(p => p.IsActive == true)
         .AsQueryable();
 

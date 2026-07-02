@@ -32,7 +32,10 @@ public class VariantEditViewModel
     public int SortOrder { get; set; }
 
     [Display(Name = "Ảnh biến thể")]
-    public IFormFile? ImageFile { get; set; }
+    public List<IFormFile>? ImageFiles { get; set; }
+
+    [Display(Name = "Album ảnh hiện tại")]
+    public string? ExistingImageUrls { get; set; }
 
     [Display(Name = "Thuộc tính")]
     public string? Attributes { get; set; }

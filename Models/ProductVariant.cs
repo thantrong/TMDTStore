@@ -34,6 +34,9 @@ public partial class ProductVariant
     [Display(Name = "Ảnh biến thể")]
     public string? ImageUrl { get; set; }
 
+    [Display(Name = "Album ảnh biến thể")]
+    public string? ImageUrls { get; set; }
+
     [Display(Name = "Mô tả biến thể")]
     public string? Description { get; set; }
 
