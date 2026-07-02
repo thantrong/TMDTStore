@@ -16,7 +16,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-6 sm:p-8">
         <h1 class="text-2xl font-bold text-admin-800 mb-8">Sửa thương hiệu</h1>
 
-        <form asp-action="Edit" method="post" class="space-y-5">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="space-y-5">
             <input type="hidden" asp-for="Id" />
 
             <div>
@@ -26,37 +26,47 @@
                 <span asp-validation-for="Name" class="text-red-500 text-xs"></span>
             </div>
             <div>
-                <label asp-for="LogoUrl" class="block text-sm font-medium text-admin-700 mb-1">Logo URL (tuỳ
+                <label class="block text-sm font-medium text-admin-700 mb-1">Logo thương hiệu</label>
+                @if (!string.IsNullOrEmpty(Model.LogoUrl))
+                {
+                    <div class="mb-2 flex items-center gap-3">
+                        <img src="@Model.LogoUrl" alt="@Model.Name"
+                             class="w-12 h-12 rounded-lg object-contain border border-admin-200" />
+                        <span class="text-xs text-admin-400">Logo hiện tại</span>
+                    </div>
+                }
+                <input type="file" name="LogoFile" accept="image/jpeg,image/png,image/webp"
+                       class="w-full px-3 py-2.5 border border-admin-200 rounded-lg text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-brand-50 file:text-brand-700 file:text-xs file:font-semibold hover:file:bg-brand-100 transition" />
+                <p class="text-xs text-admin-400 mt-1">JPG, PNG, WebP. Chọn file để thay thế logo hiện tại.</p>
+            </div>
+            <div>
+                <label asp-for="Description" class="block text-sm font-medium text-admin-700 mb-1">Mô tả (tuỳ
                     chọn)</label>
-                    <input asp-for="LogoUrl"
-                           class="w-full px-3 py-2.5 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" />
+                    <textarea asp-for="Description" rows="3"
+                              class="w-full px-3 py-2.5 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"></textarea>
                 </div>
                 <div>
-                    <label asp-for="Description" class="block text-sm font-medium text-admin-700 mb-1">Mô tả (tuỳ
-                        chọn)</label>
-                        <textarea asp-for="Description" rows="3"
-                                  class="w-full px-3 py-2.5 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"></textarea>
-                    </div>
-                    <div>
-                        <label class="flex items-center gap-2">
-                            <input asp-for="IsActive"
-                                   class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-admin-300 rounded" />
-                            <span class="text-sm font-medium text-admin-700">Đang hoạt động</span>
-                        </label>
-                    </div>
+                    <label class="flex items-center gap-2">
+                        <input asp-for="IsActive"
+                               class="w-4 h-4 text-brand-600 focus:ring-brand-500 border-admin-300 rounded" />
+                        <span class="text-sm font-medium text-admin-700">Đang hoạt động</span>
+                    </label>
+                </div>
 
-                    <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm"></div>
+                <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm"></div>
 
-                    <div class="flex items-center gap-3 pt-4 border-t border-admin-100">
-                        <button type="submit"
-                                class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer">
-                            Lưu thay đổi
-                        </button>
-                        <a asp-action="Index"
-                           class="px-6 py-2.5 border border-admin-200 text-admin-600 rounded-xl font-semibold text-sm hover:bg-admin-50 transition-all duration-200 cursor-pointer">
-                            Huỷ
-                        </a>
-                    </div>
-                </form>
-            </div>
+                <div class="flex items-center gap-3 pt-4 border-t border-admin-100">
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer">
+                        Lưu thay đổi
+                    </button>
+                    <a asp-action="Index"
+                       class="px-6 py-2.5 border border-admin-200 text-admin-600 rounded-xl font-semibold text-sm hover:bg-admin-50 transition-all duration-200 cursor-pointer">
+                        Huỷ
+                    </a>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
+</div>
