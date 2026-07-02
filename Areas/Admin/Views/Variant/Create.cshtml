@@ -127,21 +127,30 @@
             heading: { options: [{ model: 'paragraph', title: 'Paragraph' }] }
         }).catch(error => console.error(error));
 
-        // Tự động sinh SKU từ tên biến thể
-        function removeAccents(str) {
-            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-
-        function generateSku(name) {
-            return removeAccents(name)
-                .toUpperCase()
-                .replace(/[^A-Z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '')
-                .substring(0, 20);
+        // Tự động sinh SKU dạng YYMMDD + seq + variant (10 chữ số)
+        function generateSku() {
+            var now = new Date();
+            var yy = now.getFullYear().toString().slice(-2);
+            var mm = (now.getMonth() + 1).toString().padStart(2, '0');
+            var dd = now.getDate().toString().padStart(2, '0');
+            var prefix = yy + mm + dd;
+            // Phần seq + variant sẽ do server tự gen, sinh tạm để hiển thị
+            return prefix + '0010';
         }
 
         var nameInput = document.querySelector('#Name');
         var skuInput = document.querySelector('#Sku');
+
+        // Nếu SKU đang trống, tự động sinh
+        if (!skuInput.value) {
+            skuInput.value = generateSku();
+        }
+
+        nameInput.addEventListener('input', function () {
+            if (!skuInput._userModified) {
+                skuInput.value = generateSku();
+            }
+        });
 
         nameInput.addEventListener('input', function () {
             if (!skuInput._userModified) {

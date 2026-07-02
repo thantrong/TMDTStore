@@ -243,11 +243,18 @@
 
             <!-- Price Row -->
             <div class="flex flex-wrap items-baseline gap-3 p-4 bg-admin-50 rounded-xl">
-                <span class="text-2xl font-bold text-red-500">@Model.Price.ToString("#,###")₫</span>
+                @if (Model.Price.HasValue)
+                {
+                    <span class="text-2xl font-bold text-red-500">@Model.Price.Value.ToString("#,###")₫</span>
+                }
+                else
+                {
+                    <span class="text-2xl font-bold text-admin-500">Liên hệ</span>
+                }
                 @{
-                    var hasListPrice = Model.ListPrice.HasValue && Model.ListPrice > Model.Price;
-                    var hasSalePrice = Model.SalePrice.HasValue && Model.SalePrice < Model.Price;
-                    var discountPercent = hasListPrice ? (int)(((Model.ListPrice.Value - Model.Price) /
+                    var hasListPrice = Model.Price.HasValue && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
+                    var hasSalePrice = Model.Price.HasValue && Model.SalePrice.HasValue && Model.SalePrice < Model.Price.Value;
+                    var discountPercent = hasListPrice ? (int)(((Model.ListPrice.Value - Model.Price.Value) /
                 Model.ListPrice.Value) * 100) : 0;
                 }
                 @if (hasListPrice)

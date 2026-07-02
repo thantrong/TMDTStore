@@ -228,9 +228,9 @@
                                 <!-- Giá -->
                                 <div class="flex items-baseline gap-2">
                                     <span class="text-lg font-bold text-red-500">
-                                        @product.Price.ToString("#,###")₫
+                                        @(product.Price.HasValue ? product.Price.Value.ToString("#,###") + "₫" : "Liên hệ")
                                     </span>
-                                    @if (product.ListPrice > product.Price)
+                                    @if (product.Price.HasValue && product.ListPrice > product.Price.Value)
                                     {
                                         <span class="text-sm text-brand-400 line-through">
                                             @product.ListPrice?.ToString("#,###")₫

@@ -16,8 +16,9 @@
         imageList.Insert(0, Model.ImageUrl);
     }
     var hasMultipleImages = imageList.Count > 1;
-    var hasDiscount = Model.ListPrice.HasValue && Model.ListPrice > Model.Price;
-    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price) / Model.ListPrice.Value) * 100) : 0;
+    var hasPrice = Model.Price.HasValue;
+    var hasDiscount = hasPrice && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
+    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price.Value) / Model.ListPrice.Value) * 100) : 0;
 
     // Serialize variants cho JavaScript — dùng camelCase
     var variantsJson = hasVariants
@@ -207,7 +208,7 @@
                         }
                         else
                         {
-                            @(Model.Price.ToString("#,###") + "₫")
+                            @(Model.Price.HasValue ? Model.Price.Value.ToString("#,###") + "₫" : "Liên hệ")
                         }
                     </span>
                     @if (hasVariants)
@@ -230,6 +231,10 @@
                     {
                         <span class="text-lg text-brand-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
                         <span class="text-sm font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">-@discountPercent%</span>
+                    }
+                    else if (!hasPrice)
+                    {
+                        <span class="text-sm font-bold text-brand-500 bg-brand-50 px-3 py-1 rounded-full">Liên hệ để biết giá</span>
                     }
                 </div>
                 @if (hasVariants)
@@ -452,7 +457,8 @@
                 var thumbs = document.querySelectorAll('.slide-thumb');
                 var prevBtn = document.getElementById('slide-prev');
                 var nextBtn = document.getElementById('slide-next');
-                function goTo(i) {
+                window._slideStop = function() { if (timer) { clearInterval(timer); timer = null; } };
+                window._slideGoTo = function(i) {
                     if (i < 0) i = images.length - 1;
                     if (i >= images.length) i = 0;
                     current = i;
@@ -463,9 +469,10 @@
                         t.classList.toggle('border-brand-500', idx === current);
                         t.classList.toggle('border-brand-100', idx !== current);
                     });
-                }
-                function startAuto() { stopAuto(); timer = setInterval(function () { goTo(current + 1); }, 3000); }
-                function stopAuto() { if (timer) { clearInterval(timer); timer = null; } }
+                };
+                function goTo(i) { window._slideGoTo(i); }
+                function startAuto() { window._slideStop(); timer = setInterval(function () { goTo(current + 1); }, 3000); }
+                function stopAuto() { window._slideStop(); }
                 thumbs.forEach(function (t) { t.addEventListener('click', function () { goTo(parseInt(this.getAttribute('data-index'))); stopAuto(); }); });
                 if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current - 1); stopAuto(); });
                 if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current + 1); stopAuto(); });
@@ -535,8 +542,6 @@
             function updateVariantDisplay(v, idx) {
                 priceEl.textContent = numberFormat(v.price) + '₫';
                 if (v.listPrice && v.listPrice > v.price) {
-                priceEl.textContent = numberFormat(v.price) + '₫';
-                if (v.listPrice && v.listPrice > v.price) {
                     listPriceEl.textContent = numberFormat(v.listPrice) + '₫';
                     listPriceEl.classList.remove('hidden');
                     var pct = Math.round(((v.listPrice - v.price) / v.listPrice) * 100);
@@ -559,21 +564,29 @@
                     selectedName.textContent = v.name;
                 }
 
+                // Cập nhật ảnh chính — tạm dừng slideshow nếu có
                 var mainImg = document.getElementById('main-image');
                 if (mainImg && v.imageUrl) {
                     mainImg.src = v.imageUrl;
+                    if (typeof window._slideStop === 'function') window._slideStop();
+                }
+
+                // Cập nhật thông số kỹ thuật theo variant
+                if (specRows.length > 0 && idx !== undefined) {
+                    updateSpecsFromVariant(idx);
                 }
             }
 
             // === FLAT CHIP MODE ===
             var flatChips = document.querySelectorAll('.variant-chip');
             if (flatChips.length > 0) {
-                updateVariantDisplay(variants[0]);
+                updateVariantDisplay(variants[0], 0);
                 flatChips.forEach(function(chip) {
                     chip.addEventListener('click', function() {
                         var idx = parseInt(this.getAttribute('data-index'));
                         currentVariant = variants[idx];
-                        updateVariantDisplay(currentVariant);
+                        currentVariantIndex = idx;
+                        updateVariantDisplay(currentVariant, idx);
                         flatChips.forEach(function(c) {
                             c.classList.remove('border-brand-500', 'bg-brand-50', 'text-brand-700');
                             c.classList.add('border-brand-200', 'bg-white', 'text-brand-600');

@@ -1,8 +1,9 @@
 @model TMDTStore.Models.Product
 
 @{
-    var hasDiscount = Model.ListPrice.HasValue && Model.ListPrice > Model.Price;
-    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price) / Model.ListPrice.Value) * 100) : 0;
+    var hasPrice = Model.Price.HasValue;
+    var hasDiscount = hasPrice && Model.ListPrice.HasValue && Model.ListPrice > Model.Price.Value;
+    var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price.Value) / Model.ListPrice.Value) * 100) : 0;
 }
 
 <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id"
@@ -63,10 +64,17 @@
 
         <!-- Price -->
         <div class="flex items-baseline gap-2 flex-wrap">
-            <span class="text-base sm:text-lg font-bold text-red-500">@Model.Price.ToString("#,###")₫</span>
-            @if (hasDiscount)
+            @if (hasPrice)
             {
-                <span class="text-xs text-brand-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
+                <span class="text-base sm:text-lg font-bold text-red-500">@Model.Price.Value.ToString("#,###")₫</span>
+                if (hasDiscount)
+                {
+                    <span class="text-xs text-brand-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
+                }
+            }
+            else
+            {
+                <span class="text-base sm:text-lg font-semibold text-brand-500">Liên hệ</span>
             }
         </div>
     </div>
