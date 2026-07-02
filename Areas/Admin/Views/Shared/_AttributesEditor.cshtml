@@ -1,0 +1,106 @@
+@{
+    var attrsJson = ViewBag.AttributesJson as string ?? "[]";
+    var fieldName = ViewBag.AttributesFieldName as string ?? "Attributes";
+}
+
+<div id="attrs-editor" class="space-y-3">
+    <label class="block text-sm font-medium text-admin-700 mb-2">Thuộc tính biến thể</label>
+    <p class="text-xs text-admin-400 mb-2">Thêm các thuộc tính phân biệt biến thể (VD: Màu sắc, Dung lượng, Kích
+        thước...)</p>
+
+        <div id="attrs-list" class="space-y-2"></div>
+
+        <button type="button" id="add-attr-btn"
+                class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 transition-all duration-200 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Thêm thuộc tính
+        </button>
+
+        <input type="hidden" id="@fieldName" name="@fieldName" value='@attrsJson' />
+    </div>
+
+    <script>
+        (function () {
+            var fieldName = '@fieldName';
+            var attrsData = [];
+            try {
+                attrsData = JSON.parse(document.getElementById(fieldName)?.value || '[]');
+            } catch (e) { attrsData = []; }
+
+            var attrsList = document.getElementById('attrs-list');
+            var addBtn = document.getElementById('add-attr-btn');
+            var hiddenField = document.getElementById(fieldName);
+
+            function renderAttrs() {
+                attrsList.innerHTML = '';
+                attrsData.forEach(function (item, index) {
+                    var row = document.createElement('div');
+                    row.className = 'flex items-center gap-2';
+                    row.innerHTML = `
+                        <input type="text" value="${escapeHtml(item.key)}"
+                               placeholder="Tên (VD: Màu sắc)"
+                               class="attr-key flex-1 px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                               data-index="${index}" />
+                        <input type="text" value="${escapeHtml(item.value)}"
+                               placeholder="Giá trị (VD: Xám)"
+                               class="attr-value flex-[2] px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                               data-index="${index}" />
+                        <button type="button" onclick="removeAttr(${index})"
+                                class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    `;
+                    attrsList.appendChild(row);
+                });
+                updateHiddenField();
+                attachInputListeners();
+            }
+
+            function escapeHtml(str) {
+                var d = document.createElement('div');
+                d.textContent = str || '';
+                return d.innerHTML;
+            }
+
+            function updateHiddenField() {
+                var rows = attrsList.querySelectorAll('.attr-key');
+                var newData = [];
+                rows.forEach(function (input, index) {
+                    var key = input.value.trim();
+                    var value = document.querySelectorAll('.attr-value')[index]?.value.trim() || '';
+                    if (key) {
+                        newData.push({ key: key, value: value });
+                    }
+                });
+                attrsData = newData;
+                hiddenField.value = JSON.stringify(attrsData);
+            }
+
+            function attachInputListeners() {
+                attrsList.querySelectorAll('input').forEach(function (input) {
+                    input.addEventListener('input', updateHiddenField);
+                });
+            }
+
+            window.removeAttr = function (index) {
+                attrsData.splice(index, 1);
+                renderAttrs();
+            };
+
+            if (addBtn) {
+                addBtn.addEventListener('click', function () {
+                    attrsData.push({ key: '', value: '' });
+                    renderAttrs();
+                    var lastKey = attrsList.querySelector('.attr-key:last-child');
+                    if (lastKey) setTimeout(function () { lastKey.focus(); }, 100);
+                });
+            }
+
+            renderAttrs();
+        })();
+    </script>

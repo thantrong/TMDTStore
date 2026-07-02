@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
+using TMDTStore.Services.Cloudinary;
 
 namespace TMDTStore.Areas.Admin.Controllers;
 
@@ -10,10 +11,12 @@ namespace TMDTStore.Areas.Admin.Controllers;
 public class VariantController : Controller
 {
     private readonly StoreDbContext _context;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public VariantController(StoreDbContext context)
+    public VariantController(StoreDbContext context, ICloudinaryService cloudinaryService)
     {
         _context = context;
+        _cloudinaryService = cloudinaryService;
     }
 
     // GET: /Admin/Variant/Index/{productId}
@@ -46,7 +49,7 @@ public class VariantController : Controller
     // POST: /Admin/Variant/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(ProductVariant model)
+    public async Task<IActionResult> Create(ProductVariant model, IFormFile? ImageFile)
     {
         ModelState.Remove("Id");
         ModelState.Remove("CreatedAt");
@@ -60,6 +63,23 @@ public class VariantController : Controller
 
         model.CreatedAt = DateTime.UtcNow;
         model.IsActive = true;
+
+        // Upload image nếu có
+        if (ImageFile != null && ImageFile.Length > 0)
+        {
+            try
+            {
+                var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "variants");
+                if (!string.IsNullOrEmpty(imageUrl))
+                    model.ImageUrl = imageUrl;
+            }
+            catch (Exception)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Không thể tải ảnh lên.";
+                return View(model);
+            }
+        }
 
         _context.ProductVariants.Add(model);
         await _context.SaveChangesAsync();
@@ -84,7 +104,7 @@ public class VariantController : Controller
     // POST: /Admin/Variant/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(string id, ProductVariant model)
+    public async Task<IActionResult> Edit(string id, ProductVariant model, IFormFile? ImageFile)
     {
         if (!ModelState.IsValid) return View(model);
 
@@ -96,10 +116,26 @@ public class VariantController : Controller
         variant.Price = model.Price;
         variant.ListPrice = model.ListPrice;
         variant.StockQuantity = model.StockQuantity;
-        variant.ImageUrl = model.ImageUrl;
         variant.Attributes = model.Attributes;
         variant.SortOrder = model.SortOrder;
         variant.IsActive = model.IsActive;
+
+        // Upload image mới nếu có
+        if (ImageFile != null && ImageFile.Length > 0)
+        {
+            try
+            {
+                var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "variants");
+                if (!string.IsNullOrEmpty(imageUrl))
+                    variant.ImageUrl = imageUrl;
+            }
+            catch (Exception)
+            {
+                TempData["ToastType"] = "error";
+                TempData["ToastMessage"] = "Không thể tải ảnh lên.";
+                return View(model);
+            }
+        }
 
         await _context.SaveChangesAsync();
 
