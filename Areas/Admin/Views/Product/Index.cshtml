@@ -65,6 +65,7 @@
                     <th class="text-left px-4 py-3 font-semibold text-admin-600">Danh mục</th>
                     <th class="text-left px-4 py-3 font-semibold text-admin-600">Thương hiệu</th>
                     <th class="text-right px-4 py-3 font-semibold text-admin-600">Giá</th>
+                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Tồn kho</th>
                     <th class="text-center px-4 py-3 font-semibold text-admin-600">Trạng thái</th>
                     <th class="text-center px-4 py-3 font-semibold text-admin-600">Hành động</th>
                 </tr>
@@ -73,18 +74,34 @@
                 @if (Model.Products.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="px-4 py-12 text-center text-admin-400">Chưa có sản phẩm nào.</td>
+                        <td colspan="7" class="px-4 py-12 text-center text-admin-400">Chưa có sản phẩm nào.</td>
                     </tr>
                 }
                 @foreach (var product in Model.Products)
                 {
+                    var pHasVariants = product.ProductVariants != null && product.ProductVariants.Count > 0;
+                    // Giá: ưu tiên variant rẻ nhất nếu product không có giá
+                    var displayPrice = product.Price.HasValue ? product.Price.Value.ToString("#,###") + "₫" :
+                        (pHasVariants ? product.ProductVariants.Min(v => v.Price).ToString("#,###") + "₫" : "Liên hệ");
+                    // Ảnh: lấy từ variant rẻ nhất nếu product không có ảnh
+                    var displayImage = product.ImageUrl;
+                    if (string.IsNullOrEmpty(displayImage) && pHasVariants)
+                    {
+                        var cheapestWithImg = product.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v => v.Price).FirstOrDefault();
+                        if (cheapestWithImg != null) displayImage = cheapestWithImg.ImageUrl;
+                    }
+                    // Tồn kho: tổng từ variants nếu có, nếu không thì từ Inventory
+                    var totalStock = pHasVariants
+                        ? product.ProductVariants.Sum(v => v.StockQuantity)
+                        : (product.Inventory?.StockQuantity ?? 0);
+
                     <tr class="hover:bg-admin-50 transition-colors">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-lg bg-admin-100 overflow-hidden flex-shrink-0">
-                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    @if (!string.IsNullOrEmpty(displayImage))
                                     {
-                                        <img src="@product.ImageUrl" alt="" class="w-full h-full object-cover" />
+                                        <img src="@displayImage" alt="" class="w-full h-full object-cover" />
                                     }
                                     else
                                     {
@@ -98,13 +115,18 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-admin-800 max-w-[250px] truncate">@product.Name</p>
-                                    <p class="text-xs text-admin-400">ID: @product.Id</p>
+                                    <p class="text-xs text-admin-400">ID: @product.Id @(pHasVariants ? "· " + product.ProductVariants.Count + " biến thể" : "")</p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-4 py-3 text-admin-600">@product.Category?.Name</td>
                         <td class="px-4 py-3 text-admin-600">@(product.Brand?.Name ?? product.BrandName)</td>
-                        <td class="px-4 py-3 text-right font-semibold text-admin-800">@(product.Price.HasValue ? product.Price.Value.ToString("#,###") + "₫" : "Liên hệ")</td>
+                        <td class="px-4 py-3 text-right font-semibold text-admin-800">@displayPrice</td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium @(totalStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700")">
+                                @(totalStock > 0 ? "Còn " + totalStock : "Hết hàng")
+                            </span>
+                        </td>
                         <td class="px-4 py-3 text-center">
                             <span
                                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium

@@ -31,7 +31,7 @@ public class ProductController : Controller
         .Include(p => p.Brand)
         .Include(p => p.Inventory)
         .Include(p => p.ProductBadges)
-        .Where(p => p.IsActive == true)
+        .Include(p => p.ProductVariants.Where(v => v.IsActive))
         .AsQueryable();
 
         // Filter theo CategoryId
