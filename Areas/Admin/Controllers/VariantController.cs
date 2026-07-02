@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
+using TMDTStore.Models.ViewModels.Variant;
 using TMDTStore.Services.Cloudinary;
 
 namespace TMDTStore.Areas.Admin.Controllers;
@@ -43,17 +44,14 @@ public class VariantController : Controller
         if (product == null) return NotFound();
 
         ViewBag.Product = product;
-        return View(new ProductVariant { ProductId = productId, IsActive = true });
+        return View(new VariantCreateViewModel { ProductId = productId });
     }
 
     // POST: /Admin/Variant/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(ProductVariant model, IFormFile? ImageFile)
+    public async Task<IActionResult> Create(VariantCreateViewModel model)
     {
-        ModelState.Remove("Id");
-        ModelState.Remove("CreatedAt");
-
         if (!ModelState.IsValid)
         {
             var product = await _context.Products.FindAsync(model.ProductId);
@@ -61,24 +59,42 @@ public class VariantController : Controller
             return View(model);
         }
 
-        model.CreatedAt = DateTime.UtcNow;
-        model.IsActive = true;
+        // Map ViewModel → Entity
+        var variant = new ProductVariant
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            ProductId = model.ProductId,
+            Name = model.Name,
+            Price = model.Price,
+            ListPrice = model.ListPrice,
+            StockQuantity = model.StockQuantity,
+            SortOrder = model.SortOrder,
+            Attributes = model.Attributes,
+            Description = model.Description,
+            ImageUrl = null,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true
+        };
 
         // Tự động sinh SKU nếu để trống
         if (string.IsNullOrWhiteSpace(model.Sku) && !string.IsNullOrWhiteSpace(model.Name))
         {
-            model.Sku = RemoveVietnameseAccents(model.Name.ToUpperInvariant())
+            variant.Sku = RemoveVietnameseAccents(model.Name.ToUpperInvariant())
                 .Replace(" ", "-");
+        }
+        else
+        {
+            variant.Sku = model.Sku!;
         }
 
         // Upload image nếu có
-        if (ImageFile != null && ImageFile.Length > 0)
+        if (model.ImageFile != null && model.ImageFile.Length > 0)
         {
             try
             {
-                var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "variants");
+                var imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "variants");
                 if (!string.IsNullOrEmpty(imageUrl))
-                    model.ImageUrl = imageUrl;
+                    variant.ImageUrl = imageUrl;
             }
             catch (Exception)
             {
@@ -88,7 +104,7 @@ public class VariantController : Controller
             }
         }
 
-        _context.ProductVariants.Add(model);
+        _context.ProductVariants.Add(variant);
         await _context.SaveChangesAsync();
 
         TempData["ToastType"] = "success";
@@ -105,13 +121,29 @@ public class VariantController : Controller
             .FirstOrDefaultAsync(v => v.Id == id);
         if (variant == null) return NotFound();
 
-        return View(variant);
+        var model = new VariantEditViewModel
+        {
+            Id = variant.Id,
+            ProductId = variant.ProductId,
+            Name = variant.Name,
+            Sku = variant.Sku,
+            Price = variant.Price,
+            ListPrice = variant.ListPrice,
+            StockQuantity = variant.StockQuantity,
+            SortOrder = variant.SortOrder,
+            Attributes = variant.Attributes,
+            Description = variant.Description,
+            IsActive = variant.IsActive
+        };
+
+        ViewBag.ExistingImageUrl = variant.ImageUrl;
+        return View(model);
     }
 
     // POST: /Admin/Variant/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(string id, ProductVariant model, IFormFile? ImageFile)
+    public async Task<IActionResult> Edit(string id, VariantEditViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
 
@@ -119,7 +151,7 @@ public class VariantController : Controller
         if (variant == null) return NotFound();
 
         variant.Name = model.Name;
-        variant.Sku = model.Sku;
+        variant.Sku = model.Sku ?? RemoveVietnameseAccents(model.Name.ToUpperInvariant()).Replace(" ", "-");
         variant.Price = model.Price;
         variant.ListPrice = model.ListPrice;
         variant.StockQuantity = model.StockQuantity;
@@ -129,11 +161,11 @@ public class VariantController : Controller
         variant.IsActive = model.IsActive;
 
         // Upload image mới nếu có
-        if (ImageFile != null && ImageFile.Length > 0)
+        if (model.ImageFile != null && model.ImageFile.Length > 0)
         {
             try
             {
-                var imageUrl = await _cloudinaryService.UploadImageAsync(ImageFile, "variants");
+                var imageUrl = await _cloudinaryService.UploadImageAsync(model.ImageFile, "variants");
                 if (!string.IsNullOrEmpty(imageUrl))
                     variant.ImageUrl = imageUrl;
             }

@@ -1,4 +1,4 @@
-@model TMDTStore.Models.ProductVariant
+@model TMDTStore.Models.ViewModels.Variant.VariantEditViewModel
 
 @{
     ViewData["Title"] = "Sửa biến thể";
@@ -57,7 +57,8 @@
             <div>
                 @{
                     ViewBag.ImageFieldName = "ImageFile";
-                    var existingUrls = !string.IsNullOrEmpty(Model.ImageUrl) ? "[\"" + Model.ImageUrl + "\"]" : "[]";
+                    var existingUrl = ViewBag.ExistingImageUrl as string;
+                    var existingUrls = !string.IsNullOrEmpty(existingUrl) ? "[\"" + existingUrl + "\"]" : "[]";
                     ViewBag.ExistingImageUrlsJson = existingUrls;
                 }
                 @await Html.PartialAsync("_ImageUploader")
