@@ -1,12 +1,15 @@
 @model TMDTStore.Models.Product
+@using System.Text.Json;
 
 @{
     ViewData["Title"] = Model.Name;
 
+    var jsonOpts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var hasVariants = Model.ProductVariants != null && Model.ProductVariants.Count > 0;
     var imageList = new List<string>();
     if (!string.IsNullOrEmpty(Model.ImageUrls))
     {
-        try { imageList = System.Text.Json.JsonSerializer.Deserialize<List<string>>(Model.ImageUrls); } catch { }
+        try { imageList = JsonSerializer.Deserialize<List<string>>(Model.ImageUrls); } catch { }
     }
     if (!string.IsNullOrEmpty(Model.ImageUrl) && !imageList.Contains(Model.ImageUrl))
     {
@@ -15,6 +18,83 @@
     var hasMultipleImages = imageList.Count > 1;
     var hasDiscount = Model.ListPrice.HasValue && Model.ListPrice > Model.Price;
     var discountPercent = hasDiscount ? (int)(((Model.ListPrice.Value - Model.Price) / Model.ListPrice.Value) * 100) : 0;
+
+    // Serialize variants cho JavaScript — dùng camelCase
+    var variantsJson = hasVariants
+        ? JsonSerializer.Serialize(Model.ProductVariants.Select(v => new
+        {
+            v.Name,
+            v.Sku,
+            v.Price,
+            v.ListPrice,
+            v.SalePrice,
+            v.StockQuantity,
+            v.ImageUrl,
+            v.Attributes
+        }), jsonOpts)
+        : "[]";
+
+    // Parse attributes từ variant đầu để lấy danh sách attribute keys
+    var attrKeys = new List<string>();
+    if (hasVariants && !string.IsNullOrEmpty(Model.ProductVariants!.First().Attributes))
+    {
+        try
+        {
+            var firstAttrs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(Model.ProductVariants!.First().Attributes);
+            if (firstAttrs != null)
+                attrKeys = firstAttrs.Select(a => a.GetValueOrDefault("key", "")).Where(k => !string.IsNullOrEmpty(k)).ToList();
+        }
+        catch { }
+    }
+
+    // Build lookup: attribute key → danh sách các giá trị có thể có
+    var attrValues = new Dictionary<string, List<string>>();
+    if (hasVariants && attrKeys.Count > 0)
+    {
+        foreach (var v in Model.ProductVariants!)
+        {
+            if (string.IsNullOrEmpty(v.Attributes)) continue;
+            try
+            {
+                var attrs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(v.Attributes);
+                if (attrs == null) continue;
+                foreach (var a in attrs)
+                {
+                    var key = a.GetValueOrDefault("key", "");
+                    var val = a.GetValueOrDefault("value", "");
+                    if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(val)) continue;
+                    if (!attrValues.ContainsKey(key))
+                        attrValues[key] = new List<string>();
+                    if (!attrValues[key].Contains(val))
+                        attrValues[key].Add(val);
+                }
+            }
+            catch { }
+        }
+    }
+
+    // Số lượng thuộc tính từ biến thể đầu (để đánh dấu row trong bảng specs)
+    var firstVariantAttrCount = 0;
+    var firstVariantAttrs = new List<Dictionary<string, string>>();
+    if (hasVariants && !string.IsNullOrEmpty(Model.ProductVariants!.First().Attributes))
+    {
+        try
+        {
+            firstVariantAttrs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(Model.ProductVariants!.First().Attributes) ?? new();
+            firstVariantAttrCount = firstVariantAttrs.Count;
+        }
+        catch { }
+    }
+
+    // Tất cả attributes của các biến thể — để JS cập nhật specs động
+    var allVariantAttrsJson = hasVariants
+        ? JsonSerializer.Serialize(Model.ProductVariants!.Select(v =>
+        {
+            if (string.IsNullOrEmpty(v.Attributes)) return new List<Dictionary<string, string>>();
+            try { return JsonSerializer.Deserialize<List<Dictionary<string, string>>>(v.Attributes) ?? new(); }
+            catch { return new List<Dictionary<string, string>>(); }
+        }).ToList(), jsonOpts)
+        : "[]";
 }
 
 <!-- Breadcrumb -->
@@ -103,7 +183,14 @@
         }
         <h1 class="text-2xl sm:text-3xl font-heading font-bold text-brand-900 leading-tight mb-3">@Model.Name</h1>
         <div class="flex items-center gap-4 text-sm text-brand-400 mb-5">
-            <span>SKU: <span class="font-medium text-brand-600">@Model.Id</span></span>
+            @if (hasVariants)
+            {
+                <span>SKU: <span id="variant-sku" class="font-medium text-brand-600">@Model.ProductVariants!.First().Sku</span></span>
+            }
+            else
+            {
+                <span>SKU: <span class="font-medium text-brand-600">@Model.Id</span></span>
+            }
             @if (Model.RatingCount > 0)
             {
                 <span class="flex items-center gap-1"><span class="text-yellow-400">★</span> <span
@@ -113,14 +200,47 @@
             </div>
             <div class="bg-brand-50 rounded-2xl p-5 mb-5">
                 <div class="flex items-baseline gap-3 flex-wrap">
-                    <span class="text-3xl sm:text-4xl font-bold text-red-500">@Model.Price.ToString("#,###")₫</span>
-                    @if (hasDiscount)
+                    <span id="variant-price" class="text-3xl sm:text-4xl font-bold text-red-500">
+                        @if (hasVariants)
+                        {
+                            @(Model.ProductVariants!.First().Price.ToString("#,###") + "₫")
+                        }
+                        else
+                        {
+                            @(Model.Price.ToString("#,###") + "₫")
+                        }
+                    </span>
+                    @if (hasVariants)
+                    {
+                        var firstListPrice = Model.ProductVariants!.First().ListPrice;
+                        var firstPrice = Model.ProductVariants!.First().Price;
+                        if (firstListPrice.HasValue && firstListPrice > firstPrice)
+                        {
+                            <span id="variant-list-price" class="text-lg text-brand-400 line-through">@firstListPrice?.ToString("#,###")₫</span>
+                            <span id="variant-discount-badge"
+                                  class="text-sm font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">-@((int)(((firstListPrice.Value - firstPrice) / firstListPrice.Value) * 100))%</span>
+                        }
+                        else
+                        {
+                            <span id="variant-list-price" class="text-lg text-brand-400 line-through hidden"></span>
+                            <span id="variant-discount-badge" class="hidden"></span>
+                        }
+                    }
+                    else if (hasDiscount)
                     {
                         <span class="text-lg text-brand-400 line-through">@Model.ListPrice?.ToString("#,###")₫</span>
-                        <span
-                        class="text-sm font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">-@discountPercent%</span>
+                        <span class="text-sm font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full">-@discountPercent%</span>
                     }
                 </div>
+                @if (hasVariants)
+                {
+                    <div class="mt-3 flex items-center gap-2 text-sm">
+                        <span class="text-brand-400">Tình trạng:</span>
+                        <span id="variant-stock" class="font-medium text-green-600">
+                            @(Model.ProductVariants!.First().StockQuantity > 0 ? "Còn hàng" : "Hết hàng")
+                        </span>
+                    </div>
+                }
             </div>
             @if (!string.IsNullOrEmpty(Model.ShortDescription))
             {
@@ -129,6 +249,60 @@
                     <p class="text-sm text-brand-600 leading-relaxed">@Model.ShortDescription</p>
                 </div>
             }
+
+            @if (hasVariants)
+            {
+                <div class="mb-5" id="variant-section">
+                    <h3 class="text-sm font-semibold text-brand-700 mb-2">Tùy chọn sản phẩm:</h3>
+
+                    @if (attrKeys.Count > 0)
+                    {
+                        <!-- Attribute groups (like PhongVu: color, config) -->
+                        <div class="space-y-3">
+                            @foreach (var key in attrKeys)
+                            {
+                                var vals = attrValues.GetValueOrDefault(key, new List<string>());
+                                <div>
+                                    <p class="text-xs font-medium text-brand-500 mb-1.5">@key</p>
+                                    <div class="flex flex-wrap gap-2" data-attr-key="@key">
+                                        @foreach (var val in vals)
+                                        {
+                                            <button type="button"
+                                                    class="attr-chip px-3 py-1.5 rounded-lg border text-sm font-medium transition-all duration-200 cursor-pointer"
+                                                    data-attr-key="@key" data-attr-value="@val">
+                                                @val
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Chip này ẩn, dùng để hiển thị variant đã chọn -->
+                        <div class="mt-3 p-3 bg-brand-50 rounded-xl border border-brand-100 hidden" id="selected-variant-info">
+                            <p class="text-sm text-brand-700">
+                                Đã chọn: <span id="selected-variant-name" class="font-semibold text-brand-800"></span>
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Fallback: flat chips nếu không có attributes -->
+                        <div class="flex flex-wrap gap-2" id="variant-list">
+                            @for (int i = 0; i < Model.ProductVariants!.Count; i++)
+                            {
+                                var v = Model.ProductVariants.ToList()[i];
+                                <button type="button" data-index="@i"
+                                        class="variant-chip px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-200 cursor-pointer
+                                        @(i == 0 ? "border-brand-500 bg-brand-50 text-brand-700" : "border-brand-200 bg-white text-brand-600 hover:border-brand-300")">
+                                    @v.Name
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
             @if (Model.WarrantyMonths.HasValue && Model.WarrantyMonths > 0)
             {
                 <div
@@ -213,12 +387,19 @@
                             <div class="bg-brand-50 rounded-2xl overflow-hidden max-w-2xl">
                                 <table class="w-full text-sm">
                                     <tbody>
+                                        @{
+                                            var isDetailGroup = group.Name == "Cấu hình chi tiết";
+                                            var specIdx = 0;
+                                        }
                                         @foreach (var item in group.Specs)
                                         {
-                                            <tr class="border-b border-brand-100 last:border-0">
+                                            var isVariantRow = isDetailGroup && specIdx < firstVariantAttrCount;
+                                            <tr class="border-b border-brand-100 last:border-0 @(isVariantRow ? "spec-variant-row" : "")"
+                                                @if (isVariantRow) { <text>data-key="@item["key"]"</text> }>
                                                 <td class="py-3 px-4 font-medium text-brand-500 w-1/3 bg-brand-50/50">@item["key"]</td>
-                                                <td class="py-3 px-4 text-brand-800">@item["value"]</td>
+                                                <td class="py-3 px-4 text-brand-800 spec-value">@item["value"]</td>
                                             </tr>
+                                            specIdx++;
                                         }
                                     </tbody>
                                 </table>
@@ -229,17 +410,21 @@
             }
             <div id="tab-description" class="tab-content @(hasSpecGroups ? "hidden" : "")">
                 @{
-                    // Ưu tiên mô tả từ biến thể đầu tiên, fallback về mô tả sản phẩm
                     var firstVariant = Model.ProductVariants?.FirstOrDefault();
-                    var effectiveDesc = !string.IsNullOrEmpty(firstVariant?.Description)
-                        ? firstVariant.Description
-                        : Model.Description;
+                    var defaultDesc = firstVariant?.Description ?? Model.Description;
                 }
-                @if (!string.IsNullOrEmpty(effectiveDesc))
+                @if (!string.IsNullOrEmpty(defaultDesc))
                 {
                     <div class="relative">
                         <div id="desc-content" class="text-sm text-brand-700 leading-relaxed overflow-hidden transition-all duration-300 [&_img]:max-w-full [&_img]:rounded-lg [&_a]:text-brand-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" style="max-height: 180px;">
-                            @Html.Raw(effectiveDesc)
+                            @if (hasVariants)
+                            {
+                                @Html.Raw(defaultDesc)
+                            }
+                            else
+                            {
+                                @Html.Raw(Model.Description ?? "")
+                            }
                         </div>
                         <button id="desc-toggle" type="button"
                                 class="mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer"
@@ -308,6 +493,165 @@
             } else {
                 content.style.maxHeight = '180px';
                 btn.textContent = 'Xem thêm ↓';
+            }
+        }
+
+        var hasVariants = @JsonSerializer.Serialize(hasVariants, jsonOpts);
+
+        if (hasVariants) {
+            // ====== VARIANT SELECTOR ======
+            var variants = @Html.Raw(variantsJson);
+            var allVariantAttrs = @Html.Raw(allVariantAttrsJson);
+            var currentVariantIndex = 0;
+            var currentVariant = variants[0];
+
+            // DOM elements
+            var priceEl = document.getElementById('variant-price');
+            var listPriceEl = document.getElementById('variant-list-price');
+            var discountBadgeEl = document.getElementById('variant-discount-badge');
+            var skuEl = document.getElementById('variant-sku');
+            var stockEl = document.getElementById('variant-stock');
+            var selectedInfo = document.getElementById('selected-variant-info');
+            var selectedName = document.getElementById('selected-variant-name');
+            var specRows = document.querySelectorAll('.spec-variant-row');
+
+            function numberFormat(n) {
+                return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            function updateSpecsFromVariant(idx) {
+                var attrs = allVariantAttrs[idx];
+                if (!attrs) return;
+                specRows.forEach(function(row) {
+                    var key = row.getAttribute('data-key');
+                    var found = attrs.find(function(a) { return a.key === key; });
+                    var cell = row.querySelector('.spec-value');
+                    if (found && cell) {
+                        cell.textContent = found.value;
+                    }
+                });
+            }
+
+            function updateVariantDisplay(v, idx) {
+                priceEl.textContent = numberFormat(v.price) + '₫';
+                if (v.listPrice && v.listPrice > v.price) {
+                priceEl.textContent = numberFormat(v.price) + '₫';
+                if (v.listPrice && v.listPrice > v.price) {
+                    listPriceEl.textContent = numberFormat(v.listPrice) + '₫';
+                    listPriceEl.classList.remove('hidden');
+                    var pct = Math.round(((v.listPrice - v.price) / v.listPrice) * 100);
+                    discountBadgeEl.textContent = '-' + pct + '%';
+                    discountBadgeEl.classList.remove('hidden');
+                } else {
+                    listPriceEl.classList.add('hidden');
+                    discountBadgeEl.classList.add('hidden');
+                }
+
+                if (skuEl) skuEl.textContent = v.sku || v.name;
+
+                if (stockEl) {
+                    stockEl.textContent = v.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng';
+                    stockEl.className = 'font-medium ' + (v.stockQuantity > 0 ? 'text-green-600' : 'text-red-500');
+                }
+
+                if (selectedInfo && selectedName) {
+                    selectedInfo.classList.remove('hidden');
+                    selectedName.textContent = v.name;
+                }
+
+                var mainImg = document.getElementById('main-image');
+                if (mainImg && v.imageUrl) {
+                    mainImg.src = v.imageUrl;
+                }
+            }
+
+            // === FLAT CHIP MODE ===
+            var flatChips = document.querySelectorAll('.variant-chip');
+            if (flatChips.length > 0) {
+                updateVariantDisplay(variants[0]);
+                flatChips.forEach(function(chip) {
+                    chip.addEventListener('click', function() {
+                        var idx = parseInt(this.getAttribute('data-index'));
+                        currentVariant = variants[idx];
+                        updateVariantDisplay(currentVariant);
+                        flatChips.forEach(function(c) {
+                            c.classList.remove('border-brand-500', 'bg-brand-50', 'text-brand-700');
+                            c.classList.add('border-brand-200', 'bg-white', 'text-brand-600');
+                        });
+                        this.classList.remove('border-brand-200', 'bg-white', 'text-brand-600');
+                        this.classList.add('border-brand-500', 'bg-brand-50', 'text-brand-700');
+                    });
+                });
+            }
+
+            // === ATTRIBUTE GROUP MODE ===
+            var attrChips = document.querySelectorAll('.attr-chip');
+            if (attrChips.length > 0) {
+                var selectedAttrs = {};
+
+                function findVariantByAttrs() {
+                    var keys = Object.keys(selectedAttrs);
+                    if (keys.length === 0) return null;
+                    for (var i = 0; i < variants.length; i++) {
+                        var v = variants[i];
+                        if (!v.attributes) continue;
+                        var attrs;
+                        try { attrs = JSON.parse(v.attributes); } catch(e) { continue; }
+                        if (!attrs) continue;
+                        var match = keys.every(function(key) {
+                            return attrs.some(function(a) { return a.key === key && a.value === selectedAttrs[key]; });
+                        });
+                        if (match) return { variant: v, index: i };
+                    }
+                    return null;
+                }
+
+                function refreshAttrChips() {
+                    attrChips.forEach(function(chip) {
+                        var k = chip.getAttribute('data-attr-key');
+                        var v = chip.getAttribute('data-attr-value');
+                        if (selectedAttrs[k] === v) {
+                            chip.classList.remove('border-brand-200', 'bg-white', 'text-brand-600');
+                            chip.classList.add('border-brand-500', 'bg-brand-50', 'text-brand-700');
+                        } else {
+                            chip.classList.remove('border-brand-500', 'bg-brand-50', 'text-brand-700');
+                            chip.classList.add('border-brand-200', 'bg-white', 'text-brand-600');
+                        }
+                    });
+                    var result = findVariantByAttrs();
+                    if (result) {
+                        currentVariant = result.variant;
+                        currentVariantIndex = result.index;
+                        updateVariantDisplay(currentVariant, result.index);
+                    }
+                }
+
+                attrChips.forEach(function(chip) {
+                    chip.addEventListener('click', function() {
+                        var key = this.getAttribute('data-attr-key');
+                        var val = this.getAttribute('data-attr-value');
+                        if (selectedAttrs[key] === val) {
+                            delete selectedAttrs[key];
+                        } else {
+                            selectedAttrs[key] = val;
+                        }
+                        refreshAttrChips();
+                    });
+                });
+
+                // Chọn mặc định giá trị đầu tiên của mỗi nhóm
+                var groups = {};
+                attrChips.forEach(function(chip) {
+                    var k = chip.getAttribute('data-attr-key');
+                    if (!groups[k]) groups[k] = chip.getAttribute('data-attr-value');
+                });
+                Object.keys(groups).forEach(function(k) { selectedAttrs[k] = groups[k]; });
+                refreshAttrChips();
+            }
+
+            // Apply initial specs update
+            if (specRows.length > 0) {
+                updateSpecsFromVariant(0);
             }
         }
     </script>
