@@ -19,7 +19,8 @@
         }
         else if (hasVariantsLoaded && Model.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
         {
-            var firstImg = Model.ProductVariants.First(v => !string.IsNullOrEmpty(v.ImageUrl)).ImageUrl;
+            var cheapest = Model.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v => v.Price).First();
+            var firstImg = cheapest.ImageUrl;
             <img src="@firstImg" alt="@Model.Name"
                  class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
         }
@@ -102,5 +103,20 @@
                 <span class="text-base sm:text-lg font-semibold text-brand-400">Liên hệ</span>
             }
         </div>
+
+        <!-- Stock -->
+        @if (hasVariantsLoaded)
+        {
+            var totalStock = Model.ProductVariants.Sum(v => v.StockQuantity);
+            <div class="mt-1.5 text-xs @(totalStock > 0 ? "text-emerald-600" : "text-red-400")">
+                @(totalStock > 0 ? "Còn " + totalStock + " sản phẩm" : "Hết hàng")
+            </div>
+        }
+        else if (Model.Inventory != null)
+        {
+            <div class="mt-1.5 text-xs @(Model.Inventory.StockQuantity > 0 ? "text-emerald-600" : "text-red-400")">
+                @(Model.Inventory.StockQuantity > 0 ? "Còn " + Model.Inventory.StockQuantity + " sản phẩm" : "Hết hàng")
+            </div>
+        }
     </div>
 </a>
