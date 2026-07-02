@@ -180,7 +180,8 @@ public class ProductController : Controller
            .Include(p => p.Inventory)
            .Include(p => p.ProductBadges)
            .Include(p => p.Reviews)
-           .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
+           .Include(p => p.ProductVariants.OrderBy(v => v.SortOrder))
+           .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product == null)
         {
