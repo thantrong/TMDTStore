@@ -82,15 +82,15 @@ public class VariantController : Controller
 
         // Tự động sinh SKU 10 chữ số nếu để trống
         if (string.IsNullOrWhiteSpace(model.Sku))
-        // Tự động sinh SKU 10 chữ số nếu để trống
-        if (string.IsNullOrWhiteSpace(model.Sku))
-        {
-            variant.Sku = await GenerateSequentialSku();
-        }
-        else
-        {
-            variant.Sku = model.Sku;
-        }
+            // Tự động sinh SKU 10 chữ số nếu để trống
+            if (string.IsNullOrWhiteSpace(model.Sku))
+            {
+                variant.Sku = await GenerateSequentialSku();
+            }
+            else
+            {
+                variant.Sku = model.Sku;
+            }
 
         // Upload image nếu có
         if (model.ImageFile != null && model.ImageFile.Length > 0)
