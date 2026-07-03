@@ -21,6 +21,24 @@
     {
         foreach (var v in Model.ProductVariants!)
         {
+            // Lấy từ ImageUrls (JSON array) của từng variant
+            if (!string.IsNullOrEmpty(v.ImageUrls))
+            {
+                try
+                {
+                    var variantUrls = JsonSerializer.Deserialize<List<string>>(v.ImageUrls);
+                    if (variantUrls != null)
+                    {
+                        foreach (var url in variantUrls)
+                        {
+                            if (!string.IsNullOrEmpty(url) && !imageList.Contains(url))
+                                imageList.Add(url);
+                        }
+                    }
+                }
+                catch { }
+            }
+            // Lấy từ ImageUrl (1 ảnh chính) của variant
             if (!string.IsNullOrEmpty(v.ImageUrl) && !imageList.Contains(v.ImageUrl))
                 imageList.Add(v.ImageUrl);
         }
@@ -42,9 +60,30 @@
             v.SalePrice,
             v.StockQuantity,
             v.ImageUrl,
+            v.ImageUrls,
             v.Attributes,
             v.Description
         }), jsonOpts)
+        : "[]";
+
+    // Danh sách tất cả ảnh của từng variant cho JS
+    var allVariantImagesJson = hasVariants
+        ? JsonSerializer.Serialize(Model.ProductVariants!.Select(v =>
+        {
+            var urls = new List<string>();
+            if (!string.IsNullOrEmpty(v.ImageUrls))
+            {
+                try
+                {
+                    var parsed = JsonSerializer.Deserialize<List<string>>(v.ImageUrls);
+                    if (parsed != null) urls.AddRange(parsed);
+                }
+                catch { }
+            }
+            if (!string.IsNullOrEmpty(v.ImageUrl) && !urls.Contains(v.ImageUrl))
+                urls.Insert(0, v.ImageUrl);
+            return urls;
+        }).ToList(), jsonOpts)
         : "[]";
 
     // Parse attributes từ variant đầu để lấy danh sách attribute keys
@@ -142,25 +181,22 @@
                         <span
                         class="absolute top-3 left-3 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg shadow-orange-500/30">-@discountPercent%</span>
                     }
-                    @if (hasMultipleImages)
-                    {
-                        <div
-                            class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-brand-600 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm">
-                            <span id="slide-current">1</span>/@imageList.Count
-                        </div>
-                        <button type="button" id="slide-prev"
-                                class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-brand-600 hover:bg-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <button type="button" id="slide-next"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-brand-600 hover:bg-white transition-all opacity-0 group-hover:opacity-100 cursor-pointer">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    }
+                    <div
+                        class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-brand-600 text-xs font-medium px-2.5 py-1 rounded-full shadow-sm @(hasMultipleImages ? "" : "hidden")" id="slide-counter">
+                        <span id="slide-current">1</span>/@(imageList.Count > 0 ? imageList.Count : 1)
+                    </div>
+                    <button type="button" id="slide-prev"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-brand-600 hover:bg-white transition-all @(hasMultipleImages ? "" : "hidden") opacity-0 group-hover:opacity-100 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button type="button" id="slide-next"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-brand-600 hover:bg-white transition-all @(hasMultipleImages ? "" : "hidden") opacity-0 group-hover:opacity-100 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 }
                 else
                 {
@@ -176,7 +212,7 @@
         </div>
         @if (hasMultipleImages)
         {
-            <div class="flex gap-2 overflow-x-auto pb-1">
+            <div class="flex gap-2 overflow-x-auto pb-1" id="thumbnails-container">
                 @for (int i = 0; i < imageList.Count; i++)
                 {
                     <button type="button" data-index="@i"
@@ -454,17 +490,16 @@
         </div>
     </div>
 
-    @if (hasMultipleImages)
-    {
-        <script>
-            (function () {
-                var images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
-                var current = 0, timer = null;
-                var mainImg = document.getElementById('main-image');
-                var currentLabel = document.getElementById('slide-current');
-                var thumbs = document.querySelectorAll('.slide-thumb');
-                var prevBtn = document.getElementById('slide-prev');
-                var nextBtn = document.getElementById('slide-next');
+    <script>
+        (function () {
+            var images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
+            var mainImg = document.getElementById('main-image');
+            if (!mainImg) return; // Không có ảnh, thoát
+            var current = 0, timer = null;
+            var currentLabel = document.getElementById('slide-current');
+            var thumbs = document.querySelectorAll('.slide-thumb');
+            var prevBtn = document.getElementById('slide-prev');
+            var nextBtn = document.getElementById('slide-next');
                 window._slideStop = function() { if (timer) { clearInterval(timer); timer = null; } };
                 window._slideGoTo = function(i) {
                     if (i < 0) i = images.length - 1;
@@ -477,6 +512,46 @@
                         t.classList.toggle('border-brand-500', idx === current);
                         t.classList.toggle('border-brand-100', idx !== current);
                     });
+                };
+                window._slideSetImages = function(newImages) {
+                    if (!newImages || newImages.length === 0) return;
+                    images = newImages;
+                    current = 0;
+                    window._slideStop();
+                    window._slideGoTo(0);
+                    // Cập nhật counter
+                    if (currentLabel) {
+                        if (newImages.length > 1) {
+                            currentLabel.parentElement.classList.remove('hidden');
+                            currentLabel.textContent = '1/' + newImages.length;
+                        } else {
+                            currentLabel.parentElement.classList.add('hidden');
+                        }
+                    }
+                    // Cập nhật thumbnails container
+                    var thumbsContainer = document.getElementById('thumbnails-container');
+                    if (thumbsContainer) {
+                        thumbsContainer.innerHTML = '';
+                        if (newImages.length > 1) {
+                            thumbsContainer.parentElement.classList.remove('hidden');
+                            newImages.forEach(function(src, i) {
+                                var btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.setAttribute('data-index', i);
+                                btn.className = 'slide-thumb w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 ' + (i === 0 ? 'border-brand-500' : 'border-brand-100') + ' hover:border-brand-300 transition-all cursor-pointer';
+                                var img = document.createElement('img');
+                                img.src = src;
+                                img.alt = '';
+                                img.className = 'w-full h-full object-cover';
+                                btn.appendChild(img);
+                                btn.addEventListener('click', function() { window._slideGoTo(parseInt(this.getAttribute('data-index'))); window._slideStop(); });
+                                thumbsContainer.appendChild(btn);
+                            });
+                            thumbs = document.querySelectorAll('.slide-thumb');
+                        } else {
+                            thumbsContainer.parentElement.classList.add('hidden');
+                        }
+                    }
                 };
                 function goTo(i) { window._slideGoTo(i); }
                 function startAuto() { window._slideStop(); timer = setInterval(function () { goTo(current + 1); }, 3000); }
@@ -513,6 +588,7 @@
 
         var hasVariants = @JsonSerializer.Serialize(hasVariants, jsonOpts);
         var productDescription = @Html.Raw(JsonSerializer.Serialize(Model.Description ?? "", jsonOpts));
+        var allVariantImages = @Html.Raw(allVariantImagesJson);
 
         if (hasVariants) {
             // ====== VARIANT SELECTOR ======
@@ -573,11 +649,23 @@
                     selectedName.textContent = v.name;
                 }
 
-                // Cập nhật ảnh chính — tạm dừng slideshow nếu có
+                // Cập nhật ảnh chính theo variant (hỗ trợ đa ảnh)
                 var mainImg = document.getElementById('main-image');
-                if (mainImg && v.imageUrl) {
-                    mainImg.src = v.imageUrl;
-                    if (typeof window._slideStop === 'function') window._slideStop();
+                if (mainImg && idx !== undefined) {
+                    var variantImages = allVariantImages[idx];
+                    if (variantImages && variantImages.length > 0) {
+                        if (typeof window._slideSetImages === 'function') {
+                            window._slideSetImages(variantImages);
+                        } else {
+                            mainImg.src = variantImages[0];
+                        }
+                    } else if (v.imageUrl) {
+                        if (typeof window._slideSetImages === 'function') {
+                            window._slideSetImages([v.imageUrl]);
+                        } else {
+                            mainImg.src = v.imageUrl;
+                        }
+                    }
                 }
 
                 // Cập nhật thông số kỹ thuật theo variant
