@@ -210,18 +210,15 @@
                 }
             </div>
         </div>
-        @if (hasMultipleImages)
-        {
-            <div class="flex gap-2 overflow-x-auto pb-1" id="thumbnails-container">
-                @for (int i = 0; i < imageList.Count; i++)
-                {
-                    <button type="button" data-index="@i"
-                            class="slide-thumb w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 @(i == 0 ? "border-brand-500" : "border-brand-100") hover:border-brand-300 transition-all cursor-pointer">
-                        <img src="@imageList[i]" alt="" class="w-full h-full object-cover" />
-                    </button>
-                }
-            </div>
-        }
+        <div class="flex gap-2 overflow-x-auto pb-1 @(hasMultipleImages ? "" : "hidden")" id="thumbnails-container">
+            @for (int i = 0; i < imageList.Count; i++)
+            {
+                <button type="button" data-index="@i"
+                        class="slide-thumb w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 @(i == 0 ? "border-brand-500" : "border-brand-100") hover:border-brand-300 transition-all cursor-pointer">
+                    <img src="@imageList[i]" alt="" class="w-full h-full object-cover" />
+                </button>
+            }
+        </div>
     </div>
 
     <!-- ====== RIGHT: Info ====== -->
@@ -563,7 +560,7 @@
                 startAuto();
             })();
         </script>
-    }
+
     <script>
         function switchTab(tab) {
             document.querySelectorAll('.tab-content').forEach(function (e) { e.classList.add('hidden'); });
