@@ -13,15 +13,18 @@
 
     @{
         var totalStock = 0;
+        var hasStockInfo = false;
         if (hasVariantsLoaded)
         {
             totalStock = Model.ProductVariants.Sum(v => v.StockQuantity);
+            hasStockInfo = true;
         }
         else if (Model.Inventory != null)
         {
             totalStock = Model.Inventory.StockQuantity;
+            hasStockInfo = true;
         }
-        var isOutOfStock = totalStock <= 0;
+        var isOutOfStock = hasStockInfo && totalStock <= 0;
     }
 
     <!-- Image -->
@@ -124,9 +127,10 @@
         </div>
 
         <!-- Stock -->
-        @if (hasVariantsLoaded)
+        @if (hasStockInfo)
         {
-            <div class="mt-1.5 text-xs @(totalStock > 0 ? "text-emerald-600" : "text-red-400")">
+            <div
+                class="mt-1.5 text-xs @(totalStock > 0 ? "text-emerald-600" : "text-red-400")">
                 @(totalStock > 0 ? "Còn " + totalStock + " sản phẩm" : "Hết hàng")
             </div>
         }

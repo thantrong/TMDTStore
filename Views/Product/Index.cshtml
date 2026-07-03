@@ -192,9 +192,17 @@
                         <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="block">
                             <!-- Ảnh -->
                             <div class="aspect-square bg-brand-50 overflow-hidden">
-                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                @{
+                                    var prodImgUrl = product.ImageUrl;
+                                    if (string.IsNullOrEmpty(prodImgUrl) && product.ProductVariants != null && product.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
+                                    {
+                                        var cheapestVariant = product.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v => v.Price).First();
+                                        prodImgUrl = cheapestVariant.ImageUrl;
+                                    }
+                                }
+                                @if (!string.IsNullOrEmpty(prodImgUrl))
                                 {
-                                    <img src="@product.ImageUrl" alt="@product.Name"
+                                    <img src="@prodImgUrl" alt="@product.Name"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                 }
                                 else
