@@ -488,78 +488,83 @@
     </div>
 
     <script>
-        (function () {
-            var images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
-            var mainImg = document.getElementById('main-image');
-            if (!mainImg) return; // Không có ảnh, thoát
-            var current = 0, timer = null;
-            var currentLabel = document.getElementById('slide-current');
-            var thumbs = document.querySelectorAll('.slide-thumb');
-            var prevBtn = document.getElementById('slide-prev');
-            var nextBtn = document.getElementById('slide-next');
-                window._slideStop = function() { if (timer) { clearInterval(timer); timer = null; } };
-                window._slideGoTo = function(i) {
-                    if (i < 0) i = images.length - 1;
-                    if (i >= images.length) i = 0;
-                    current = i;
-                    mainImg.style.opacity = '0.5';
-                    setTimeout(function () { mainImg.src = images[current]; mainImg.style.opacity = '1'; }, 150);
-                    if (currentLabel) currentLabel.textContent = (current + 1);
-                    thumbs.forEach(function (t, idx) {
-                        t.classList.toggle('border-brand-500', idx === current);
-                        t.classList.toggle('border-brand-100', idx !== current);
-                    });
-                };
-                window._slideSetImages = function(newImages) {
-                    if (!newImages || newImages.length === 0) return;
-                    images = newImages;
-                    current = 0;
-                    window._slideStop();
-                    window._slideGoTo(0);
-                    // Cập nhật counter
-                    if (currentLabel) {
-                        if (newImages.length > 1) {
-                            currentLabel.parentElement.classList.remove('hidden');
-                            currentLabel.textContent = '1/' + newImages.length;
-                        } else {
-                            currentLabel.parentElement.classList.add('hidden');
-                        }
-                    }
-                    // Cập nhật thumbnails container
-                    var thumbsContainer = document.getElementById('thumbnails-container');
-                    if (thumbsContainer) {
-                        thumbsContainer.innerHTML = '';
-                        if (newImages.length > 1) {
-                            thumbsContainer.parentElement.classList.remove('hidden');
-                            newImages.forEach(function(src, i) {
-                                var btn = document.createElement('button');
-                                btn.type = 'button';
-                                btn.setAttribute('data-index', i);
-                                btn.className = 'slide-thumb w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 ' + (i === 0 ? 'border-brand-500' : 'border-brand-100') + ' hover:border-brand-300 transition-all cursor-pointer';
-                                var img = document.createElement('img');
-                                img.src = src;
-                                img.alt = '';
-                                img.className = 'w-full h-full object-cover';
-                                btn.appendChild(img);
-                                btn.addEventListener('click', function() { window._slideGoTo(parseInt(this.getAttribute('data-index'))); window._slideStop(); });
-                                thumbsContainer.appendChild(btn);
-                            });
-                            thumbs = document.querySelectorAll('.slide-thumb');
-                        } else {
-                            thumbsContainer.parentElement.classList.add('hidden');
-                        }
-                    }
-                };
-                function goTo(i) { window._slideGoTo(i); }
-                function startAuto() { window._slideStop(); timer = setInterval(function () { goTo(current + 1); }, 3000); }
-                function stopAuto() { window._slideStop(); }
-                thumbs.forEach(function (t) { t.addEventListener('click', function () { goTo(parseInt(this.getAttribute('data-index'))); stopAuto(); }); });
-                if (prevBtn) prevBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current - 1); stopAuto(); });
-                if (nextBtn) nextBtn.addEventListener('click', function (e) { e.stopPropagation(); goTo(current + 1); stopAuto(); });
-                document.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') { goTo(current - 1); stopAuto(); } if (e.key === 'ArrowRight') { goTo(current + 1); stopAuto(); } });
-                startAuto();
-            })();
-        </script>
+        // ====== SLIDESHOW GLOBALS (luôn được định nghĩa, kể cả khi không có ảnh) ======
+        var _slideTimer = null;
+        var _slideImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageList));
+        var _slideCurrent = 0;
+        var _slideMainImg = document.getElementById('main-image');
+        var _slideLabel = document.getElementById('slide-current');
+        var _slideThumbs = document.querySelectorAll('.slide-thumb');
+        var _slidePrev = document.getElementById('slide-prev');
+        var _slideNext = document.getElementById('slide-next');
+
+        window._slideStop = function() { if (_slideTimer) { clearInterval(_slideTimer); _slideTimer = null; } };
+        window._slideGoTo = function(i) {
+            if (!_slideImages || _slideImages.length === 0 || !_slideMainImg) return;
+            if (i < 0) i = _slideImages.length - 1;
+            if (i >= _slideImages.length) i = 0;
+            _slideCurrent = i;
+            _slideMainImg.style.opacity = '0.5';
+            setTimeout(function () { _slideMainImg.src = _slideImages[_slideCurrent]; _slideMainImg.style.opacity = '1'; }, 150);
+            if (_slideLabel) _slideLabel.textContent = (_slideCurrent + 1);
+            _slideThumbs.forEach(function (t, idx) {
+                t.classList.toggle('border-brand-500', idx === _slideCurrent);
+                t.classList.toggle('border-brand-100', idx !== _slideCurrent);
+            });
+        };
+        window._slideSetImages = function(newImages) {
+            if (!newImages || newImages.length === 0) return;
+            _slideImages = newImages;
+            _slideCurrent = 0;
+            window._slideStop();
+            _slideMainImg = document.getElementById('main-image');
+            if (_slideMainImg) {
+                _slideMainImg.style.opacity = '0.5';
+                setTimeout(function () {
+                    _slideMainImg.src = newImages[0];
+                    if (!_slideMainImg.parentElement.classList.contains('hidden')) _slideMainImg.style.opacity = '1';
+                }, 150);
+            }
+            // Cập nhật counter
+            var counter = document.getElementById('slide-counter');
+            if (counter) {
+                counter.classList.toggle('hidden', newImages.length <= 1);
+            }
+            if (_slideLabel) _slideLabel.textContent = '1/' + newImages.length;
+            // Cập nhật thumbnails
+            var container = document.getElementById('thumbnails-container');
+            if (container) {
+                container.innerHTML = '';
+                container.classList.toggle('hidden', newImages.length <= 1);
+                newImages.forEach(function(src, i) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('data-index', i);
+                    btn.className = 'slide-thumb w-16 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 ' + (i === 0 ? 'border-brand-500' : 'border-brand-100') + ' hover:border-brand-300 transition-all cursor-pointer';
+                    var img = document.createElement('img');
+                    img.src = src; img.alt = ''; img.className = 'w-full h-full object-cover';
+                    btn.appendChild(img);
+                    btn.addEventListener('click', function() { window._slideGoTo(parseInt(this.getAttribute('data-index'))); window._slideStop(); });
+                    container.appendChild(btn);
+                });
+                _slideThumbs = document.querySelectorAll('.slide-thumb');
+                _slideLabel = document.getElementById('slide-current');
+            }
+            // Cập nhật prev/next
+            if (_slidePrev) _slidePrev.classList.toggle('hidden', newImages.length <= 1);
+            if (_slideNext) _slideNext.classList.toggle('hidden', newImages.length <= 1);
+        };
+
+        // Khởi động slideshow nếu có ảnh
+        if (_slideMainImg && _slideImages.length > 0) {
+            _slideThumbs.forEach(function (t) { t.addEventListener('click', function () { window._slideGoTo(parseInt(this.getAttribute('data-index'))); window._slideStop(); }); });
+            if (_slidePrev) _slidePrev.addEventListener('click', function (e) { e.stopPropagation(); window._slideGoTo(_slideCurrent - 1); window._slideStop(); });
+            if (_slideNext) _slideNext.addEventListener('click', function (e) { e.stopPropagation(); window._slideGoTo(_slideCurrent + 1); window._slideStop(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') { window._slideGoTo(_slideCurrent - 1); window._slideStop(); } if (e.key === 'ArrowRight') { window._slideGoTo(_slideCurrent + 1); window._slideStop(); } });
+            function startAuto() { window._slideStop(); _slideTimer = setInterval(function () { window._slideGoTo(_slideCurrent + 1); }, 3000); }
+            startAuto();
+        }
+    </script>
 
     <script>
         function switchTab(tab) {
