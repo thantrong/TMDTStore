@@ -25,6 +25,7 @@ public class ProductController : Controller
     public async Task<IActionResult> Index(ProductListViewModels model)
     {
         model.Categories = await _context.Categories.ToListAsync();
+        ViewBag.Brands = await _context.Brands.OrderBy(b => b.Name).ToListAsync();
 
         var query = _context.Products
         .Include(p => p.Category)

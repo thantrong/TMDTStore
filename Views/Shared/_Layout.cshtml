@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -86,26 +86,26 @@
                     <a class="px-4 py-2 text-sm font-medium text-brand-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200"
                        asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                     <a class="px-4 py-2 text-sm font-medium text-brand-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200"
-                       href="#">Sản phẩm</a>
+                       asp-area="" asp-controller="Product" asp-action="Index">Sản phẩm</a>
                     <a class="px-4 py-2 text-sm font-medium text-brand-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200"
-                       href="#">Danh mục</a>
+                       asp-area="" asp-controller="Product" asp-action="Index">Danh mục</a>
                     <a class="px-4 py-2 text-sm font-medium text-brand-700 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200"
-                       href="#">Khuyến mãi</a>
+                       asp-area="" asp-controller="Product" asp-action="Index">Khuyến mãi</a>
                 </div>
 
                 <!-- Right Section -->
                 <div class="flex items-center gap-2 sm:gap-3">
 
                     <!-- Search button -->
-                    <button
-                        class="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-500 rounded-xl hover:bg-brand-100 hover:text-brand-600 transition-all duration-200 cursor-pointer"
-                        aria-label="Tìm kiếm">
+                    <a asp-area="" asp-controller="Product" asp-action="Index"
+                       class="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-500 rounded-xl hover:bg-brand-100 hover:text-brand-600 transition-all duration-200 cursor-pointer"
+                       aria-label="Tìm kiếm">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <span class="text-sm hidden xl:inline">Tìm kiếm</span>
-                    </button>
+                    </a>
 
                     <!-- Cart icon -->
                     <button
@@ -233,7 +233,7 @@
                     </div>
                 </div>
 
-                <!-- Mobile Menu -->
+                <!-- Mobile Menu (outside flex container) -->
                 <div id="mobile-menu" class="hidden lg:hidden pb-5 space-y-1 border-t border-brand-100 pt-4 mt-1">
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
                        asp-area="" asp-controller="Home" asp-action="Index">
@@ -245,7 +245,7 @@
                         Trang chủ
                     </a>
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
-                       href="#">
+                       asp-area="" asp-controller="Product" asp-action="Index">
                         <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -254,7 +254,7 @@
                         Sản phẩm
                     </a>
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
-                       href="#">
+                       asp-area="" asp-controller="Product" asp-action="Index">
                         <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                              stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -346,8 +346,8 @@
                     <div class="sm:col-span-2 lg:col-span-1">
                         <div class="flex items-center gap-2.5 mb-4">
                             <div
-                                class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 flex items-center justify-center shadow-lg shadow-brand-600/20">
+                                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                      stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                           d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
