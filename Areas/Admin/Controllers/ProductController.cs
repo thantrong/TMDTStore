@@ -69,7 +69,9 @@ public class ProductController : Controller
         {
             Categories = await _context.Categories.ToListAsync(),
             Brands = await _context.Brands.ToListAsync(),
-            ProductBadges = await _context.ProductBadges.ToListAsync()
+            ProductBadges = await _context.ProductBadges
+                .Select(b => b.Label).Distinct()
+                .Select(l => new ProductBadge { Label = l }).ToListAsync()
         };
         return View(model);
     }
@@ -103,7 +105,9 @@ public class ProductController : Controller
         {
             model.Categories = await _context.Categories.ToListAsync();
             model.Brands = await _context.Brands.ToListAsync();
-            model.ProductBadges = await _context.ProductBadges.ToListAsync();
+            model.ProductBadges = await _context.ProductBadges
+                .Select(b => b.Label).Distinct()
+                .Select(l => new ProductBadge { Label = l }).ToListAsync();
             return View(model);
         }
 
@@ -224,7 +228,9 @@ public class ProductController : Controller
             ExistingImageUrls = product.ImageUrls,
             Categories = await _context.Categories.ToListAsync(),
             Brands = await _context.Brands.ToListAsync(),
-            AvailableBadges = await _context.ProductBadges.ToListAsync(),
+            AvailableBadges = await _context.ProductBadges
+                .Select(b => b.Label).Distinct()
+                .Select(l => new ProductBadge { Label = l }).ToListAsync(),
             SelectedBadgeIds = product.ProductBadges.Select(b => b.Label).ToList()
         };
 
@@ -243,7 +249,9 @@ public class ProductController : Controller
         {
             model.Categories = await _context.Categories.ToListAsync();
             model.Brands = await _context.Brands.ToListAsync();
-            model.AvailableBadges = await _context.ProductBadges.ToListAsync();
+            model.AvailableBadges = await _context.ProductBadges
+                .Select(b => b.Label).Distinct()
+                .Select(l => new ProductBadge { Label = l }).ToListAsync();
             return View(model);
         }
 
