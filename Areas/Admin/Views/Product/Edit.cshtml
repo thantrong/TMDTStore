@@ -98,6 +98,24 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-admin-700 mb-2">Nhãn sản phẩm (Badges)</label>
+                <div class="flex flex-wrap gap-3">
+                    @if (Model.AvailableBadges != null)
+                    {
+                        @foreach (var badge in Model.AvailableBadges)
+                        {
+                            <label class="inline-flex items-center gap-2">
+                                <input type="checkbox" name="SelectedBadgeIds" value="@badge.Label"
+                                       @(Model.SelectedBadgeIds != null && Model.SelectedBadgeIds.Contains(badge.Label) ? "checked" : "")
+                                       class="h-4 w-4 text-brand-600 focus:ring-brand-500 border-admin-300 rounded" />
+                                <span class="text-sm text-admin-700">@badge.Label</span>
+                            </label>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div>
                 @await Html.PartialAsync("_TechnicalSpecsEditor")
             </div>
 
