@@ -69,9 +69,8 @@ public class ProductController : Controller
         {
             Categories = await _context.Categories.ToListAsync(),
             Brands = await _context.Brands.ToListAsync(),
-            ProductBadges = await _context.ProductBadges
-                .Select(b => b.Label).Distinct()
-                .Select(l => new ProductBadge { Label = l }).ToListAsync()
+            ProductBadges = (await _context.ProductBadges.ToListAsync())
+                .GroupBy(b => b.Label).Select(g => g.First()).ToList()
         };
         return View(model);
     }
@@ -105,9 +104,8 @@ public class ProductController : Controller
         {
             model.Categories = await _context.Categories.ToListAsync();
             model.Brands = await _context.Brands.ToListAsync();
-            model.ProductBadges = await _context.ProductBadges
-                .Select(b => b.Label).Distinct()
-                .Select(l => new ProductBadge { Label = l }).ToListAsync();
+            model.ProductBadges = (await _context.ProductBadges.ToListAsync())
+                .GroupBy(b => b.Label).Select(g => g.First()).ToList();
             return View(model);
         }
 
@@ -228,9 +226,8 @@ public class ProductController : Controller
             ExistingImageUrls = product.ImageUrls,
             Categories = await _context.Categories.ToListAsync(),
             Brands = await _context.Brands.ToListAsync(),
-            AvailableBadges = await _context.ProductBadges
-                .Select(b => b.Label).Distinct()
-                .Select(l => new ProductBadge { Label = l }).ToListAsync(),
+            AvailableBadges = (await _context.ProductBadges.ToListAsync())
+                .GroupBy(b => b.Label).Select(g => g.First()).ToList(),
             SelectedBadgeIds = product.ProductBadges.Select(b => b.Label).ToList()
         };
 
@@ -249,9 +246,8 @@ public class ProductController : Controller
         {
             model.Categories = await _context.Categories.ToListAsync();
             model.Brands = await _context.Brands.ToListAsync();
-            model.AvailableBadges = await _context.ProductBadges
-                .Select(b => b.Label).Distinct()
-                .Select(l => new ProductBadge { Label = l }).ToListAsync();
+            model.AvailableBadges = (await _context.ProductBadges.ToListAsync())
+                .GroupBy(b => b.Label).Select(g => g.First()).ToList();
             return View(model);
         }
 
