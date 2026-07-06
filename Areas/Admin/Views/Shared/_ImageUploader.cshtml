@@ -25,12 +25,16 @@
     <div id="image-preview-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-3"
          data-existing='@existingImagesJson'>
     </div>
+
+    <!-- Hidden input chứa danh sách URL ảnh cần xoá -->
+    <div id="delete-urls-container"></div>
 </div>
 
 <script>
     (function () {
         var previewGrid = document.getElementById('image-preview-grid');
         var fileInput = document.getElementById('image-input');
+        var deleteContainer = document.getElementById('delete-urls-container');
 
         // Render existing images (đã upload trước đó)
         var existingImages = [];
@@ -38,30 +42,56 @@
             existingImages = JSON.parse(previewGrid.getAttribute('data-existing') || '[]');
         } catch (e) { existingImages = []; }
 
+        // Danh sách URL bị xoá (đang chờ submit)
+        var deletedUrls = [];
+
         function renderAll() {
             // Xoá hết preview cũ
             previewGrid.querySelectorAll('.preview-item').forEach(function (el) { el.remove(); });
 
-            // Render ảnh đã upload trước đó (existing)
+            // Render ảnh đã upload trước đó (existing) — chỉ render ảnh chưa bị xoá
             existingImages.forEach(function (url) {
+                if (deletedUrls.indexOf(url) !== -1) return; // bỏ qua ảnh đã xoá
                 var div = document.createElement('div');
                 div.className = 'preview-item relative group rounded-lg overflow-hidden border border-admin-200 bg-admin-50 aspect-square';
                 div.innerHTML = `
                     <img src="${escapeHtml(url)}" class="w-full h-full object-cover" />
-                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
-                        <span class="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">Đã lưu</span>
-                    </div>
-                    <div class="absolute top-1 right-1 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold shadow-md">✓</div>
+                    <button type="button" data-url="${escapeHtml(url)}"
+                        class="delete-btn absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-600 hover:scale-110 transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer z-10">
+                        ✕
+                    </button>
+                    <div class="absolute top-1 left-1 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-[10px] font-bold shadow-md">✓</div>
                 `;
                 previewGrid.appendChild(div);
+            });
+
+            // Gắn sự kiện xoá cho các nút delete trên ảnh existing
+            previewGrid.querySelectorAll('.delete-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var url = this.getAttribute('data-url');
+                    if (!url) return;
+                    // Thêm vào danh sách chờ xoá
+                    if (deletedUrls.indexOf(url) === -1) {
+                        deletedUrls.push(url);
+                    }
+                    // Tạo hidden input để gửi URL này lên server
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'DeleteImageUrls';
+                    input.value = url;
+                    input.className = 'delete-url-input';
+                    deleteContainer.appendChild(input);
+                    // Render lại preview
+                    renderAll();
+                });
             });
 
             // Render ảnh mới chọn từ file input (chưa upload)
             for (var i = 0; i < fileInput.files.length; i++) {
                 var file = fileInput.files[i];
-                var reader = new FileReader();
-                reader.onload = (function (f) {
-                    return function (e) {
+                (function (f) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
                         var div = document.createElement('div');
                         div.className = 'preview-item relative group rounded-lg overflow-hidden border-2 border-brand-300 bg-brand-50 aspect-square';
                         div.innerHTML = `
@@ -72,8 +102,8 @@
                         `;
                         previewGrid.appendChild(div);
                     };
-                })(file);
-                reader.readAsDataURL(file);
+                    reader.readAsDataURL(f);
+                })(fileInput.files[i]);
             }
         }
 

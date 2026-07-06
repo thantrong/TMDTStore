@@ -284,7 +284,7 @@ public class ProductController : Controller
         }
 
         // Upload ảnh mới nếu có — giữ nguyên ảnh cũ, thêm ảnh mới vào cuối
-        if (model.ImageFiles != null && model.ImageFiles.Count > 0)
+        if (model.ImageFiles != null && model.ImageFiles.Count > 0 || model.DeleteImageUrls != null && model.DeleteImageUrls.Count > 0)
         {
             // Lấy danh sách ảnh cũ
             var existingUrls = new List<string>();
@@ -293,24 +293,58 @@ public class ProductController : Controller
                 try { existingUrls = System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.ImageUrls) ?? new(); } catch { }
             }
 
-            // Upload ảnh mới
-            foreach (var image in model.ImageFiles)
+            // Xoá ảnh nếu người dùng yêu cầu
+            if (model.DeleteImageUrls != null && model.DeleteImageUrls.Count > 0)
             {
-                if (image.Length > 0)
+                foreach (var deleteUrl in model.DeleteImageUrls)
                 {
+                    existingUrls.Remove(deleteUrl);
+                    // Xoá trên Cloudinary (nếu có)
                     try
                     {
-                        var imageUrl = await _cloudinaryService.UploadImageAsync(image, "products");
-                        if (!string.IsNullOrEmpty(imageUrl))
+                        // Trích xuất public ID từ URL Cloudinary
+                        // Format: https://res.cloudinary.com/{cloud}/image/upload/v{version}/{folder}/{file}.ext
+                        var uri = new Uri(deleteUrl);
+                        var segments = uri.Segments;
+                        // Segments: / /image/upload/v1234567/products/filename.jpg
+                        // Public ID = products/filename (bỏ extension)
+                        if (segments.Length >= 4)
                         {
-                            existingUrls.Add(imageUrl);
+                            var publicId = string.Join("", segments.Skip(4));
+                            if (!string.IsNullOrEmpty(publicId))
+                            {
+                                // Bỏ extension
+                                var dotIndex = publicId.LastIndexOf('.');
+                                if (dotIndex > 0) publicId = publicId[..dotIndex];
+                                await _cloudinaryService.DeleteImageAsync(publicId);
+                            }
                         }
                     }
-                    catch (Exception)
+                    catch { /* ignore Cloudinary delete errors */ }
+                }
+            }
+
+            // Upload ảnh mới
+            if (model.ImageFiles != null)
+            {
+                foreach (var image in model.ImageFiles)
+                {
+                    if (image.Length > 0)
                     {
-                        TempData["ToastType"] = "error";
-                        TempData["ToastMessage"] = "Không thể tải ảnh lên.";
-                        return View(model);
+                        try
+                        {
+                            var imageUrl = await _cloudinaryService.UploadImageAsync(image, "products");
+                            if (!string.IsNullOrEmpty(imageUrl))
+                            {
+                                existingUrls.Add(imageUrl);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            TempData["ToastType"] = "error";
+                            TempData["ToastMessage"] = "Không thể tải ảnh lên.";
+                            return View(model);
+                        }
                     }
                 }
             }

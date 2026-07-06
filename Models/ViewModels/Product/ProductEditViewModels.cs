@@ -54,6 +54,9 @@ public class ProductEditViewModels
     public List<IFormFile>? ImageFiles { get; set; }
     public string? ExistingImageUrls { get; set; }
 
+    [Display(Name = "Xoá ảnh")]
+    public List<string>? DeleteImageUrls { get; set; }
+
     public List<string>? SelectedBadgeIds { get; set; }
     public List<ProductBadge>? AvailableBadges { get; set; }
     public List<Category> Categories { get; set; } = new();
