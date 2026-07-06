@@ -86,17 +86,26 @@
         }).ToList(), jsonOpts)
         : "[]";
 
-    // Parse attributes từ variant đầu để lấy danh sách attribute keys
+    // Parse attributes từ TẤT CẢ biến thể để lấy danh sách attribute keys
     var attrKeys = new List<string>();
-    if (hasVariants && !string.IsNullOrEmpty(Model.ProductVariants!.First().Attributes))
+    if (hasVariants)
     {
-        try
+        foreach (var v in Model.ProductVariants!)
         {
-            var firstAttrs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(Model.ProductVariants!.First().Attributes);
-            if (firstAttrs != null)
-                attrKeys = firstAttrs.Select(a => a.GetValueOrDefault("key", "")).Where(k => !string.IsNullOrEmpty(k)).ToList();
+            if (string.IsNullOrEmpty(v.Attributes)) continue;
+            try
+            {
+                var attrs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(v.Attributes);
+                if (attrs == null) continue;
+                foreach (var a in attrs)
+                {
+                    var key = a.GetValueOrDefault("key", "").Trim();
+                    if (!string.IsNullOrEmpty(key) && !attrKeys.Contains(key))
+                        attrKeys.Add(key);
+                }
+            }
+            catch { }
         }
-        catch { }
     }
 
     // Build lookup: attribute key → danh sách các giá trị có thể có
@@ -112,13 +121,21 @@
                 if (attrs == null) continue;
                 foreach (var a in attrs)
                 {
-                    var key = a.GetValueOrDefault("key", "");
-                    var val = a.GetValueOrDefault("value", "");
+                    var key = a.GetValueOrDefault("key", "").Trim();
+                    var val = a.GetValueOrDefault("value", "").Trim();
                     if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(val)) continue;
-                    if (!attrValues.ContainsKey(key))
-                        attrValues[key] = new List<string>();
-                    if (!attrValues[key].Contains(val))
-                        attrValues[key].Add(val);
+                    // Thêm value vào tất cả key tương ứng (xử lý key lệch như Màu/Màu sắc)
+                    foreach (var knownKey in attrKeys)
+                    {
+                        if (key == knownKey || knownKey.Contains(key) || key.Contains(knownKey))
+                        {
+                            if (!attrValues.ContainsKey(knownKey))
+                                attrValues[knownKey] = new List<string>();
+                            if (!attrValues[knownKey].Contains(val))
+                                attrValues[knownKey].Add(val);
+                            break;
+                        }
+                    }
                 }
             }
             catch { }
