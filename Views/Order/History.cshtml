@@ -1,0 +1,93 @@
+@model List<TMDTStore.Models.Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="max-w-4xl mx-auto">
+    <nav class="text-sm text-brand-500 mb-6 flex items-center gap-2 flex-wrap">
+        <a asp-controller="Home" asp-action="Index" class="hover:text-brand-600">Trang chủ</a>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+        <span class="text-brand-700 font-medium">Đơn hàng</span>
+    </nav>
+
+    <h1 class="text-2xl font-heading font-bold text-brand-800 mb-6">Đơn hàng của tôi</h1>
+
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-16 bg-white rounded-2xl border border-brand-100">
+            <div class="w-20 h-20 mx-auto mb-4 bg-brand-50 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+            <p class="text-brand-500 mb-4">Bạn chưa có đơn hàng nào.</p>
+            <a asp-controller="Product" asp-action="Index"
+               class="inline-flex items-center gap-2 bg-brand-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all duration-200">
+                Mua sắm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var order in Model)
+            {
+                var statusColor = order.Status switch
+                {
+                    "Pending" => "bg-yellow-50 text-yellow-700 border-yellow-200",
+                    "WaitingPayment" => "bg-orange-50 text-orange-700 border-orange-200",
+                    "Confirmed" => "bg-green-50 text-green-700 border-green-200",
+                    "Cancelled" => "bg-red-50 text-red-700 border-red-200",
+                    _ => "bg-gray-50 text-gray-700 border-gray-200"
+                };
+                var statusText = order.Status switch
+                {
+                    "Pending" => "Chờ xác nhận",
+                    "WaitingPayment" => "Chờ thanh toán",
+                    "Confirmed" => "Đã xác nhận",
+                    "Cancelled" => "Đã hủy",
+                    _ => order.Status
+                };
+                var statusDot = order.Status switch
+                {
+                    "Pending" => "bg-yellow-500",
+                    "WaitingPayment" => "bg-orange-500",
+                    "Confirmed" => "bg-green-500",
+                    "Cancelled" => "bg-red-500",
+                    _ => "bg-gray-500"
+                };
+
+                <a asp-action="Details" asp-route-id="@order.Id"
+                   class="block bg-white rounded-2xl border border-brand-100 p-5 hover:shadow-md transition-shadow duration-200">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-sm font-bold text-brand-800">@order.Id</span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-xs font-medium @statusColor">
+                                    <span class="w-1.5 h-1.5 rounded-full @statusDot"></span>
+                                    @statusText
+                                </span>
+                            </div>
+                            <p class="text-sm text-brand-600 line-clamp-1">
+                                @(order.FullName) — @order.Address
+                            </p>
+                            <div class="flex items-center gap-4 mt-2 text-xs text-brand-400">
+                                <span>@(order.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</span>
+                                <span>@order.OrderItems.Count sản phẩm</span>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-base font-bold text-red-500">@order.TotalPrice.ToString("#,###")₫</p>
+                            @if (order.Status == "WaitingPayment")
+                            {
+                                <span class="inline-block mt-2 px-3 py-1 bg-orange-500 text-white text-xs font-semibold rounded-lg">
+                                    Thanh toán ngay
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</div>

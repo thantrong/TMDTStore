@@ -382,8 +382,8 @@ namespace TMDTStore.Migrations
                         .HasColumnName("total_price");
 
                     b.Property<string>("UserId")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
                         .HasColumnName("user_id");
 
                     b.Property<string>("VoucherId")
@@ -466,8 +466,8 @@ namespace TMDTStore.Migrations
                         .HasDefaultValueSql("now()");
 
                     b.Property<string>("ChangedByUserId")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)")
                         .HasColumnName("changed_by_user_id");
 
                     b.Property<string>("OrderId")

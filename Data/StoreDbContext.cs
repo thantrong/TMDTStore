@@ -133,7 +133,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasPrecision(18, 2)
                 .HasColumnName("total_price");
             entity.Property(e => e.UserId)
-                .HasMaxLength(20)
+                .HasMaxLength(450)
                 .HasColumnName("user_id");
             entity.Property(e => e.VoucherId)
                 .HasMaxLength(20)
@@ -216,7 +216,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasDefaultValueSql("now()")
                 .HasColumnName("changed_at_utc");
             entity.Property(e => e.ChangedByUserId)
-                .HasMaxLength(20)
+                .HasMaxLength(450)
                 .HasColumnName("changed_by_user_id");
             entity.Property(e => e.OrderId)
                 .HasMaxLength(20)

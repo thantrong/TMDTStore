@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
@@ -11,11 +12,13 @@ public class OrderController : Controller
 {
     private readonly StoreDbContext _context;
     private readonly IVietQrService _vietQr;
+    private readonly UserManager<User> _userManager;
 
-    public OrderController(StoreDbContext context, IVietQrService vietQr)
+    public OrderController(StoreDbContext context, IVietQrService vietQr, UserManager<User> userManager)
     {
         _context = context;
         _vietQr = vietQr;
+        _userManager = userManager;
     }
 
     [HttpGet]
@@ -30,6 +33,35 @@ public class OrderController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> History()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        var orders = await _context.Orders
+            .Where(o => o.UserId == user.Id)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        return View(orders);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(string id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        var order = await _context.Orders
+            .Include(o => o.OrderItems)
+            .Include(o => o.OrderStatusHistories.OrderByDescending(h => h.ChangedAtUtc))
+            .FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
+
+        if (order == null) return NotFound();
+        return View(order);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Payment(string id)
     {
         var order = await _context.Orders
@@ -37,6 +69,8 @@ public class OrderController : Controller
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return NotFound();
+
+        // Nếu đã thanh toán hoặc đã huỷ → redirect sang Success
         if (order.Status != "WaitingPayment")
             return RedirectToAction("Success", new { id });
 

@@ -41,12 +41,6 @@
     }
     <p class="text-brand-500 mb-6">Mã đơn hàng: <strong class="text-brand-700">@Model.Id</strong></p>
 
-    <!-- Trạng thái -->
-    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium mb-6 @statusBadge.Item1">
-        <span class="w-2 h-2 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
-        @statusBadge.Item2
-    </div>
-
     <div class="bg-white rounded-2xl border border-brand-100 p-6 text-left mb-8">
         <div class="space-y-3 text-sm">
             <div class="flex justify-between">
@@ -63,33 +57,36 @@
             </div>
             <div class="flex justify-between">
                 <span class="text-brand-400">Phương thức</span>
-                <span class="font-medium text-brand-800">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : "Chuyển khoản VietQR")</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-brand-400">Tình trạng</span>
-                <span class="font-medium @statusBadge.Item1 px-2.5 py-0.5 rounded-full text-xs border inline-flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
-                    @statusBadge.Item2
-                </span>
-            </div>
-            <div class="flex justify-between border-t border-brand-100 pt-3 mt-3">
-                <span class="font-semibold text-brand-800">Tổng tiền</span>
-                <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
+                <span class="font-medium text-brand-800">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" :
+                                                  "Chuyển khoản VietQR")</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-brand-400">Tình trạng</span>
+                    <span
+                        class="font-medium @statusBadge.Item1 px-2.5 py-0.5 rounded-full text-xs border inline-flex items-center gap-1.5">
+                        <span
+                        class="w-1.5 h-1.5 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
+                        @statusBadge.Item2
+                    </span>
+                </div>
+                <div class="flex justify-between border-t border-brand-100 pt-3 mt-3">
+                    <span class="font-semibold text-brand-800">Tổng tiền</span>
+                    <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a asp-controller="Product" asp-action="Index"
-           class="px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all duration-200">
-            Tiếp tục mua sắm
-        </a>
-        @if (Model.PaymentMethod == "Banking" && Model.Status == "WaitingPayment")
-        {
-            <a asp-action="Payment" asp-route-id="@Model.Id"
-               class="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 transition-all duration-200">
-                Thanh toán ngay
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a asp-controller="Product" asp-action="Index"
+               class="px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all duration-200">
+                Tiếp tục mua sắm
             </a>
-        }
+            @if (Model.PaymentMethod == "Banking" && Model.Status == "WaitingPayment")
+            {
+                <a asp-action="Payment" asp-route-id="@Model.Id"
+                   class="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 transition-all duration-200">
+                    Thanh toán ngay
+                </a>
+            }
+        </div>
     </div>
-</div>
