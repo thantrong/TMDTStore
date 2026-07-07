@@ -413,7 +413,7 @@ string>>>(Model.ProductVariants!.First().Attributes) ?? new();
                                 <input type="hidden" name="imageUrl" id="cart-imageUrl"
                                        value="@(imageList.Count > 0 ? imageList[0] : "")" />
                                 <input type="hidden" name="price" id="cart-price"
-                                       value="@(hasVariants ? Model.ProductVariants!.First().Price.ToString(System.Globalization.CultureInfo.InvariantCulture) : Model.Price.HasValue ? Model.Price.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0")" />
+                                       value="@(hasVariants ? ((long)(Model.ProductVariants!.First().Price)).ToString() : Model.Price.HasValue ? ((long)(Model.Price.Value)).ToString() : "0")" />
                                 <input type="hidden" name="maxQuantity" id="cart-maxQuantity"
                                        value="@(hasVariants ? Model.ProductVariants!.First().StockQuantity : Model.Inventory?.StockQuantity ?? 0)" />
                                 <input type="hidden" name="quantity" value="1" />
