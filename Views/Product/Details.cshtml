@@ -479,7 +479,7 @@
                 @if (!string.IsNullOrEmpty(Model.Description) || hasVariants)
                 {
                     <div class="relative" id="desc-wrapper">
-                        <div id="desc-content" class="text-sm text-brand-700 leading-relaxed overflow-hidden transition-all duration-300 [&_img]:max-w-full [&_img]:rounded-lg [&_a]:text-brand-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5" style="max-height: 180px;">
+                        <div id="desc-content" class="text-sm text-brand-700 leading-relaxed overflow-hidden transition-all duration-300 [&_img]:max-w-full [&_img]:rounded-lg [&_a]:text-brand-600 [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-3 [&_h1]:text-brand-900 [&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-2 [&_h2]:text-brand-900 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:mb-2 [&_h3]:text-brand-800 [&_strong]:font-bold [&_strong]:text-brand-800 [&_em]:italic [&_blockquote]:border-l-4 [&_blockquote]:border-brand-200 [&_blockquote]:pl-4 [&_blockquote]:text-brand-500 [&_blockquote]:italic [&_blockquote]:my-3 [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_td]:border [&_td]:border-brand-200 [&_td]:px-3 [&_td]:py-2 [&_th]:border [&_th]:border-brand-200 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-brand-50 [&_th]:font-semibold" style="max-height: 180px;">
                             @if (hasVariants && Model.ProductVariants!.First().Description != null)
                             {
                                 @Html.Raw(Model.ProductVariants!.First().Description)

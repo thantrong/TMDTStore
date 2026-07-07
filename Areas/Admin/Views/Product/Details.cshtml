@@ -331,15 +331,32 @@
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Tồn kho</dt>
                             <dd class="font-medium">
+                                @{
+                                    var totalStockAdmin = 0;
+                                    if (Model.ProductVariants != null && Model.ProductVariants.Count > 0)
+                                    {
+                                        totalStockAdmin = Model.ProductVariants.Sum(v => v.StockQuantity);
+                                    }
+                                    else if (Model.Inventory != null)
+                                    {
+                                        totalStockAdmin = Model.Inventory.StockQuantity;
+                                    }
+                                }
                                 <span
-                                    class="@(Model.Inventory?.StockQuantity > 10 ? "text-emerald-600" : Model.Inventory?.StockQuantity > 0 ? "text-amber-600" : "text-red-500")">
-                                    @(Model.Inventory?.StockQuantity ?? 0)
+                                    class="@(totalStockAdmin > 10 ? "text-emerald-600" : totalStockAdmin > 0 ? "text-amber-600" : "text-red-500")">
+                                    @totalStockAdmin
                                 </span>
                             </dd>
                         </div>
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Đã đặt trước</dt>
                             <dd class="font-medium text-admin-800">@(Model.Inventory?.ReservedQuantity ?? 0)</dd>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
+                            <dt class="text-admin-500">Biến thể</dt>
+                            <dd class="font-medium text-admin-800">
+                                @(Model.ProductVariants?.Count > 0 ? Model.ProductVariants.Count + " biến thể" : "---")
+                            </dd>
                         </div>
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Đánh giá TB</dt>
