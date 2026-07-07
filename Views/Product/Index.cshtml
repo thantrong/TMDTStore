@@ -25,7 +25,7 @@
             var b = breadcrumbCats[i];
             if (i < breadcrumbCats.Count - 1)
             {
-                <a asp-action="Index" asp-route-categoryId="@b.Id" class="hover:text-brand-600">@b.Name</a>
+                <a asp-action="Index" asp-route-category="@b.Slug" class="hover:text-brand-600">@b.Name</a>
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
@@ -69,7 +69,7 @@
                 c.Cat.Id)).ToList();
 
                     <li class="relative group">
-                        <a asp-action="Index" asp-route-categoryId="@cat.Id"
+                        <a asp-action="Index" asp-route-category="@cat.Slug"
                            class="flex items-center justify-between px-5 py-2.5 text-sm transition-colors @(isActive ? "text-brand-700 font-semibold bg-brand-50 border-r-2 border-brand-600" : "text-brand-600 hover:text-brand-700 hover:bg-brand-50")">
                             <span>@cat.Name</span>
                             @if (children.Count > 0)
@@ -96,7 +96,7 @@
                             => t.Cat.Name).ToList();
 
                                         <li class="relative group/sub">
-                                            <a asp-action="Index" asp-route-categoryId="@child.Cat.Id"
+                                            <a asp-action="Index" asp-route-category="@child.Cat.Slug"
                                                class="flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors @(isChildActive ? "text-brand-700 font-semibold bg-brand-50" : "text-brand-600 hover:text-brand-700 hover:bg-brand-50")">
                                                 <span>@child.Cat.Name</span>
                                                 @if (childGrandchildren.Count > 0)
@@ -120,7 +120,7 @@
                                                         {
                                                             var isGcActive = Model.CategoryId == gc.Cat.Id;
                                                             <li>
-                                                                <a asp-action="Index" asp-route-categoryId="@gc.Cat.Id"
+                                                                <a asp-action="Index" asp-route-category="@gc.Cat.Slug"
                                                                    class="block px-3 py-2 text-sm rounded-md transition-colors @(isGcActive ? "text-brand-700 font-semibold bg-brand-50" : "text-brand-500 hover:text-brand-700 hover:bg-brand-50")">
                                                                     @gc.Cat.Name
                                                                 </a>
@@ -132,7 +132,7 @@
                                         </li>
                                     }
                                 </ul>
-                                <a asp-action="Index" asp-route-categoryId="@cat.Id"
+                                <a asp-action="Index" asp-route-category="@cat.Slug"
                                    class="block px-4 pt-2 mt-1 text-xs font-medium text-brand-500 hover:text-brand-600 border-t border-brand-100">
                                     Xem tất cả @cat.Name →
                                 </a>
@@ -157,7 +157,7 @@
                 }
                 @foreach (var (key, label) in sorts)
                 {
-                    <a asp-action="Index" asp-route-sortBy="@key" asp-route-categoryId="@Model.CategoryId"
+                    <a asp-action="Index" asp-route-sortBy="@key" asp-route-category="@Model.CategorySlug"
                        class="block text-sm text-brand-600 hover:text-brand-700 @(Model.SortBy == key || (string.IsNullOrEmpty(Model.SortBy) && key == "newest") ? "font-semibold text-brand-700" : "")">
                         @label
                     </a>
@@ -271,7 +271,7 @@
         <!-- ====== PHÂN TRANG ====== -->
         @if (Model.PagingInfo.TotalPages > 1)
         {
-            <div page-model="@Model.PagingInfo" page-action="Index" page-url-categoryId="@Model.CategoryId"
+            <div page-model="@Model.PagingInfo" page-action="Index" page-url-category="@Model.CategorySlug"
                  page-url-sortBy="@Model.SortBy" page-url-searchQuery="@Model.SearchQuery">
             </div>
         }

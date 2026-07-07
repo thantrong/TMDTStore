@@ -6,6 +6,7 @@ public class ProductListViewModels
 {
     // Filter
     public string? CategoryId { get; set; } // Lọc theo danh mục
+    public string? CategorySlug { get; set; } // Slug cho route {category}
     public string? SearchQuery { get; set; } // Lọc theo tên sản phẩm
     public decimal? MinPrice { get; set; } // Lọc theo giá tối thiểu
     public decimal? MaxPrice { get; set; } // Lọc theo giá tối đa

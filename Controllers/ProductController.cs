@@ -21,12 +21,23 @@ public class ProductController : Controller
 
     // GET: /Product
     [HttpGet]
-    public async Task<IActionResult> Index(ProductListViewModels model)
+    public async Task<IActionResult> Index(ProductListViewModels model, string? category)
     {
         model.Categories = await _context.Categories
             .Include(c => c.Parent)
             .Include(c => c.InverseParent)
             .ToListAsync();
+
+        // Nếu có slug từ route {category}, lookup CategoryId từ slug
+        if (!string.IsNullOrEmpty(category))
+        {
+            var catBySlug = model.Categories.FirstOrDefault(c => c.Slug == category);
+            if (catBySlug != null)
+            {
+                model.CategoryId = catBySlug.Id;
+                model.CategorySlug = category;
+            }
+        }
 
         // Build flat tree for category navigation
         var flatTree = new List<(TMDTStore.Models.Category Cat, int Level)>();
