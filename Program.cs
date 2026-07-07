@@ -69,7 +69,8 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "product_category",
     pattern: "{category}",
-    defaults: new { controller = "Product", action = "Index", page = 1 });
+    defaults: new { controller = "Product", action = "Index", page = 1 },
+    constraints: new { category = @"^(?!Account$|Cart$|Checkout$|Order$|Auth$|Home$|Product$|Admin$|css$|js$|lib$|images$|favicon\.ico$).+$" });
 
 app.MapControllerRoute(
     name: "areas",
