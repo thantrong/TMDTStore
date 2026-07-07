@@ -62,6 +62,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "product_pagination",
+    pattern: "{category}/Page{page:int}",
+    defaults: new { controller = "Product", action = "Index", page = 1 });
+
+app.MapControllerRoute(
+    name: "product_category",
+    pattern: "{category}",
+    defaults: new { controller = "Product", action = "Index", page = 1 });
+
+app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 

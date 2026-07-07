@@ -261,19 +261,13 @@
         }
 
         <!-- ====== PHÂN TRANG ====== -->
-        @if (Model.TotalPages > 1)
+        @if (Model.PagingInfo.TotalPages > 1)
         {
-            <div class="flex items-center justify-center gap-2 mt-10">
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <a asp-action="Index" asp-route-page="@i" asp-route-categoryId="@Model.CategoryId"
-                       asp-route-sortBy="@Model.SortBy" asp-route-searchQuery="@Model.SearchQuery" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
-                        @(i == Model.Page
-                           ? "bg-brand-600 text-white shadow-md"
-                           : "bg-white text-brand-600 hover:bg-brand-50 border border-brand-200")">
-                        @i
-                    </a>
-                }
+            <div page-model="@Model.PagingInfo"
+                 page-action="Index"
+                 page-url-categoryId="@Model.CategoryId"
+                 page-url-sortBy="@Model.SortBy"
+                 page-url-searchQuery="@Model.SearchQuery">
             </div>
         }
 

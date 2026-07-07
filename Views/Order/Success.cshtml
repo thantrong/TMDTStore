@@ -1,16 +1,51 @@
 @model TMDTStore.Models.Order
 @{
     ViewData["Title"] = "Đặt hàng thành công";
+    var statusBadge = Model.Status switch
+    {
+        "Pending" => ("bg-yellow-50 text-yellow-700 border-yellow-200", "Chờ xác nhận"),
+        "WaitingPayment" => ("bg-orange-50 text-orange-700 border-orange-200", "Chờ thanh toán"),
+        "Confirmed" => ("bg-green-50 text-green-700 border-green-200", "Đã xác nhận"),
+        "Cancelled" => ("bg-red-50 text-red-700 border-red-200", "Đã hủy"),
+        _ => ("bg-gray-50 text-gray-700 border-gray-200", Model.Status)
+    };
 }
 
 <div class="max-w-2xl mx-auto text-center py-12">
-    <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-full flex items-center justify-center">
-        <svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-    </div>
-    <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Đặt hàng thành công!</h1>
+    @if (Model.Status == "Cancelled")
+    {
+        <div class="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </div>
+        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Đơn hàng đã hủy</h1>
+    }
+    else if (Model.Status == "Confirmed")
+    {
+        <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Thanh toán thành công!</h1>
+    }
+    else
+    {
+        <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Đặt hàng thành công!</h1>
+    }
     <p class="text-brand-500 mb-6">Mã đơn hàng: <strong class="text-brand-700">@Model.Id</strong></p>
+
+    <!-- Trạng thái -->
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium mb-6 @statusBadge.Item1">
+        <span class="w-2 h-2 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
+        @statusBadge.Item2
+    </div>
 
     <div class="bg-white rounded-2xl border border-brand-100 p-6 text-left mb-8">
         <div class="space-y-3 text-sm">
@@ -29,6 +64,13 @@
             <div class="flex justify-between">
                 <span class="text-brand-400">Phương thức</span>
                 <span class="font-medium text-brand-800">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : "Chuyển khoản VietQR")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-brand-400">Tình trạng</span>
+                <span class="font-medium @statusBadge.Item1 px-2.5 py-0.5 rounded-full text-xs border inline-flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
+                    @statusBadge.Item2
+                </span>
             </div>
             <div class="flex justify-between border-t border-brand-100 pt-3 mt-3">
                 <span class="font-semibold text-brand-800">Tổng tiền</span>
