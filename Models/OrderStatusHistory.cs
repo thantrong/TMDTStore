@@ -9,6 +9,8 @@ public partial class OrderStatusHistory
 
     public string OrderId { get; set; } = null!;
 
+    public string Status { get; set; } = null!;
+
     public string? Reason { get; set; }
 
     public string? ChangedByUserId { get; set; }

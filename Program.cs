@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using TMDTStore.Services.Email;
 using TMDTStore.Services.Cloudinary;
 using TMDTStore.Services.Cart;
+using TMDTStore.Services.Banking;
+using TMDTStore.Services;
 using TMDTStore.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,11 @@ builder.Services.AddSingleton<IEmailService>(new EmailService(emailSetting));
 
 builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+builder.Services.Configure<VietQrSetting>(builder.Configuration.GetSection("VietQr"));
+builder.Services.AddScoped<IVietQrService, VietQrService>();
+
+builder.Services.AddHostedService<OrderCleanupService>();
 
 var app = builder.Build();
 

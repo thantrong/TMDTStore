@@ -13,4 +13,6 @@ public class LoginViewModels
     public string Password { get; set; } = null!;
     [Display(Name = "Ghi nhớ đăng nhập")]
     public bool RememberMe { get; set; }
+
+    public string? ReturnUrl { get; set; }
 }

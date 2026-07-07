@@ -9,11 +9,19 @@ public partial class Order
 
     public string? UserId { get; set; }
 
+    public string FullName { get; set; } = null!;
+
+    public string Phone { get; set; } = null!;
+
+    public string Address { get; set; } = null!;
+
+    public string? Note { get; set; }
+
     public decimal TotalPrice { get; set; }
 
-    public string ShippingAddress { get; set; } = null!;
+    public string Status { get; set; } = null!; // Pending, WaitingPayment, Confirmed, Shipping, Delivered, Cancelled
 
-    public string? PaymentMethod { get; set; }
+    public string? PaymentMethod { get; set; } // COD, Banking
 
     public DateTime? CreatedAt { get; set; }
 

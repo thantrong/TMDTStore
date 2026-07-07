@@ -19,7 +19,11 @@ public class AuthController : Controller
         _signInManager = signInManager;
         _emailService = emailService;
     }
-    public IActionResult Login() => View();
+    public IActionResult Login(string? returnUrl = null)
+    {
+        ViewBag.ReturnUrl = returnUrl;
+        return View();
+    }
     [HttpPost]
     public async Task<IActionResult> Login(LoginViewModels model)
     {
@@ -36,6 +40,9 @@ public class AuthController : Controller
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }
+            // Chuyển hướng về ReturnUrl nếu có
+            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                return Redirect(model.ReturnUrl);
             return RedirectToAction("Index", "Home", new { area = "" });
         }
         TempData["ToastType"] = "error";

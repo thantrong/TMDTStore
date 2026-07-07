@@ -128,7 +128,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(50)
                 .HasColumnName("payment_method");
-            entity.Property(e => e.ShippingAddress).HasColumnName("shipping_address");
+            entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.TotalPrice)
                 .HasPrecision(18, 2)
                 .HasColumnName("total_price");
@@ -138,6 +138,18 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.VoucherId)
                 .HasMaxLength(20)
                 .HasColumnName("voucher_id");
+            entity.Property(e => e.FullName)
+                .HasMaxLength(200)
+                .HasColumnName("full_name");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(20)
+                .HasColumnName("phone");
+            entity.Property(e => e.Address).HasColumnName("address");
+            entity.Property(e => e.Note).HasColumnName("note");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Pending")
+                .HasColumnName("status");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
@@ -168,6 +180,16 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.UnitPrice)
                 .HasPrecision(18, 2)
                 .HasColumnName("unit_price");
+            entity.Property(e => e.VariantId)
+                .HasMaxLength(20)
+                .HasColumnName("variant_id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(500)
+                .HasColumnName("name");
+            entity.Property(e => e.VariantName)
+                .HasMaxLength(200)
+                .HasColumnName("variant_name");
+            entity.Property(e => e.ImageUrl).HasColumnName("image_url");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderItems)
                 .HasForeignKey(d => d.OrderId)
@@ -199,6 +221,9 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.OrderId)
                 .HasMaxLength(20)
                 .HasColumnName("order_id");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasColumnName("status");
             entity.Property(e => e.Reason)
                 .HasMaxLength(500)
                 .HasColumnName("reason");

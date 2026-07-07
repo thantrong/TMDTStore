@@ -9,6 +9,14 @@ public partial class OrderItem
 
     public string ProductId { get; set; } = null!;
 
+    public string? VariantId { get; set; }
+
+    public string Name { get; set; } = null!;
+
+    public string? VariantName { get; set; }
+
+    public string? ImageUrl { get; set; }
+
     public int Quantity { get; set; }
 
     public decimal UnitPrice { get; set; }
