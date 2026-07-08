@@ -158,6 +158,39 @@
     }
 </section>
 
+<!-- ====== BEST SELLERS ====== -->
+<section class="mb-10 sm:mb-14">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-heading text-2xl sm:text-3xl font-bold text-brand-900">Bán chạy nhất</h2>
+            <p class="text-brand-500 mt-1">Sản phẩm được yêu thích nhất</p>
+        </div>
+        <a asp-controller="Product" asp-action="Index" asp-route-sortBy="rating"
+           class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors cursor-pointer">
+            Xem tất cả
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    @if (Model.BestSellers.Count == 0)
+    {
+        <div class="text-center py-12 text-brand-300">
+            <p class="text-lg">Chưa có sản phẩm nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+            @foreach (var product in Model.BestSellers)
+            {
+                <partial name="_ProductCard" model="product" />
+            }
+        </div>
+    }
+</section>
+
 <!-- ====== STATS BANNER ====== -->
 <section class="mb-10 sm:mb-14">
     <div class="bg-gradient-to-r from-brand-800 to-brand-900 rounded-2xl px-6 sm:px-10 py-8 sm:py-10">

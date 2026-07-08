@@ -32,10 +32,17 @@ public class AuthController : Controller
             return View(model);
         }
 
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user != null && !user.EmailConfirmed)
+        {
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Vui lòng xác nhận email trước khi đăng nhập. Kiểm tra hộp thư (cả Spam).";
+            return View(model);
+        }
+
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
@@ -72,8 +79,30 @@ public class AuthController : Controller
         var result = await _userManager.CreateAsync(NewUser, model.Password);
         if (result.Succeeded)
         {
+            // Gửi email xác nhận
+            try
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(NewUser);
+                var confirmLink = Url.Action("ConfirmEmail", "Auth",
+                    new { userId = NewUser.Id, token }, Request.Scheme);
+
+                await _emailService.SendEmailAsync(
+                    model.Email,
+                    "Xác nhận email - TVT PC",
+                    $"<h2>Xin chào {model.FullName},</h2>" +
+                    $"<p>Cảm ơn bạn đã đăng ký tài khoản tại <b>TVT PC</b>.</p>" +
+                    $"<p>Vui lòng click vào nút bên dưới để xác nhận email:</p>" +
+                    $"<p style='text-align:center;margin:30px 0;'>" +
+                    $"<a href='{confirmLink}' " +
+                    $"style='display:inline-block;padding:14px 32px;background:#0033CC;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px;'>" +
+                    $"Xác nhận email</a></p>" +
+                    $"<p>Link này hết hạn sau 24 giờ.</p>" +
+                    $"<p>Nếu bạn không đăng ký, vui lòng bỏ qua email này.</p>");
+            }
+            catch { /* Email không gửi được không ảnh hưởng đến đăng ký */ }
+
             TempData["ToastType"] = "success";
-            TempData["ToastMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+            TempData["ToastMessage"] = "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.";
             return RedirectToAction("Login", "Auth", new { area = "" });
         }
         foreach (var error in result.Errors)
@@ -81,6 +110,43 @@ public class AuthController : Controller
             ModelState.AddModelError(string.Empty, error.Description);
         }
         return View(model);
+    }
+
+    // GET: /Auth/ConfirmEmail
+    [HttpGet]
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Link xác nhận không hợp lệ.";
+            return RedirectToAction("Login");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Người dùng không tồn tại.";
+            return RedirectToAction("Login");
+        }
+
+        if (user.EmailConfirmed)
+        {
+            ViewBag.Message = "Email của bạn đã được xác nhận trước đó.";
+            return View();
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            ViewBag.Message = "Xác nhận email thành công! Bạn có thể đăng nhập ngay bây giờ.";
+            return View();
+        }
+
+        TempData["ToastType"] = "error";
+        TempData["ToastMessage"] = "Xác nhận email thất bại. Link có thể đã hết hạn.";
+        return RedirectToAction("Login");
     }
 
     [HttpPost]
