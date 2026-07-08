@@ -1,5 +1,26 @@
 @{
     ViewData["Title"] = "Tổng quan";
+    var statusLabels = new Dictionary<string, string>
+    {
+        { "Pending", "Chờ xử lý" }, { "WaitingPayment", "Chờ thanh toán" },
+        { "Confirmed", "Đã xác nhận" }, { "Shipping", "Đang giao" },
+        { "Delivered", "Đã giao" }, { "Cancelled", "Đã huỷ" }
+    };
+    var statusColors = new Dictionary<string, string>
+    {
+        { "Pending", "bg-amber-500" }, { "WaitingPayment", "bg-yellow-500" },
+        { "Confirmed", "bg-blue-500" }, { "Shipping", "bg-purple-500" },
+        { "Delivered", "bg-emerald-500" }, { "Cancelled", "bg-red-500" }
+    };
+    var statusBgColors = new Dictionary<string, string>
+    {
+        { "Pending", "bg-amber-50 text-amber-700 border-amber-200" },
+        { "WaitingPayment", "bg-yellow-50 text-yellow-700 border-yellow-200" },
+        { "Confirmed", "bg-blue-50 text-blue-700 border-blue-200" },
+        { "Shipping", "bg-purple-50 text-purple-700 border-purple-200" },
+        { "Delivered", "bg-emerald-50 text-emerald-700 border-emerald-200" },
+        { "Cancelled", "bg-red-50 text-red-700 border-red-200" }
+    };
 }
 
 <div class="mb-8">
@@ -7,113 +28,345 @@
     <p class="text-admin-500 text-sm mt-1">Chào mừng bạn đến với trang quản trị TVT PC.</p>
 </div>
 
-<!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+<!-- ====== STATS CARDS ====== -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
 
-    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">Tổng số</span>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Doanh thu hôm nay</p>
+                <p class="text-lg font-bold text-admin-800">@(((decimal)ViewBag.TodayRevenue).ToString("#,###"))₫</p>
+            </div>
         </div>
-        <p class="text-2xl font-bold text-admin-800">@(ViewBag.TotalProducts ?? 0)</p>
-        <p class="text-sm text-admin-500 mt-1">Sản phẩm</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Doanh thu tháng này</p>
+                <p class="text-lg font-bold text-admin-800">@(((decimal)ViewBag.MonthRevenue).ToString("#,###"))₫</p>
+            </div>
         </div>
-        <p class="text-2xl font-bold text-admin-800">@(ViewBag.TotalOrders ?? 0)</p>
-        <p class="text-sm text-admin-500 mt-1">Đơn hàng</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Đơn hàng hôm nay</p>
+                <p class="text-lg font-bold text-admin-800">@ViewBag.OrdersToday</p>
+            </div>
         </div>
-        <p class="text-2xl font-bold text-admin-800">@(ViewBag.TotalUsers ?? 0)</p>
-        <p class="text-sm text-admin-500 mt-1">Người dùng</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
-        <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             </div>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Sản phẩm</p>
+                <p class="text-lg font-bold text-admin-800">@ViewBag.TotalProducts</p>
+            </div>
         </div>
-        <p class="text-2xl font-bold text-admin-800">@(ViewBag.PendingOrders ?? 0)</p>
-        <p class="text-sm text-admin-500 mt-1">Chờ xử lý</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Người dùng</p>
+                <p class="text-lg font-bold text-admin-800">@ViewBag.TotalUsers</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 @(ViewBag.LowStockVariants > 0 ? "border-l-4 border-l-red-400" : "")">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg @(ViewBag.LowStockVariants > 0 ? "bg-red-50" : "bg-admin-50") flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 @(ViewBag.LowStockVariants > 0 ? "text-red-500" : "text-admin-400")" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="text-xs text-admin-400 truncate">Tồn kho thấp</p>
+                <p class="text-lg font-bold @(ViewBag.LowStockVariants > 0 ? "text-red-500" : "text-admin-800")">
+                    @(ViewBag.LowStockVariants > 0 ? ViewBag.LowStockVariants + " biến thể" : "Ổn định")
+                </p>
+                @if (ViewBag.OutOfStock > 0)
+                {
+                    <p class="text-xs text-red-400">Trong đó @ViewBag.OutOfStock hết hàng</p>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-6">
-    <h2 class="text-lg font-semibold text-admin-800 mb-4">Truy cập nhanh</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- ====== RECENT ORDERS + STATUS DISTRIBUTION ====== -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+
+    <!-- Recent Orders -->
+    <div class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-admin-100">
+            <h2 class="font-bold text-admin-800">Đơn hàng gần đây</h2>
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+               class="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">Xem tất cả →</a>
+        </div>
+        @{
+            var recentOrders = ViewBag.RecentOrders as List<TMDTStore.Models.Order> ?? new();
+        }
+        @if (recentOrders.Count > 0)
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-admin-50">
+                        <tr>
+                            <th class="text-left px-4 py-2.5 font-semibold text-admin-600">Mã đơn</th>
+                            <th class="text-left px-4 py-2.5 font-semibold text-admin-600">Khách</th>
+                            <th class="text-right px-4 py-2.5 font-semibold text-admin-600">Tổng</th>
+                            <th class="text-center px-4 py-2.5 font-semibold text-admin-600">Trạng thái</th>
+                            <th class="text-right px-4 py-2.5 font-semibold text-admin-600">Ngày</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-admin-100">
+                        @foreach (var order in recentOrders)
+                        {
+                            var sl = statusLabels.ContainsKey(order.Status) ? statusLabels[order.Status] : order.Status;
+                            var sb = statusBgColors.ContainsKey(order.Status) ? statusBgColors[order.Status] : "bg-admin-50 text-admin-700";
+                            <tr class="hover:bg-admin-50 transition-colors">
+                                <td class="px-4 py-3">
+                                    <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                                       class="font-mono text-xs font-medium text-brand-600 hover:underline">@order.Id</a>
+                                </td>
+                                <td class="px-4 py-3 text-admin-700">@order.FullName</td>
+                                <td class="px-4 py-3 text-right font-semibold text-admin-800">@order.TotalPrice.ToString("#,###")₫</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border @sb">@sl</span>
+                                </td>
+                                <td class="px-4 py-3 text-right text-admin-400 text-xs">@order.CreatedAt?.ToString("dd/MM HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="px-5 py-8 text-center text-sm text-admin-400">Chưa có đơn hàng nào.</div>
+        }
+    </div>
+
+    <!-- Status Distribution -->
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+        <h2 class="font-bold text-admin-800 mb-4">Đơn hàng theo trạng thái</h2>
+        @{
+            var statusCounts = ViewBag.StatusCounts as List<dynamic> ?? new();
+            var totalForStats = (int)ViewBag.TotalOrdersForStats;
+            var orderStatuses = new[] { "Delivered", "Shipping", "Confirmed", "WaitingPayment", "Pending", "Cancelled" };
+            var statusDisplay = new Dictionary<string, string>
+            {
+                { "Delivered", "Đã giao" }, { "Shipping", "Đang giao" },
+                { "Confirmed", "Đã xác nhận" }, { "WaitingPayment", "Chờ thanh toán" },
+                { "Pending", "Chờ xử lý" }, { "Cancelled", "Đã huỷ" }
+            };
+            var statusBarColors = new Dictionary<string, string>
+            {
+                { "Delivered", "bg-emerald-500" }, { "Shipping", "bg-purple-500" },
+                { "Confirmed", "bg-blue-500" }, { "WaitingPayment", "bg-yellow-500" },
+                { "Pending", "bg-amber-500" }, { "Cancelled", "bg-red-500" }
+            };
+        }
+        <div class="space-y-3">
+            @foreach (var s in orderStatuses)
+            {
+                var countObj = statusCounts.FirstOrDefault(sc =>
+                {
+                    try { return sc.GetType().GetProperty("Status")?.GetValue(sc)?.ToString() == s; }
+                    catch { return false; }
+                });
+                var count = 0;
+                try { count = countObj?.Count ?? 0; } catch { }
+                var pct = totalForStats > 0 ? (int)Math.Round((double)count / totalForStats * 100) : 0;
+                var barColor = statusBarColors.ContainsKey(s) ? statusBarColors[s] : "bg-admin-400";
+                var displayName = statusDisplay.ContainsKey(s) ? statusDisplay[s] : s;
+
+                <div>
+                    <div class="flex items-center justify-between text-sm mb-1">
+                        <span class="text-admin-600">@displayName</span>
+                        <span class="font-semibold text-admin-800">@count</span>
+                    </div>
+                    <div class="h-2.5 bg-admin-100 rounded-full overflow-hidden">
+                        <div class="h-full @barColor rounded-full transition-all duration-500" style="width:@pct%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="mt-4 pt-3 border-t border-admin-100 text-center">
+            <span class="text-xs text-admin-400">Tổng số: <strong class="text-admin-700">@totalForStats</strong> đơn hàng</span>
+        </div>
+    </div>
+</div>
+
+<!-- ====== TOP PRODUCTS + WAITING ORDERS ====== -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+
+    <!-- Top Products -->
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+        <div class="px-5 py-4 border-b border-admin-100">
+            <h2 class="font-bold text-admin-800">Top sản phẩm bán chạy</h2>
+        </div>
+        @{
+            var topProducts = ViewBag.TopProducts as List<dynamic> ?? new();
+        }
+        @if (topProducts.Count > 0)
+        {
+            <div class="divide-y divide-admin-100">
+                @foreach (var p in topProducts)
+                {
+                    <div class="flex items-center gap-3 px-5 py-3 hover:bg-admin-50 transition-colors">
+                        <div class="w-10 h-10 rounded-lg bg-admin-100 overflow-hidden flex-shrink-0 border border-admin-200">
+                            @if (!string.IsNullOrEmpty(p.ImageUrl))
+                            {
+                                <img src="@p.ImageUrl" alt="" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center text-admin-400">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            }
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-admin-800 truncate">@p.Name</p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-bold text-brand-600">@p.TotalSold</p>
+                            <p class="text-xs text-admin-400">đã bán</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="px-5 py-8 text-center text-sm text-admin-400">Chưa có sản phẩm nào được bán.</div>
+        }
+    </div>
+
+    <!-- Pending Orders -->
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-admin-100">
+            <h2 class="font-bold text-admin-800">Đơn hàng chờ xử lý</h2>
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">@ViewBag.PendingOrders đơn</span>
+        </div>
+        @{
+            var waitingOrders = ViewBag.WaitingOrders as List<TMDTStore.Models.Order> ?? new();
+        }
+        @if (waitingOrders.Count > 0)
+        {
+            <div class="divide-y divide-admin-100">
+                @foreach (var order in waitingOrders)
+                {
+                    var sl = statusLabels.ContainsKey(order.Status) ? statusLabels[order.Status] : order.Status;
+                    var sb = statusBgColors.ContainsKey(order.Status) ? statusBgColors[order.Status] : "bg-admin-50 text-admin-700";
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                       class="flex items-center justify-between px-5 py-3 hover:bg-admin-50 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-admin-800">#@order.Id</p>
+                            <p class="text-xs text-admin-400 mt-0.5">@order.FullName · @order.Phone</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-admin-800">@order.TotalPrice.ToString("#,###")₫</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border @sb">@sl</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="px-5 py-8 text-center text-sm text-green-600">
+                <svg class="w-10 h-10 mx-auto text-green-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tất cả đơn hàng đã được xử lý! 🎉
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ====== QUICK ACTIONS ====== -->
+<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+    <h2 class="font-bold text-admin-800 mb-4">Truy cập nhanh</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <a asp-area="Admin" asp-controller="Product" asp-action="Index"
-           class="flex items-center gap-3 p-4 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors duration-200 border border-admin-200">
-            <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+           class="flex items-center gap-3 p-3.5 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors border border-admin-200">
+            <div class="w-9 h-9 rounded-lg bg-brand-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
             </div>
             <div>
-                <p class="font-medium text-admin-800">Quản lý sản phẩm</p>
-                <p class="text-sm text-admin-500">Xem, thêm, sửa sản phẩm</p>
+                <p class="text-sm font-medium text-admin-800">Sản phẩm</p>
+                <p class="text-xs text-admin-500">Quản lý sản phẩm</p>
             </div>
         </a>
-
-        <a asp-area="Admin" asp-controller="Product" asp-action="Create"
-           class="flex items-center gap-3 p-4 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors duration-200 border border-admin-200">
-            <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <a asp-area="Admin" asp-controller="Order" asp-action="Index"
+           class="flex items-center gap-3 p-3.5 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors border border-admin-200">
+            <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
             <div>
-                <p class="font-medium text-admin-800">Thêm sản phẩm mới</p>
-                <p class="text-sm text-admin-500">Tạo sản phẩm lên cửa hàng</p>
+                <p class="text-sm font-medium text-admin-800">Đơn hàng</p>
+                <p class="text-xs text-admin-500">Xử lý đơn hàng</p>
             </div>
         </a>
-
+        <a asp-area="Admin" asp-controller="Voucher" asp-action="Index"
+           class="flex items-center gap-3 p-3.5 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors border border-admin-200">
+            <div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 5H9l-7 7 7 7h6l7-7-7-7zM9 9a1 1 0 100 2 1 1 0 000-2z" />
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-admin-800">Mã giảm giá</p>
+                <p class="text-xs text-admin-500">Khuyến mãi</p>
+            </div>
+        </a>
         <a asp-area="Admin" asp-controller="Category" asp-action="Index"
-           class="flex items-center gap-3 p-4 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors duration-200 border border-admin-200">
-            <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                     stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+           class="flex items-center gap-3 p-3.5 rounded-xl bg-admin-50 hover:bg-admin-100 transition-colors border border-admin-200">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
             </div>
             <div>
-                <p class="font-medium text-admin-800">Danh mục</p>
-                <p class="text-sm text-admin-500">Quản lý danh mục sản phẩm</p>
+                <p class="text-sm font-medium text-admin-800">Danh mục</p>
+                <p class="text-xs text-admin-500">Phân loại sản phẩm</p>
             </div>
         </a>
     </div>
