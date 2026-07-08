@@ -96,16 +96,36 @@
                 <!-- Right Section -->
                 <div class="flex items-center gap-2 sm:gap-3">
 
-                    <!-- Search button -->
-                    <a asp-area="" asp-controller="Product" asp-action="Index"
-                       class="hidden sm:flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-500 rounded-xl hover:bg-brand-100 hover:text-brand-600 transition-all duration-200 cursor-pointer"
-                       aria-label="Tìm kiếm">
+                    <!-- Search bar -->
+                    <div class="relative hidden sm:block">
+                        <form asp-area="" asp-controller="Product" asp-action="Index" method="get"
+                              class="flex items-center bg-brand-50 rounded-xl hover:bg-brand-100 transition-all duration-200 border border-transparent focus-within:border-brand-300 focus-within:bg-white">
+                            <input type="text" name="SearchQuery" placeholder="Tìm sản phẩm..."
+                                   class="w-40 lg:w-56 bg-transparent text-sm text-brand-700 placeholder-brand-400 px-4 py-2 outline-none border-none"
+                                   value="@Context.Request.Query["SearchQuery"]"
+                                   onfocus="this.parentElement.classList.add('shadow-sm')"
+                                   onblur="this.parentElement.classList.remove('shadow-sm')" />
+                            <button type="submit"
+                                    class="flex items-center gap-1.5 px-3 py-2 text-brand-500 hover:text-brand-600 transition-colors cursor-pointer flex-shrink-0"
+                                    aria-label="Tìm kiếm">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Mobile search -->
+                    <button type="button" id="mobile-search-btn"
+                            class="sm:hidden p-2 text-brand-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200 cursor-pointer"
+                            aria-label="Mở tìm kiếm"
+                            onclick="document.getElementById('mobile-search').classList.toggle('hidden'); document.getElementById('mobile-search-input').focus();">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        <span class="text-sm hidden xl:inline">Tìm kiếm</span>
-                    </a>
+                    </button>
 
                     <!-- Cart icon -->
                     @await Component.InvokeAsync("CartBadge")
@@ -235,6 +255,21 @@
 
                 <!-- Mobile Menu (outside flex container) -->
                 <div id="mobile-menu" class="hidden lg:hidden pb-5 space-y-1 border-t border-brand-100 pt-4 mt-1">
+
+                    <!-- Mobile Search -->
+                    <form asp-area="" asp-controller="Product" asp-action="Index" method="get"
+                          class="flex items-center gap-2 px-3 py-2 mb-3 bg-brand-50 rounded-xl border border-brand-200">
+                        <svg class="w-5 h-5 text-brand-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input type="text" name="SearchQuery" placeholder="Tìm sản phẩm..."
+                               class="flex-1 bg-transparent text-sm text-brand-700 placeholder-brand-400 outline-none border-none"
+                               value="@Context.Request.Query["SearchQuery"]" />
+                        <button type="submit"
+                                class="text-xs font-semibold text-brand-600 hover:text-brand-700 bg-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex-shrink-0">
+                            Tìm
+                        </button>
+                    </form>
                     <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
                        asp-area="" asp-controller="Home" asp-action="Index">
                         <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
