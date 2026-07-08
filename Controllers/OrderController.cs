@@ -26,6 +26,7 @@ public class OrderController : Controller
     {
         var order = await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Voucher)
             .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return NotFound();
@@ -54,6 +55,7 @@ public class OrderController : Controller
 
         var order = await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Voucher)
             .Include(o => o.OrderStatusHistories.OrderByDescending(h => h.ChangedAtUtc))
             .FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
 

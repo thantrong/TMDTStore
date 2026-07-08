@@ -96,6 +96,17 @@
                     <p class="text-admin-400">Phương thức</p>
                     <p class="font-medium text-admin-800">@(Model.PaymentMethod == "Banking" ? "Chuyển khoản" : Model.PaymentMethod == "COD" ? "COD" : "—")</p>
                 </div>
+                @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
+                {
+                    <div>
+                        <p class="text-admin-400">Mã giảm giá</p>
+                        <p class="font-medium text-green-600">@(Model.Voucher?.Code ?? "")</p>
+                    </div>
+                    <div>
+                        <p class="text-admin-400">Giảm giá</p>
+                        <p class="font-medium text-red-500">-@Model.DiscountAmount?.ToString("#,###")₫</p>
+                    </div>
+                }
                 <div>
                     <p class="text-admin-400">Tổng tiền</p>
                     <p class="font-bold text-lg text-admin-800">@Model.TotalPrice.ToString("#,###")₫</p>

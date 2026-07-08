@@ -124,6 +124,17 @@
                                             </span>
                                         </div>
                                         <hr class="border-brand-100 my-2" />
+                                        @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
+                                        {
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-brand-500">Mã giảm giá</span>
+                                                <span class="font-medium text-green-600">@(Model.Voucher?.Code ?? "")</span>
+                                            </div>
+                                            <div class="flex justify-between text-sm mb-2">
+                                                <span class="text-brand-500">Giảm giá</span>
+                                                <span class="font-semibold text-red-500">-@Model.DiscountAmount?.ToString("#,###")₫</span>
+                                            </div>
+                                        }
                                         <div class="flex justify-between">
                                             <span class="font-semibold text-brand-800">Tổng tiền</span>
                                             <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>

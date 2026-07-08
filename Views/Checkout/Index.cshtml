@@ -57,6 +57,23 @@
 
                     <hr class="my-6 border-brand-100" />
 
+                    <!-- Mã giảm giá -->
+                    <div class="mb-6" id="voucher-section">
+                        <h2 class="text-base font-bold text-brand-800 mb-3">Mã giảm giá</h2>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="voucher-input"
+                                   class="flex-1 px-4 py-2.5 border border-brand-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition uppercase"
+                                   placeholder="Nhập mã giảm giá..." />
+                            <button type="button" id="voucher-apply-btn"
+                                    class="px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                    onclick="applyVoucher()">
+                                Áp dụng
+                            </button>
+                        </div>
+                        <div id="voucher-message" class="text-sm mt-2 hidden"></div>
+                        <input type="hidden" name="voucherCode" id="voucher-code-input" value="" />
+                    </div>
+
                     <h2 class="text-base font-bold text-brand-800 mb-4">Phương thức thanh toán</h2>
                     <div class="space-y-3">
                         <label
@@ -79,7 +96,7 @@
                         </label>
                     </div>
 
-                    <button type="submit"
+                    <button type="submit" id="place-order-btn"
                             class="w-full mt-6 bg-orange-500 text-white py-3.5 rounded-xl font-bold text-base hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25 active:scale-[0.98] transition-all duration-200 cursor-pointer">
                         Đặt hàng (@total.ToString("#,###")₫)
                     </button>
@@ -131,12 +148,103 @@
                             <span class="text-sm text-brand-500">Tạm tính</span>
                             <span class="text-sm font-semibold text-brand-800">@total.ToString("#,###")₫</span>
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-2 hidden" id="voucher-discount-row">
+                            <span class="text-sm text-brand-500">Giảm giá</span>
+                            <span class="text-sm font-semibold text-red-500" id="voucher-discount-amount">-0₫</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-brand-100">
                             <span class="text-sm font-bold text-brand-800">Tổng cộng</span>
-                            <span class="text-lg font-bold text-red-500">@total.ToString("#,###")₫</span>
+                            <span class="text-lg font-bold text-red-500" id="order-total-display">@total.ToString("#,###")₫</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+@section Scripts {
+    <script>
+        var checkoutTotal = @total;
+        var checkoutCount = @count;
+
+        function applyVoucher() {
+            var input = document.getElementById('voucher-input');
+            var code = input.value.trim().toUpperCase();
+            var msg = document.getElementById('voucher-message');
+            var btn = document.getElementById('voucher-apply-btn');
+
+            if (!code) {
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Vui lòng nhập mã giảm giá.';
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Đang kiểm tra...';
+            msg.className = 'text-sm mt-2 hidden';
+
+            fetch('/Checkout/ApplyVoucher', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: 'code=' + encodeURIComponent(code)
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                btn.disabled = false;
+                btn.textContent = 'Áp dụng';
+
+                if (data.success) {
+                    msg.className = 'text-sm mt-2 text-green-600 font-medium';
+                    msg.textContent = data.message;
+
+                    // Hiển thị dòng giảm giá
+                    var discountRow = document.getElementById('voucher-discount-row');
+                    discountRow.classList.remove('hidden');
+                    document.getElementById('voucher-discount-amount').textContent = '-' + data.discountFormatted;
+
+                    // Cập nhật tổng
+                    var newTotal = checkoutTotal - data.discountAmount;
+                    var totalDisplay = document.getElementById('order-total-display');
+                    totalDisplay.textContent = newTotal.toLocaleString('vi-VN') + '₫';
+
+                    // Cập nhật nút đặt hàng
+                    document.getElementById('place-order-btn').textContent = 'Đặt hàng (' + newTotal.toLocaleString('vi-VN') + '₫)';
+
+                    // Lưu mã vào hidden input
+                    document.getElementById('voucher-code-input').value = code;
+                    input.disabled = true;
+
+                    // Đổi nút thành "Đã áp dụng"
+                    btn.textContent = 'Đã áp dụng';
+                    btn.disabled = true;
+                    btn.className = 'px-5 py-2.5 bg-green-600 text-white rounded-xl font-semibold text-sm cursor-not-allowed whitespace-nowrap';
+                } else {
+                    msg.className = 'text-sm mt-2 text-red-500';
+                    msg.textContent = data.message;
+                    msg.classList.remove('hidden');
+                    document.getElementById('voucher-code-input').value = '';
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+                btn.textContent = 'Áp dụng';
+                msg.className = 'text-sm mt-2 text-red-500';
+                msg.textContent = 'Lỗi kết nối, vui lòng thử lại.';
+                msg.classList.remove('hidden');
+            });
+        }
+
+        // Enter key support
+        document.getElementById('voucher-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyVoucher();
+            }
+        });
+    </script>
+}

@@ -37,9 +37,77 @@ public class CheckoutController : Controller
         return View(items);
     }
 
+    // POST: /Checkout/ApplyVoucher
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PlaceOrder(string fullName, string phone, string address, string? note, string paymentMethod)
+    public async Task<JsonResult> ApplyVoucher(string code)
+    {
+        var items = _cart.GetCart();
+        var total = _cart.GetCartTotal();
+
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return Json(new { success = false, message = "Vui lòng nhập mã giảm giá." });
+        }
+
+        var voucher = await _context.Vouchers
+            .FirstOrDefaultAsync(v => v.Code == code.ToUpper() && v.IsActive == true);
+
+        if (voucher == null)
+        {
+            return Json(new { success = false, message = "Mã giảm giá không hợp lệ." });
+        }
+
+        // Kiểm tra hạn sử dụng
+        var now = DateTime.UtcNow;
+        if (now < voucher.StartDate.ToUniversalTime())
+        {
+            return Json(new { success = false, message = $"Mã giảm giá có hiệu lực từ {voucher.StartDate:dd/MM/yyyy}." });
+        }
+        if (now > voucher.EndDate.ToUniversalTime())
+        {
+            return Json(new { success = false, message = "Mã giảm giá đã hết hạn." });
+        }
+
+        // Kiểm tra lượt dùng
+        if (voucher.UsageLimit.HasValue && (voucher.UsedCount ?? 0) >= voucher.UsageLimit.Value)
+        {
+            return Json(new { success = false, message = "Mã giảm giá đã hết lượt sử dụng." });
+        }
+
+        // Kiểm tra đơn tối thiểu
+        if (voucher.MinOrderValue.HasValue && total < voucher.MinOrderValue.Value)
+        {
+            return Json(new { success = false, message = $"Đơn hàng tối thiểu {voucher.MinOrderValue.Value:#,###}₫ để áp dụng mã này." });
+        }
+
+        // Tính discount
+        decimal discountAmount = 0;
+        if (voucher.DiscountType == "fixed")
+        {
+            discountAmount = voucher.DiscountValue;
+        }
+        else // percentage
+        {
+            discountAmount = total * voucher.DiscountValue / 100;
+            if (voucher.MaxDiscountAmount.HasValue && discountAmount > voucher.MaxDiscountAmount.Value)
+            {
+                discountAmount = voucher.MaxDiscountAmount.Value;
+            }
+        }
+
+        return Json(new
+        {
+            success = true,
+            message = $"Đã áp dụng mã {voucher.Code}!",
+            discountAmount = discountAmount,
+            discountFormatted = discountAmount.ToString("#,###") + "₫"
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PlaceOrder(string fullName, string phone, string address, string? note, string paymentMethod, string? voucherCode)
     {
         var items = _cart.GetCart();
         if (items.Count == 0)
@@ -71,15 +139,54 @@ public class CheckoutController : Controller
         }
 
         var user = await _userManager.GetUserAsync(User);
+        var cartTotal = _cart.GetCartTotal();
+        var discountAmount = 0m;
+
+        // Xử lý voucher nếu có
+        Voucher? appliedVoucher = null;
+        if (!string.IsNullOrWhiteSpace(voucherCode))
+        {
+            appliedVoucher = await _context.Vouchers
+                .FirstOrDefaultAsync(v => v.Code == voucherCode.ToUpper() && v.IsActive == true);
+
+            if (appliedVoucher != null)
+            {
+                var now = DateTime.UtcNow;
+                var valid = true;
+                if (now < appliedVoucher.StartDate.ToUniversalTime()) valid = false;
+                else if (now > appliedVoucher.EndDate.ToUniversalTime()) valid = false;
+                else if (appliedVoucher.UsageLimit.HasValue && (appliedVoucher.UsedCount ?? 0) >= appliedVoucher.UsageLimit.Value) valid = false;
+                else if (appliedVoucher.MinOrderValue.HasValue && cartTotal < appliedVoucher.MinOrderValue.Value) valid = false;
+
+                if (valid)
+                {
+                    if (appliedVoucher.DiscountType == "fixed")
+                    {
+                        discountAmount = appliedVoucher.DiscountValue;
+                    }
+                    else // percentage
+                    {
+                        discountAmount = cartTotal * appliedVoucher.DiscountValue / 100;
+                        if (appliedVoucher.MaxDiscountAmount.HasValue && discountAmount > appliedVoucher.MaxDiscountAmount.Value)
+                            discountAmount = appliedVoucher.MaxDiscountAmount.Value;
+                    }
+
+                    appliedVoucher.UsedCount = (appliedVoucher.UsedCount ?? 0) + 1;
+                }
+            }
+        }
+
         var order = new Order
         {
-            Id = null!, // DB auto-generate
+            Id = null!,
             UserId = user?.Id,
             FullName = fullName,
             Phone = phone,
             Address = address,
             Note = note,
-            TotalPrice = _cart.GetCartTotal(),
+            TotalPrice = cartTotal - discountAmount,
+            DiscountAmount = discountAmount > 0 ? discountAmount : null,
+            VoucherId = appliedVoucher?.Id,
             Status = paymentMethod == "Banking" ? "WaitingPayment" : "Pending",
             PaymentMethod = paymentMethod,
             CreatedAt = DateTime.UtcNow,
@@ -87,7 +194,7 @@ public class CheckoutController : Controller
         };
 
         _context.Orders.Add(order);
-        await _context.SaveChangesAsync(); // để lấy Id
+        await _context.SaveChangesAsync();
 
         // Trừ tồn kho + tạo OrderItems
         foreach (var item in items)

@@ -9,6 +9,8 @@ public partial class Voucher
 
     public string Code { get; set; } = null!;
 
+    public string DiscountType { get; set; } = null!; // "fixed" or "percentage"
+
     public decimal DiscountValue { get; set; }
 
     public decimal? MinOrderValue { get; set; }

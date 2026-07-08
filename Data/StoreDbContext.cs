@@ -493,6 +493,10 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasDefaultValueSql("('VOU_'::text || lpad((nextval('vou_id_seq'::regclass))::text, 3, '0'::text))")
                 .HasColumnName("id");
             entity.Property(e => e.Code).HasColumnName("code");
+            entity.Property(e => e.DiscountType)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'fixed'::character varying")
+                .HasColumnName("discount_type");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnName("created_at");

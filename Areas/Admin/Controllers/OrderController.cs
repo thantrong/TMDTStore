@@ -58,6 +58,7 @@ public class OrderController : Controller
     {
         var order = await _context.Orders
             .Include(o => o.OrderItems)
+            .Include(o => o.Voucher)
             .Include(o => o.OrderStatusHistories.OrderByDescending(h => h.ChangedAtUtc))
             .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.Id == id);

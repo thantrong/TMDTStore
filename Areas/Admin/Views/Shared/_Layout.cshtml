@@ -136,6 +136,18 @@
                 Thương hiệu
             </a>
 
+            <!-- Vouchers -->
+            <a asp-area="Admin" asp-controller="Voucher" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "Voucher" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M15 5H9l-7 7 7 7h6l7-7-7-7zM9 9a1 1 0 100 2 1 1 0 000-2z" />
+                </svg>
+                Mã giảm giá
+            </a>
+
             <!-- Orders -->
             <a asp-area="Admin" asp-controller="Order" asp-action="Index"
                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200

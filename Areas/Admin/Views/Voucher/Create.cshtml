@@ -1,0 +1,78 @@
+@model TMDTStore.Models.Voucher
+@{
+    ViewData["Title"] = "Thêm mã giảm giá";
+}
+
+<div class="max-w-2xl mx-auto">
+    <a asp-action="Index" class="inline-flex items-center text-sm text-brand-600 hover:text-brand-700 mb-6 transition-colors">
+        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Quay lại danh sách
+    </a>
+
+    <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-6 sm:p-8">
+        <h1 class="text-2xl font-bold text-admin-800 mb-8">Thêm mã giảm giá</h1>
+
+        <form asp-action="Create" method="post" class="space-y-5">
+            <div>
+                <label asp-for="Code" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                <input asp-for="Code" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition font-mono uppercase" placeholder="SUMMER2024" />
+                <span asp-validation-for="Code" class="text-red-500 text-sm"></span>
+                <p class="text-xs text-admin-400 mt-1">Mã nên viết hoa, không dấu, không khoảng trắng.</p>
+            </div>
+
+            <div>
+                <label asp-for="DiscountType" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                <select asp-for="DiscountType" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition">
+                    <option value="fixed">₫ Giảm tiền mặt</option>
+                    <option value="percentage">% Giảm phần trăm</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="DiscountValue" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                    <input asp-for="DiscountValue" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" />
+                    <span asp-validation-for="DiscountValue" class="text-red-500 text-sm"></span>
+                    <p class="text-xs text-admin-400 mt-1">Số tiền giảm hoặc % giảm.</p>
+                </div>
+                <div>
+                    <label asp-for="MaxDiscountAmount" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                    <input asp-for="MaxDiscountAmount" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" placeholder="Chỉ áp dụng cho loại %" />
+                    <p class="text-xs text-admin-400 mt-1">Giới hạn giảm tối đa (₫) — chỉ dùng cho giảm %.</p>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="MinOrderValue" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                <input asp-for="MinOrderValue" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" placeholder="0" />
+                <p class="text-xs text-admin-400 mt-1">Đơn hàng tối thiểu (₫) để áp dụng mã. Bỏ trống = không yêu cầu.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="StartDate" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                    <input asp-for="StartDate" type="date" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" />
+                </div>
+                <div>
+                    <label asp-for="EndDate" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                    <input asp-for="EndDate" type="date" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" />
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="UsageLimit" class="block text-sm font-medium text-admin-700 mb-1"></label>
+                <input asp-for="UsageLimit" class="w-full px-4 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition" placeholder="Bỏ trống = không giới hạn" />
+                <p class="text-xs text-admin-400 mt-1">Số lượt sử dụng tối đa. Bỏ trống = không giới hạn.</p>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm"></div>
+
+            <button type="submit"
+                    class="w-full bg-brand-600 text-white py-2.5 rounded-xl font-semibold hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer">
+                Tạo mã giảm giá
+            </button>
+        </form>
+    </div>
+</div>
