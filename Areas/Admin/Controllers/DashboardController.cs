@@ -59,6 +59,9 @@ public class DashboardController : Controller
             .GroupBy(o => o.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync();
+        var statusDict = new Dictionary<string, int>();
+        foreach (var sc in statusCounts)
+            statusDict[sc.Status] = sc.Count;
         var totalOrdersForStats = statusCounts.Sum(s => s.Count);
 
         // ---- Doanh thu theo ngày (7 ngày gần nhất) ----
@@ -107,7 +110,7 @@ public class DashboardController : Controller
         ViewBag.LowStockVariants = lowStockVariants;
         ViewBag.OutOfStock = outOfStock;
         ViewBag.RecentOrders = recentOrders;
-        ViewBag.StatusCounts = statusCounts;
+        ViewBag.StatusCounts = statusDict;
         ViewBag.TotalOrdersForStats = totalOrdersForStats > 0 ? totalOrdersForStats : 1;
         ViewBag.TopProducts = topProducts;
         ViewBag.WaitingOrders = waitingOrders;

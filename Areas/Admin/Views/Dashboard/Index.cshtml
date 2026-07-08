@@ -124,7 +124,7 @@
 
 <!-- ====== DAILY REVENUE CHART ====== -->
 @{
-    var dailyRev = ViewBag.DailyRevenue as List<dynamic> ?? new();
+    var dailyRev = (IEnumerable<dynamic>)(ViewBag.DailyRevenue ?? Enumerable.Empty<dynamic>());
     var maxRev = (decimal)ViewBag.MaxRevenue;
 }
 <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5 mb-8">
@@ -204,7 +204,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
         <h2 class="font-bold text-admin-800 mb-4">Đơn hàng theo trạng thái</h2>
         @{
-            var statusCounts = ViewBag.StatusCounts as List<dynamic> ?? new();
+            var statusCounts = ViewBag.StatusCounts as Dictionary<string, int> ?? new Dictionary<string, int>();
             var totalForStats = (int)ViewBag.TotalOrdersForStats;
             var orderStatuses = new[] { "Delivered", "Shipping", "Confirmed", "WaitingPayment", "Pending", "Cancelled" };
             var statusDisplay = new Dictionary<string, string>
@@ -223,13 +223,7 @@
         <div class="space-y-3">
             @foreach (var s in orderStatuses)
             {
-                var countObj = statusCounts.FirstOrDefault(sc =>
-                {
-                    try { return sc.GetType().GetProperty("Status")?.GetValue(sc)?.ToString() == s; }
-                    catch { return false; }
-                });
-                var count = 0;
-                try { count = countObj?.Count ?? 0; } catch { }
+                var count = statusCounts.ContainsKey(s) ? statusCounts[s] : 0;
                 var pct = totalForStats > 0 ? (int)Math.Round((double)count / totalForStats * 100) : 0;
                 var barColor = statusBarColors.ContainsKey(s) ? statusBarColors[s] : "bg-admin-400";
                 var displayName = statusDisplay.ContainsKey(s) ? statusDisplay[s] : s;
@@ -260,9 +254,9 @@
             <h2 class="font-bold text-admin-800">Top sản phẩm bán chạy</h2>
         </div>
         @{
-            var topProducts = ViewBag.TopProducts as List<dynamic> ?? new();
+            var topProducts = (IEnumerable<dynamic>)(ViewBag.TopProducts ?? Enumerable.Empty<dynamic>());
         }
-        @if (topProducts.Count > 0)
+        @if (topProducts.Any())
         {
             <div class="divide-y divide-admin-100">
                 @foreach (var p in topProducts)
