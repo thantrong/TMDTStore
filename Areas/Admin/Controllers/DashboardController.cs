@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Staff")]
 public class DashboardController : Controller
 {
     private readonly StoreDbContext _context;

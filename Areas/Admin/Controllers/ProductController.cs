@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Text;
 [Area("Admin")]
+[Authorize(Roles = "Admin,Staff")]
 public class ProductController : Controller
 {
     private readonly ICloudinaryService _cloudinaryService;
@@ -21,7 +22,6 @@ public class ProductController : Controller
 
     // GET: /Admin/Product
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index(ProductListViewModels model)
     {
         model.Categories = await _context.Categories.ToListAsync();
@@ -69,7 +69,7 @@ public class ProductController : Controller
 
     // GET: /Admin/Product/Create
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Chỉ Admin
     public async Task<IActionResult> Create()
     {
         var model = new ProductCreatViewModels
@@ -103,7 +103,7 @@ public class ProductController : Controller
     }
     // POST: /Admin/Product/Create
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProductCreatViewModels model)
     {
@@ -181,7 +181,6 @@ public class ProductController : Controller
 
     // GET: /Admin/Product/Details/{id}
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Details(string id)
     {
         var product = await _context.Products
@@ -202,7 +201,7 @@ public class ProductController : Controller
 
     // GET: /Admin/Product/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Chỉ Admin
     public async Task<IActionResult> Edit(string id)
     {
         var product = await _context.Products
@@ -245,7 +244,7 @@ public class ProductController : Controller
 
     // POST: /Admin/Product/Edit/{id}
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string id, ProductEditViewModels model)
     {
@@ -386,7 +385,7 @@ public class ProductController : Controller
 
     // POST: /Admin/Product/ToggleStatus/{id}
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleStatus(string id)
     {

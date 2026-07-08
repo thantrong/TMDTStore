@@ -7,7 +7,7 @@ using TMDTStore.Models;
 using TMDTStore.Models.ViewModels.Order;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Staff")]
 public class OrderController : Controller
 {
     private readonly StoreDbContext _context;

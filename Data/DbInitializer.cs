@@ -9,7 +9,7 @@ public static class DbInitializer
     public static async Task InitializeAsync(UserManager<User> userManager, RoleManager<Role> roleManager, StoreDbContext context)
     {
         // Create roles if they don't exist
-        string[] roles = new[] { "Admin", "Customer" };
+        string[] roles = new[] { "Admin", "Customer", "Staff" };
         foreach (var role in roles)
         {
             if (!await roleManager.RoleExistsAsync(role))
