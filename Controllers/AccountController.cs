@@ -3,6 +3,7 @@ namespace TMDTStore.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
 using TMDTStore.Models.ViewModels;
 using TMDTStore.Services.Cloudinary;
@@ -12,12 +13,14 @@ public class AccountController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly ICloudinaryService _cloudinaryService;
+    private readonly StoreDbContext _context;
 
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ICloudinaryService cloudinaryService)
+    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ICloudinaryService cloudinaryService, StoreDbContext context)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _cloudinaryService = cloudinaryService;
+        _context = context;
     }
 
     // GET: /Account
@@ -26,6 +29,26 @@ public class AccountController : Controller
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return RedirectToAction("Login", "Auth");
+
+        // Thống kê
+        var userId = user.Id;
+        ViewBag.TotalOrders = await _context.Orders.CountAsync(o => o.UserId == userId && o.Status != "Cancelled");
+        ViewBag.TotalReviews = await _context.Reviews.CountAsync(r => r.UserId == userId);
+
+        // Đơn hàng gần đây (5 đơn)
+        ViewBag.RecentOrders = await _context.Orders
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+
+        // Đánh giá gần đây (5 đánh giá)
+        ViewBag.RecentReviews = await _context.Reviews
+            .Include(r => r.Product)
+            .Where(r => r.UserId == userId && r.ParentId == null)
+            .OrderByDescending(r => r.CreatedAt)
+            .Take(5)
+            .ToListAsync();
 
         return View(user);
     }
