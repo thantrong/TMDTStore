@@ -22,10 +22,10 @@ public class CartController : Controller
     // POST: /Cart/Add
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Add(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, int quantity, int maxQuantity)
+    public IActionResult Add(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, decimal? listPrice, int quantity, int maxQuantity)
     {
         if (quantity <= 0) quantity = 1;
-        _cart.AddItem(productId, variantId, name, variantName, imageUrl, price, quantity, maxQuantity);
+        _cart.AddItem(productId, variantId, name, variantName, imageUrl, price, listPrice, quantity, maxQuantity);
         TempData["ToastType"] = "success";
         TempData["ToastMessage"] = "Đã thêm vào giỏ hàng.";
         return RedirectToAction("Details", "Product", new { id = productId });

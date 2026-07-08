@@ -109,7 +109,18 @@
 
                                         <div class="flex items-center justify-between mt-4">
                                             <div>
-                                                <p class="text-base font-bold text-red-500">@item.Price.ToString("#,###")₫</p>
+                                                @{
+                                                    var cartItemHasDiscount = item.ListPrice.HasValue && item.ListPrice > item.Price;
+                                                    var cartItemDiscountPercent = cartItemHasDiscount ? (int)(((item.ListPrice.Value - item.Price) / item.ListPrice.Value) * 100) : 0;
+                                                }
+                                                <div class="flex items-center gap-2">
+                                                    <p class="text-base font-bold text-red-500">@item.Price.ToString("#,###")₫</p>
+                                                    @if (cartItemHasDiscount)
+                                                    {
+                                                        <span class="text-sm text-brand-400 line-through">@item.ListPrice?.ToString("#,###")₫</span>
+                                                        <span class="text-xs font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">-@cartItemDiscountPercent%</span>
+                                                    }
+                                                </div>
                                             </div>
                                             <div class="flex items-center gap-1">
                                                 <form asp-action="Update" method="post" class="flex items-center gap-1">

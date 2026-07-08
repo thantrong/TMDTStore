@@ -8,6 +8,7 @@ public class CartItem
     public string? VariantName { get; set; }
     public string? ImageUrl { get; set; }
     public decimal Price { get; set; }
+    public decimal? ListPrice { get; set; } // Giá gốc (để hiển thị giảm giá)
     public int Quantity { get; set; }
     public int MaxQuantity { get; set; } // Tồn kho tối đa cho phép
 }

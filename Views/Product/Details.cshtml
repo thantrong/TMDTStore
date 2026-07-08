@@ -414,6 +414,8 @@ string>>>(Model.ProductVariants!.First().Attributes) ?? new();
                                        value="@(imageList.Count > 0 ? imageList[0] : "")" />
                                 <input type="hidden" name="price" id="cart-price"
                                        value="@(hasVariants ? ((long)(Model.ProductVariants!.First().Price)).ToString() : Model.Price.HasValue ? ((long)(Model.Price.Value)).ToString() : "0")" />
+                                <input type="hidden" name="listPrice" id="cart-listPrice"
+                                       value="@(hasVariants ? (Model.ProductVariants!.First().ListPrice.HasValue ? ((long)Model.ProductVariants!.First().ListPrice.Value).ToString() : "") : Model.ListPrice.HasValue ? ((long)Model.ListPrice.Value).ToString() : "")" />
                                 <input type="hidden" name="maxQuantity" id="cart-maxQuantity"
                                        value="@(hasVariants ? Model.ProductVariants!.First().StockQuantity : Model.Inventory?.StockQuantity ?? 0)" />
                                 <input type="hidden" name="quantity" value="1" />
@@ -737,11 +739,13 @@ string>>>(Model.ProductVariants!.First().Attributes) ?? new();
                                 var cartVariantId = document.getElementById('cart-variantId');
                                 var cartVariantName = document.getElementById('cart-variantName');
                                 var cartPrice = document.getElementById('cart-price');
+                                var cartListPrice = document.getElementById('cart-listPrice');
                                 var cartImage = document.getElementById('cart-imageUrl');
                                 var cartMaxQty = document.getElementById('cart-maxQuantity');
                                 if (cartVariantId) cartVariantId.value = v.id || '';
                                 if (cartVariantName) cartVariantName.value = v.name || '';
                                 if (cartPrice) cartPrice.value = v.price.toString();
+                                if (cartListPrice) cartListPrice.value = v.listPrice ? v.listPrice.toString() : '';
                                 if (cartImage) cartImage.value = v.imageUrl || '';
                                 if (cartMaxQty) cartMaxQty.value = v.stockQuantity || 0;
                             }

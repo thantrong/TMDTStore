@@ -6,7 +6,7 @@ namespace TMDTStore.Services.Cart;
 public interface ICartService
 {
     List<CartItem> GetCart();
-    CartItem? AddItem(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, int quantity, int maxQuantity);
+    CartItem? AddItem(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, decimal? listPrice, int quantity, int maxQuantity);
     void UpdateQuantity(string productId, string? variantId, int quantity);
     void RemoveItem(string productId, string? variantId);
     int GetCartCount();
@@ -40,7 +40,7 @@ public class CartService : ICartService
         Session.SetString(SessionKey, JsonSerializer.Serialize(items));
     }
 
-    public CartItem? AddItem(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, int quantity, int maxQuantity)
+    public CartItem? AddItem(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, decimal? listPrice, int quantity, int maxQuantity)
     {
         var cart = GetCart();
         var key = variantId ?? productId;
@@ -65,6 +65,7 @@ public class CartService : ICartService
             VariantName = variantName,
             ImageUrl = imageUrl,
             Price = price,
+            ListPrice = listPrice,
             Quantity = Math.Min(quantity, maxQuantity),
             MaxQuantity = maxQuantity
         };
