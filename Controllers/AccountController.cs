@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using TMDTStore.Models;
 using TMDTStore.Models.ViewModels;
 using TMDTStore.Services.Cloudinary;
-using TMDTStore.Services.Email;
 [Authorize]
 public class AccountController : Controller
 {
@@ -15,15 +14,13 @@ public class AccountController : Controller
     private readonly SignInManager<User> _signInManager;
     private readonly ICloudinaryService _cloudinaryService;
     private readonly StoreDbContext _context;
-    private readonly IEmailService _emailService;
 
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ICloudinaryService cloudinaryService, StoreDbContext context, IEmailService emailService)
+    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ICloudinaryService cloudinaryService, StoreDbContext context)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _cloudinaryService = cloudinaryService;
         _context = context;
-        _emailService = emailService;
     }
 
     // GET: /Account
@@ -156,70 +153,5 @@ public class AccountController : Controller
             ModelState.AddModelError(string.Empty, error.Description);
 
         return View(model);
-    }
-
-    // POST: /Account/TestMail
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> TestMail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            TempData["ToastType"] = "error";
-            TempData["ToastMessage"] = "Vui lòng nhập địa chỉ email.";
-            return RedirectToAction("Index");
-        }
-
-        try
-        {
-            await _emailService.SendEmailAsync(
-                email,
-                "📧 TVT PC - Thư kiểm tra kết nối email",
-                $"""
-                <!DOCTYPE html>
-                <html>
-                <head><meta charset="utf-8"></head>
-                <body style="font-family: Arial, sans-serif; background: #f4f7f6; padding: 40px 20px;">
-                    <div style="max-width: 600px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                        <div style="background: linear-gradient(135deg, #0033CC, #1A4BFF); padding: 30px; text-align: center;">
-                            <h1 style="color: #fff; margin: 0; font-size: 24px;">📧 Kiểm tra kết nối Email</h1>
-                        </div>
-                        <div style="padding: 30px;">
-                            <p style="font-size: 16px; color: #333; line-height: 1.6;">Xin chào,</p>
-                            <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                                Đây là email kiểm tra từ hệ thống <strong>TVT PC - Linh kiện máy tính</strong>.
-                            </p>
-                            <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                                Nếu bạn nhận được email này, hệ thống gửi mail đã hoạt động <strong style="color: #16a34a;">✅ thành công</strong>!
-                            </p>
-                            <div style="background: #f0f4ff; border-radius: 12px; padding: 20px; margin: 20px 0;">
-                                <p style="margin: 5px 0; font-size: 14px; color: #555;">
-                                    📅 Thời gian gửi: <strong>{DateTime.Now:dd/MM/yyyy HH:mm:ss}</strong>
-                                </p>
-                                <p style="margin: 5px 0; font-size: 14px; color: #555;">
-                                    📬 Đến: <strong>{email}</strong>
-                                </p>
-                            </div>
-                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-                            <p style="font-size: 13px; color: #999;">
-                                TVT PC - Linh kiện máy tính chất lượng cao<br>
-                                Email này được gửi tự động từ hệ thống, vui lòng không trả lời.
-                            </p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                """);
-
-            TempData["ToastType"] = "success";
-            TempData["ToastMessage"] = $"Email kiểm tra đã được gửi đến {email}! Vui lòng kiểm tra hộp thư (cả Spam).";
-        }
-        catch (Exception ex)
-        {
-            TempData["ToastType"] = "error";
-            TempData["ToastMessage"] = $"Gửi email thất bại: {ex.Message}";
-        }
-
-        return RedirectToAction("Index");
     }
 }

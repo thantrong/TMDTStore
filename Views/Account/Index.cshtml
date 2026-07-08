@@ -263,24 +263,5 @@
         </div>
     </div>
 
-    <!-- Test Email -->
-    <div class="bg-white rounded-xl border border-brand-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-brand-100">
-            <h2 class="font-bold text-brand-800">Kiểm tra gửi email</h2>
-            <p class="text-xs text-brand-400 mt-0.5">Gửi thử email kiểm tra hệ thống SMTP</p>
-        </div>
-        <form asp-action="TestMail" method="post" class="p-5 flex items-center gap-3">
-            @Html.AntiForgeryToken()
-            <input type="email" name="email" value="@Model.Email" required
-                   class="flex-1 px-4 py-2 border border-brand-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
-                   placeholder="Nhập email nhận thử..." />
-            <button type="submit"
-                    class="px-5 py-2 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer whitespace-nowrap flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Gửi thử
-            </button>
-        </form>
     </div>
 </div>
