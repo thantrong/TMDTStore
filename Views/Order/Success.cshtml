@@ -73,6 +73,13 @@
                     <span class="font-semibold text-brand-800">Tổng tiền</span>
                     <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
                 </div>
+                @if (Model.ShippingFee.HasValue && Model.ShippingFee > 0)
+                {
+                    <div class="flex justify-between pt-2">
+                        <span class="text-sm text-brand-500">Phí vận chuyển</span>
+                        <span class="text-sm font-semibold text-brand-800">@Model.ShippingFee?.ToString("#,###")₫</span>
+                    </div>
+                }
                 @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                 {
                     <div class="flex justify-between pt-2 mt-2 border-t border-dashed border-brand-100">

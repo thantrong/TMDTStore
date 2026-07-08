@@ -140,6 +140,7 @@ public class CheckoutController : Controller
 
         var user = await _userManager.GetUserAsync(User);
         var cartTotal = _cart.GetCartTotal();
+        var shippingFee = 30000m;
         var discountAmount = 0m;
 
         // Xử lý voucher nếu có
@@ -184,7 +185,8 @@ public class CheckoutController : Controller
             Phone = phone,
             Address = address,
             Note = note,
-            TotalPrice = cartTotal - discountAmount,
+            TotalPrice = cartTotal - discountAmount + shippingFee,
+            ShippingFee = shippingFee,
             DiscountAmount = discountAmount > 0 ? discountAmount : null,
             VoucherId = appliedVoucher?.Id,
             Status = paymentMethod == "Banking" ? "WaitingPayment" : "Pending",
@@ -278,6 +280,11 @@ public class CheckoutController : Controller
             "<th style=\"padding:10px;text-align:right;border-bottom:2px solid #e5e7eb;\">Thành tiền</th>" +
             "</tr></thead><tbody>" + itemsHtml + "</tbody>" +
             "<tfoot><tr>" +
+            "<td colspan=\"3\" style=\"padding:12px 10px;text-align:right;font-weight:bold;\">Phí vận chuyển:</td>" +
+            "<td style=\"padding:12px 10px;text-align:right;font-weight:bold;\">30.000₫</td>" +
+            "</tr>" +
+            (discountAmount > 0 ? "<tr><td colspan=\"3\" style=\"padding:12px 10px;text-align:right;font-weight:bold;\">Giảm giá:</td><td style=\"padding:12px 10px;text-align:right;font-weight:bold;color:#dc2626;\">-" + discountAmount.ToString("#,###") + "₫</td></tr>" : "") +
+            "<tr>" +
             "<td colspan=\"3\" style=\"padding:12px 10px;text-align:right;font-weight:bold;\">Tổng cộng:</td>" +
             "<td style=\"padding:12px 10px;text-align:right;font-weight:bold;font-size:18px;color:#dc2626;\">" + order.TotalPrice.ToString("#,###") + "₫</td>" +
             "</tr></tfoot></table>" +

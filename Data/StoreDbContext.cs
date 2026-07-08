@@ -132,6 +132,9 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.TotalPrice)
                 .HasPrecision(18, 2)
                 .HasColumnName("total_price");
+            entity.Property(e => e.ShippingFee)
+                .HasPrecision(18, 2)
+                .HasColumnName("shipping_fee");
             entity.Property(e => e.UserId)
                 .HasMaxLength(450)
                 .HasColumnName("user_id");

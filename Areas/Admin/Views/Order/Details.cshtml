@@ -96,6 +96,13 @@
                     <p class="text-admin-400">Phương thức</p>
                     <p class="font-medium text-admin-800">@(Model.PaymentMethod == "Banking" ? "Chuyển khoản" : Model.PaymentMethod == "COD" ? "COD" : "—")</p>
                 </div>
+                @if (Model.ShippingFee.HasValue && Model.ShippingFee > 0)
+                {
+                    <div>
+                        <p class="text-admin-400">Phí vận chuyển</p>
+                        <p class="font-medium text-admin-800">@Model.ShippingFee?.ToString("#,###")₫</p>
+                    </div>
+                }
                 @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                 {
                     <div>

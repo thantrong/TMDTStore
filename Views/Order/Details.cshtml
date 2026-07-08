@@ -124,6 +124,13 @@
                                             </span>
                                         </div>
                                         <hr class="border-brand-100 my-2" />
+                                        @if (Model.ShippingFee.HasValue && Model.ShippingFee > 0)
+                                        {
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-brand-500">Phí vận chuyển</span>
+                                                <span class="font-semibold text-brand-800">@Model.ShippingFee?.ToString("#,###")₫</span>
+                                            </div>
+                                        }
                                         @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                                         {
                                             <div class="flex justify-between text-sm">

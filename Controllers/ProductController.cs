@@ -82,7 +82,11 @@ public class ProductController : Controller
         }
         if (!string.IsNullOrEmpty(model.SearchQuery))
         {
-            query = query.Where(p => p.Name.Contains(model.SearchQuery));
+            var kw = model.SearchQuery.ToLower();
+            query = query.Where(p =>
+                p.Name.ToLower().Contains(kw) ||
+                (p.ShortDescription != null && p.ShortDescription.ToLower().Contains(kw)) ||
+                (p.Description != null && p.Description.ToLower().Contains(kw)));
         }
         if (string.IsNullOrEmpty(model.BrandName) == false)
         {

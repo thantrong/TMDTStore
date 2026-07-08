@@ -19,6 +19,8 @@ public partial class Order
 
     public decimal TotalPrice { get; set; }
 
+    public decimal? ShippingFee { get; set; }
+
     public string Status { get; set; } = null!; // Pending, WaitingPayment, Confirmed, Shipping, Delivered, Cancelled
 
     public string? PaymentMethod { get; set; } // COD, Banking

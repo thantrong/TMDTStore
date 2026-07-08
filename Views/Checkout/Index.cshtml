@@ -98,7 +98,7 @@
 
                     <button type="submit" id="place-order-btn"
                             class="w-full mt-6 bg-orange-500 text-white py-3.5 rounded-xl font-bold text-base hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25 active:scale-[0.98] transition-all duration-200 cursor-pointer">
-                        Đặt hàng (@total.ToString("#,###")₫)
+                        Đặt hàng (@((total + 30000).ToString("#,###"))₫)
                     </button>
                 </form>
             </div>
@@ -148,13 +148,17 @@
                             <span class="text-sm text-brand-500">Tạm tính</span>
                             <span class="text-sm font-semibold text-brand-800">@total.ToString("#,###")₫</span>
                         </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-brand-500">Phí vận chuyển</span>
+                            <span class="text-sm font-semibold text-brand-800">30.000₫</span>
+                        </div>
                         <div class="flex items-center justify-between mb-2 hidden" id="voucher-discount-row">
                             <span class="text-sm text-brand-500">Giảm giá</span>
                             <span class="text-sm font-semibold text-red-500" id="voucher-discount-amount">-0₫</span>
                         </div>
                         <div class="flex items-center justify-between pt-3 border-t border-brand-100">
                             <span class="text-sm font-bold text-brand-800">Tổng cộng</span>
-                            <span class="text-lg font-bold text-red-500" id="order-total-display">@total.ToString("#,###")₫</span>
+                            <span class="text-lg font-bold text-red-500" id="order-total-display">@((total + 30000).ToString("#,###"))₫</span>
                         </div>
                     </div>
                 </div>
@@ -165,8 +169,9 @@
 
 @section Scripts {
     <script>
-        var checkoutTotal = @total;
+        var checkoutTotal = @(total + 30000);
         var checkoutCount = @count;
+        var checkoutSubtotal = @total;
 
         function applyVoucher() {
             var input = document.getElementById('voucher-input');
@@ -208,7 +213,8 @@
                     document.getElementById('voucher-discount-amount').textContent = '-' + data.discountFormatted;
 
                     // Cập nhật tổng
-                    var newTotal = checkoutTotal - data.discountAmount;
+                    // Shipping fee 30,000
+                    var newTotal = checkoutSubtotal + 30000 - data.discountAmount;
                     var totalDisplay = document.getElementById('order-total-display');
                     totalDisplay.textContent = newTotal.toLocaleString('vi-VN') + '₫';
 
