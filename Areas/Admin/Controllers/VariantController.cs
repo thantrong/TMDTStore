@@ -22,17 +22,34 @@ public class VariantController : Controller
 
     // GET: /Admin/Variant/Index/{productId}
     [HttpGet]
-    public async Task<IActionResult> Index(string productId)
+    public async Task<IActionResult> Index(string productId, string? search, int page = 1)
     {
         var product = await _context.Products.FindAsync(productId);
         if (product == null) return NotFound();
 
-        var variants = await _context.ProductVariants
+        var query = _context.ProductVariants
             .Where(v => v.ProductId == productId)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            var kw = search.ToLower();
+            query = query.Where(v => v.Name.ToLower().Contains(kw) || v.Sku.ToLower().Contains(kw));
+        }
+
+        var totalItems = await query.CountAsync();
+        var pageSize = 10;
+        var variants = await query
             .OrderBy(v => v.SortOrder)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         ViewBag.Product = product;
+        ViewBag.TotalItems = totalItems;
+        ViewBag.TotalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+        ViewBag.CurrentPage = page;
+        ViewBag.Search = search;
         return View(variants);
     }
 

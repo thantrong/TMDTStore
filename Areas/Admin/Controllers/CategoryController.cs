@@ -20,12 +20,42 @@ public class CategoryController : Controller
 
     // GET: /Admin/Category
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? search)
     {
         var allCategories = await _context.Categories
             .Include(c => c.Products)
             .OrderBy(c => c.Name)
             .ToListAsync();
+
+        // Filter theo search nếu có
+        if (!string.IsNullOrEmpty(search))
+        {
+            var kw = search.ToLower();
+            // Tìm category phù hợp + tất cả con cháu của nó
+            var matchedIds = allCategories
+                .Where(c => c.Name.ToLower().Contains(kw) || c.Slug.ToLower().Contains(kw))
+                .Select(c => c.Id)
+                .ToHashSet();
+
+            // Thêm tất cả con cháu của các category được match
+            var allDescendantIds = new HashSet<string>();
+            void GetDescendants(string pid)
+            {
+                var children = allCategories.Where(c => c.ParentId == pid).ToList();
+                foreach (var child in children)
+                {
+                    allDescendantIds.Add(child.Id);
+                    GetDescendants(child.Id);
+                }
+            }
+            foreach (var mid in matchedIds)
+                GetDescendants(mid);
+
+            matchedIds.UnionWith(allDescendantIds);
+
+            allCategories = allCategories.Where(c => matchedIds.Contains(c.Id)).ToList();
+            ViewBag.SearchResult = true;
+        }
 
         // Build tree: gán level và sắp xếp theo cấp bậc
         var flatTree = new List<(Category Cat, int Level)>();
@@ -40,6 +70,8 @@ public class CategoryController : Controller
         }
         AddNode(allCategories, null, 0);
 
+        ViewBag.Search = search;
+        ViewBag.TotalCategories = allCategories.Count;
         return View(flatTree);
     }
 
