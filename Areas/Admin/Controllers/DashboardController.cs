@@ -61,6 +61,21 @@ public class DashboardController : Controller
             .ToListAsync();
         var totalOrdersForStats = statusCounts.Sum(s => s.Count);
 
+        // ---- Doanh thu theo ngày (7 ngày gần nhất) ----
+        var dailyRevenue = new List<dynamic>();
+        for (int i = 6; i >= 0; i--)
+        {
+            var dayStart = now.Date.AddDays(-i);
+            var dayEnd = dayStart.AddDays(1);
+            var rev = await _context.Orders
+                .Where(o => o.Status == "Delivered" && o.CreatedAt >= dayStart && o.CreatedAt < dayEnd)
+                .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+            var count = await _context.Orders
+                .CountAsync(o => o.CreatedAt >= dayStart && o.CreatedAt < dayEnd);
+            dailyRevenue.Add(new { Date = dayStart.ToString("dd/MM"), Revenue = rev, Count = count });
+        }
+        var maxRev = dailyRevenue.Any() ? dailyRevenue.Max(d => (decimal)d.Revenue) : 1m;
+
         // ---- Top sản phẩm bán chạy ----
         var topProducts = await _context.OrderItems
             .GroupBy(oi => new { oi.ProductId, oi.Name, oi.ImageUrl })
@@ -96,6 +111,8 @@ public class DashboardController : Controller
         ViewBag.TotalOrdersForStats = totalOrdersForStats > 0 ? totalOrdersForStats : 1;
         ViewBag.TopProducts = topProducts;
         ViewBag.WaitingOrders = waitingOrders;
+        ViewBag.DailyRevenue = dailyRevenue;
+        ViewBag.MaxRevenue = maxRev;
 
         return View();
     }

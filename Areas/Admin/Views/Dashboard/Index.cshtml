@@ -122,6 +122,30 @@
     </div>
 </div>
 
+<!-- ====== DAILY REVENUE CHART ====== -->
+@{
+    var dailyRev = ViewBag.DailyRevenue as List<dynamic> ?? new();
+    var maxRev = (decimal)ViewBag.MaxRevenue;
+}
+<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5 mb-8">
+    <h2 class="font-bold text-admin-800 mb-1">Doanh thu 7 ngày gần nhất</h2>
+    <p class="text-xs text-admin-400 mb-5">Biểu đồ doanh thu và số đơn hàng theo ngày</p>
+    <div class="flex items-end gap-2 sm:gap-3 h-48" style="padding-bottom:2px;">
+        @foreach (var item in dailyRev)
+        {
+            var pct = maxRev > 0 ? (double)((decimal)item.Revenue / maxRev) * 100 : 0;
+            var height = Math.Max(pct * 1.6, 4);
+            <div class="flex-1 flex flex-col items-center h-full justify-end">
+                <span class="text-[10px] font-semibold text-admin-600 mb-1 whitespace-nowrap">@(((decimal)item.Revenue).ToString("#,###"))₫</span>
+                <div class="w-full rounded-lg bg-gradient-to-t from-brand-500 to-brand-300 transition-all duration-500 hover:from-brand-600 hover:to-brand-400 min-h-[4px]"
+                     style="height:@(height)%;max-height:160px;"></div>
+                <span class="text-[10px] text-admin-400 mt-1.5">@item.Date</span>
+                <span class="text-[9px] text-admin-300">@item.Count đơn</span>
+            </div>
+        }
+    </div>
+</div>
+
 <!-- ====== RECENT ORDERS + STATUS DISTRIBUTION ====== -->
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
 
