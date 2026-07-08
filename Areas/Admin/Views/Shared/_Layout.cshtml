@@ -160,6 +160,18 @@
                 Đơn hàng
             </a>
 
+            <!-- Users -->
+            <a asp-area="Admin" asp-controller="User" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "bg-brand-600 text-white shadow-lg shadow-brand-600/25" : "text-admin-300 hover:text-white hover:bg-admin-700")">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Người dùng
+            </a>
+
             <!-- Divider -->
             <hr class="border-admin-700 my-4" />
 
