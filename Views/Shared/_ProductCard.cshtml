@@ -8,7 +8,7 @@
     var hasVariantsLoaded = Model.ProductVariants != null && Model.ProductVariants.Count > 0;
 }
 
-<a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Id"
+<a asp-controller="Product" asp-action="Details" asp-route-slug="@Model.Slug"
    class="group bg-white rounded-xl border border-brand-100 overflow-hidden hover:border-brand-300 hover:shadow-lg hover:shadow-brand-100/50 transition-all duration-200 cursor-pointer flex flex-col">
 
     @{

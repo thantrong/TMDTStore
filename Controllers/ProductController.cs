@@ -112,18 +112,34 @@ public class ProductController : Controller
         return View(model);
     }
 
-    // GET: /Product/Details/{id}
+    // GET: /Product/Details/{id} or /Product/{slug}
     [HttpGet]
-    public async Task<IActionResult> Details(string id)
+    public async Task<IActionResult> Details(string? slug, string? id)
     {
-        var product = await _context.Products
-            .Include(p => p.Category)
-            .Include(p => p.Brand)
-            .Include(p => p.Inventory)
-            .Include(p => p.ProductBadges)
-            .Include(p => p.Reviews)
-            .Include(p => p.ProductVariants.OrderBy(v => v.Price))
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
+        Product? product;
+
+        if (!string.IsNullOrEmpty(slug))
+        {
+            product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Inventory)
+                .Include(p => p.ProductBadges)
+                .Include(p => p.Reviews)
+                .Include(p => p.ProductVariants.OrderBy(v => v.Price))
+                .FirstOrDefaultAsync(p => p.Slug == slug && p.IsActive == true);
+        }
+        else
+        {
+            product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Inventory)
+                .Include(p => p.ProductBadges)
+                .Include(p => p.Reviews)
+                .Include(p => p.ProductVariants.OrderBy(v => v.Price))
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
+        }
 
         if (product == null)
         {

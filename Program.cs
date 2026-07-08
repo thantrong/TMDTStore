@@ -73,6 +73,12 @@ app.MapControllerRoute(
     constraints: new { category = @"^(?!Account$|Cart$|Checkout$|Order$|Auth$|Home$|Product$|Admin$|css$|js$|lib$|images$|favicon\.ico$).+$" });
 
 app.MapControllerRoute(
+    name: "product_details",
+    pattern: "Product/{slug}",
+    defaults: new { controller = "Product", action = "Details" },
+    constraints: new { slug = @"^(?!Index$|Details$).+$" });
+
+app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
