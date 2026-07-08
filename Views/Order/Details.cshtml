@@ -30,9 +30,13 @@
 <div class="max-w-4xl mx-auto">
     <nav class="text-sm text-brand-500 mb-6 flex items-center gap-2 flex-wrap">
         <a asp-controller="Home" asp-action="Index" class="hover:text-brand-600">Trang chủ</a>
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
         <a asp-action="History" class="hover:text-brand-600">Đơn hàng</a>
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
         <span class="text-brand-700 font-medium truncate">@Model.Id</span>
     </nav>
 
@@ -43,7 +47,8 @@
                 <h1 class="text-xl font-heading font-bold text-brand-800">Đơn hàng @Model.Id</h1>
                 <p class="text-sm text-brand-400 mt-1">Đặt lúc @(Model.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</p>
             </div>
-            <div class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium @statusColor">
+            <div
+                class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium @statusColor">
                 <span class="w-2 h-2 rounded-full @statusDot"></span>
                 @statusText
             </div>
@@ -59,7 +64,8 @@
                     @foreach (var item in Model.OrderItems)
                     {
                         <div class="flex items-start gap-3 pb-3 border-b border-brand-100 last:border-0 last:pb-0">
-                            <div class="w-16 h-16 rounded-xl bg-brand-50 overflow-hidden flex-shrink-0 border border-brand-100">
+                            <div
+                                class="w-16 h-16 rounded-xl bg-brand-50 overflow-hidden flex-shrink-0 border border-brand-100">
                                 @if (!string.IsNullOrEmpty(item.ImageUrl))
                                 {
                                     <img src="@item.ImageUrl" alt="" class="w-full h-full object-cover" />
@@ -73,98 +79,104 @@
                                 }
                                 <p class="text-xs text-brand-500 mt-1">x@(item.Quantity)</p>
                             </div>
-                            <p class="text-sm font-semibold text-brand-800 flex-shrink-0">@((item.UnitPrice * item.Quantity).ToString("#,###"))₫</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT: Thông tin -->
-        <div class="space-y-4">
-            <!-- Thông tin giao hàng -->
-            <div class="bg-white rounded-2xl border border-brand-100 p-6">
-                <h2 class="text-base font-bold text-brand-800 mb-4">Thông tin giao hàng</h2>
-                <div class="space-y-2 text-sm">
-                    <div><span class="text-brand-400">Người nhận:</span><br /><span class="font-medium text-brand-700">@Model.FullName</span></div>
-                    <div><span class="text-brand-400">SĐT:</span><br /><span class="font-medium text-brand-700">@Model.Phone</span></div>
-                    <div><span class="text-brand-400">Địa chỉ:</span><br /><span class="font-medium text-brand-700">@Model.Address</span></div>
-                    @if (!string.IsNullOrEmpty(Model.Note))
-                    {
-                        <div><span class="text-brand-400">Ghi chú:</span><br /><span class="font-medium text-brand-700">@Model.Note</span></div>
-                    }
-                </div>
-            </div>
-
-            <!-- Thanh toán -->
-            <div class="bg-white rounded-2xl border border-brand-100 p-6">
-                <h2 class="text-base font-bold text-brand-800 mb-4">Thanh toán</h2>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-brand-400">Phương thức</span>
-                        <span class="font-medium text-brand-700">@(Model.PaymentMethod == "COD" ? "COD" : "Chuyển khoản")</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-brand-400">Trạng thái</span>
-                        <span class="font-medium @statusColor px-2 py-0.5 rounded-full text-xs border inline-flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full @statusDot"></span>
-                            @statusText
-                        </span>
-                    </div>
-                    <hr class="border-brand-100 my-2" />
-                    <div class="flex justify-between">
-                        <span class="font-semibold text-brand-800">Tổng tiền</span>
-                        <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
-                    </div>
-                </div>
-            </div>
-
-            @if (Model.OrderStatusHistories.Count > 0)
-            {
-                <!-- Lịch sử -->
-                <div class="bg-white rounded-2xl border border-brand-100 p-6">
-                    <h2 class="text-base font-bold text-brand-800 mb-4">Lịch sử</h2>
-                    <div class="space-y-3">
-                        @foreach (var history in Model.OrderStatusHistories)
-                        {
-                            var hStatusText = history.Status switch
-                            {
-                                "Pending" => "Đặt hàng",
-                                "WaitingPayment" => "Chờ thanh toán",
-                                "Confirmed" => "Đã xác nhận",
-                                "Cancelled" => "Đã hủy",
-                                _ => history.Status
-                            };
-                            <div class="flex items-start gap-3 text-sm">
-                                <div class="w-6 flex flex-col items-center mt-0.5">
-                                    <div class="w-3 h-3 rounded-full bg-brand-200"></div>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-brand-700">@hStatusText</p>
-                                    <p class="text-xs text-brand-400">@history.ChangedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
-                                    @if (!string.IsNullOrEmpty(history.Reason))
-                                    {
-                                        <p class="text-xs text-brand-500 mt-0.5">@history.Reason</p>
-                                    }
-                                </div>
+                            <p class="text-sm font-semibold text-brand-800 flex-shrink-0">@((item.UnitPrice *
+                                                            item.Quantity).ToString("#,###"))₫</p>
                             </div>
                         }
                     </div>
                 </div>
-            }
+            </div>
 
-            <!-- Hành động -->
-            @if (Model.Status == "WaitingPayment")
-            {
-                <a asp-action="Payment" asp-route-id="@Model.Id"
-                   class="block w-full text-center bg-orange-500 text-white py-3 rounded-xl font-bold text-sm hover:bg-orange-600 transition-all duration-200">
-                    Tiếp tục thanh toán
-                </a>
-            }
-            <a asp-action="History"
-               class="block w-full text-center py-3 border border-brand-200 text-brand-600 rounded-xl font-semibold text-sm hover:bg-brand-50 transition-all duration-200">
-                ← Quay lại đơn hàng
-            </a>
-        </div>
-    </div>
-</div>
+            <!-- RIGHT: Thông tin -->
+            <div class="space-y-4">
+                <!-- Thông tin giao hàng -->
+                <div class="bg-white rounded-2xl border border-brand-100 p-6">
+                    <h2 class="text-base font-bold text-brand-800 mb-4">Thông tin giao hàng</h2>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-brand-400">Người nhận:</span><br /><span
+                            class="font-medium text-brand-700">@Model.FullName</span></div>
+                            <div><span class="text-brand-400">SĐT:</span><br /><span
+                                class="font-medium text-brand-700">@Model.Phone</span></div>
+                                <div><span class="text-brand-400">Địa chỉ:</span><br /><span
+                                    class="font-medium text-brand-700">@Model.Address</span></div>
+                                    @if (!string.IsNullOrEmpty(Model.Note))
+                                    {
+                                        <div><span class="text-brand-400">Ghi chú:</span><br /><span
+                                            class="font-medium text-brand-700">@Model.Note</span></div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Thanh toán -->
+                                <div class="bg-white rounded-2xl border border-brand-100 p-6">
+                                    <h2 class="text-base font-bold text-brand-800 mb-4">Thanh toán</h2>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-brand-400">Phương thức</span>
+                                            <span class="font-medium text-brand-700">@(Model.PaymentMethod == "COD" ? "COD" : "Chuyển khoản")</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-brand-400">Trạng thái</span>
+                                            <span
+                                                class="font-medium @statusColor px-2 py-0.5 rounded-full text-xs border inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full @statusDot"></span>
+                                                @statusText
+                                            </span>
+                                        </div>
+                                        <hr class="border-brand-100 my-2" />
+                                        <div class="flex justify-between">
+                                            <span class="font-semibold text-brand-800">Tổng tiền</span>
+                                            <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (Model.OrderStatusHistories.Count > 0)
+                                {
+                                    <!-- Lịch sử -->
+                                    <div class="bg-white rounded-2xl border border-brand-100 p-6">
+                                        <h2 class="text-base font-bold text-brand-800 mb-4">Lịch sử</h2>
+                                        <div class="space-y-3">
+                                            @foreach (var history in Model.OrderStatusHistories)
+                                            {
+                                                var hStatusText = history.Status switch
+                                                {
+                                                    "Pending" => "Đặt hàng",
+                                                    "WaitingPayment" => "Chờ thanh toán",
+                                                    "Confirmed" => "Đã xác nhận",
+                                                    "Cancelled" => "Đã hủy",
+                                                    _ => history.Status
+                                                };
+                                                <div class="flex items-start gap-3 text-sm">
+                                                    <div class="w-6 flex flex-col items-center mt-0.5">
+                                                        <div class="w-3 h-3 rounded-full bg-brand-200"></div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-brand-700">@hStatusText</p>
+                                                        <p class="text-xs text-brand-400">@history.ChangedAtUtc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                                                        @if (!string.IsNullOrEmpty(history.Reason))
+                                                        {
+                                                            <p class="text-xs text-brand-500 mt-0.5">@history.Reason</p>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Hành động -->
+                                @if (Model.Status == "WaitingPayment")
+                                {
+                                    <a asp-action="Payment" asp-route-id="@Model.Id"
+                                       class="block w-full text-center bg-orange-500 text-white py-3 rounded-xl font-bold text-sm hover:bg-orange-600 transition-all duration-200">
+                                        Tiếp tục thanh toán
+                                    </a>
+                                }
+                                <a asp-action="History"
+                                   class="block w-full text-center py-3 border border-brand-200 text-brand-600 rounded-xl font-semibold text-sm hover:bg-brand-50 transition-all duration-200">
+                                    ← Quay lại đơn hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>

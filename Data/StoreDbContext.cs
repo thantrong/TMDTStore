@@ -461,7 +461,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasColumnName("product_id");
             entity.Property(e => e.Rating).HasColumnName("rating");
             entity.Property(e => e.UserId)
-                .HasMaxLength(20)
+                .HasMaxLength(450)
                 .HasColumnName("user_id");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
