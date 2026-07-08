@@ -125,7 +125,7 @@ public class ProductController : Controller
                 .Include(p => p.Brand)
                 .Include(p => p.Inventory)
                 .Include(p => p.ProductBadges)
-                .Include(p => p.Reviews)
+                .Include(p => p.Reviews.Where(r => r.ParentId == null)).ThenInclude(r => r.User)
                 .Include(p => p.ProductVariants.OrderBy(v => v.Price))
                 .FirstOrDefaultAsync(p => p.Slug == slug && p.IsActive == true);
         }
@@ -136,7 +136,7 @@ public class ProductController : Controller
                 .Include(p => p.Brand)
                 .Include(p => p.Inventory)
                 .Include(p => p.ProductBadges)
-                .Include(p => p.Reviews)
+                .Include(p => p.Reviews.Where(r => r.ParentId == null)).ThenInclude(r => r.User)
                 .Include(p => p.ProductVariants.OrderBy(v => v.Price))
                 .FirstOrDefaultAsync(p => p.Id == id && p.IsActive == true);
         }
