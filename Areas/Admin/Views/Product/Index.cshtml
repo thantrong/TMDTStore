@@ -200,4 +200,34 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    @{
+        var prodTotalPages = (int)Math.Ceiling((double)Model.TotalItems / Model.PageSize);
+    }
+    @if (prodTotalPages > 1)
+    {
+        <div class="flex items-center justify-between px-5 py-4 border-t border-admin-100 bg-admin-50/50">
+            <p class="text-sm text-admin-500">
+                Hiển thị @(Math.Min(Model.TotalItems, (Model.Page - 1) * Model.PageSize + 1))–@(Math.Min(Model.TotalItems, Model.Page * Model.PageSize))
+                trên tổng số @Model.TotalItems sản phẩm
+            </p>
+            <div class="flex items-center gap-1.5">
+                @for (int i = 1; i <= prodTotalPages; i++)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-searchQuery="@Model.SearchQuery"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-brandName="@Model.BrandName"
+                       class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer
+                              @(i == Model.Page
+                                  ? "bg-brand-600 text-white shadow-md"
+                                  : "bg-white text-admin-600 hover:bg-brand-50 border border-admin-200")">
+                       @i
+                    </a>
+                }
+            </div>
+        </div>
+    }
 </div>

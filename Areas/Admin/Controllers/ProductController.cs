@@ -56,7 +56,14 @@ public class ProductController : Controller
         {
             query = query.Where(p => p.Price.HasValue && p.Price.Value <= model.MaxPrice.Value);
         }
-        model.Products = await query.ToListAsync();
+
+        model.TotalItems = await query.CountAsync();
+        model.Products = await query
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((model.Page - 1) * model.PageSize)
+            .Take(model.PageSize)
+            .ToListAsync();
+
         return View(model);
     }
 

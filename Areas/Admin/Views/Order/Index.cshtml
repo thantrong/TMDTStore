@@ -1,0 +1,179 @@
+@model TMDTStore.Models.ViewModels.Order.OrderListViewModel
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+
+    var statuses = new[] {
+        ("", "Tất cả"),
+        ("Pending", "Chờ xử lý"),
+        ("WaitingPayment", "Chờ thanh toán"),
+        ("Confirmed", "Đã xác nhận"),
+        ("Shipping", "Đang giao"),
+        ("Delivered", "Đã giao"),
+        ("Cancelled", "Đã huỷ")
+    };
+}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-admin-800">Đơn hàng</h1>
+        <p class="text-sm text-admin-500 mt-1">Quản lý tất cả đơn hàng trong cửa hàng</p>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 mb-6">
+    <form method="get" class="flex flex-wrap items-end gap-3">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-xs font-medium text-admin-500 mb-1">Tìm kiếm</label>
+            <input type="text" name="SearchQuery" value="@Model.SearchQuery"
+                   class="w-full px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                   placeholder="Tên khách hàng, SĐT, mã đơn..." />
+        </div>
+        <div class="w-44">
+            <label class="block text-xs font-medium text-admin-500 mb-1">Trạng thái</label>
+            <select name="StatusFilter"
+                    class="w-full px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition">
+                @foreach (var (val, label) in statuses)
+                {
+                    <option value="@val" selected="@(Model.StatusFilter == val || (string.IsNullOrEmpty(Model.StatusFilter) && string.IsNullOrEmpty(val)))">@label</option>
+                }
+            </select>
+        </div>
+        <button type="submit"
+                class="px-4 py-2 bg-admin-800 text-white rounded-lg text-sm font-semibold hover:bg-admin-700 transition-all duration-200 cursor-pointer">
+            Lọc
+        </button>
+        <a asp-action="Index"
+           class="px-4 py-2 border border-admin-200 text-admin-600 rounded-lg text-sm font-semibold hover:bg-admin-50 transition-all duration-200 cursor-pointer">
+            Xoá lọc
+        </a>
+    </form>
+</div>
+
+<!-- Orders Table -->
+<div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-admin-50 border-b border-admin-200">
+                <tr>
+                    <th class="text-left px-4 py-3 font-semibold text-admin-600">Mã đơn</th>
+                    <th class="text-left px-4 py-3 font-semibold text-admin-600">Khách hàng</th>
+                    <th class="text-left px-4 py-3 font-semibold text-admin-600">SĐT</th>
+                    <th class="text-right px-4 py-3 font-semibold text-admin-600">Tổng tiền</th>
+                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Phương thức</th>
+                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Trạng thái</th>
+                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Ngày đặt</th>
+                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-admin-100">
+                @if (Model.Orders.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-admin-400">Chưa có đơn hàng nào.</td>
+                    </tr>
+                }
+                @foreach (var order in Model.Orders)
+                {
+                    <tr class="hover:bg-admin-50 transition-colors">
+                        <td class="px-4 py-3">
+                            <span class="font-mono text-xs font-medium text-admin-700">@order.Id</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div>
+                                <p class="font-medium text-admin-800">@order.FullName</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-admin-600">@order.Phone</td>
+                        <td class="px-4 py-3 text-right font-semibold text-admin-800">@order.TotalPrice.ToString("#,###")₫</td>
+                        <td class="px-4 py-3 text-center">
+                            @if (order.PaymentMethod == "Banking")
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                    Chuyển khoản
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    COD
+                                </span>
+                            }
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            @{
+                                var statusColors = new Dictionary<string, string>
+                                {
+                                    { "Pending", "bg-gray-50 text-gray-700" },
+                                    { "WaitingPayment", "bg-yellow-50 text-yellow-700" },
+                                    { "Confirmed", "bg-blue-50 text-blue-700" },
+                                    { "Shipping", "bg-purple-50 text-purple-700" },
+                                    { "Delivered", "bg-emerald-50 text-emerald-700" },
+                                    { "Cancelled", "bg-red-50 text-red-700" }
+                                };
+                                var statusLabels = new Dictionary<string, string>
+                                {
+                                    { "Pending", "Chờ xử lý" },
+                                    { "WaitingPayment", "Chờ thanh toán" },
+                                    { "Confirmed", "Đã xác nhận" },
+                                    { "Shipping", "Đang giao" },
+                                    { "Delivered", "Đã giao" },
+                                    { "Cancelled", "Đã huỷ" }
+                                };
+                                var sc = statusColors.ContainsKey(order.Status) ? statusColors[order.Status] : "bg-gray-50 text-gray-700";
+                                var sl = statusLabels.ContainsKey(order.Status) ? statusLabels[order.Status] : order.Status;
+                            }
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium @sc">
+                                @sl
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-center text-admin-500 text-xs">
+                            @order.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <a asp-action="Details" asp-route-id="@order.Id"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-brand-600 hover:text-white bg-brand-50 hover:bg-brand-600 rounded-lg transition-all duration-200 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="flex items-center justify-between px-5 py-4 border-t border-admin-100 bg-admin-50/50">
+            <p class="text-sm text-admin-500">
+                Hiển thị @(Math.Min(Model.TotalItems, (Model.Page - 1) * Model.PageSize + 1))–@(Math.Min(Model.TotalItems, Model.Page * Model.PageSize))
+                trên tổng số @Model.TotalItems đơn hàng
+            </p>
+            <div class="flex items-center gap-1.5">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-searchQuery="@Model.SearchQuery"
+                       asp-route-statusFilter="@Model.StatusFilter"
+                       class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer
+                              @(i == Model.Page
+                                  ? "bg-brand-600 text-white shadow-md"
+                                  : "bg-white text-admin-600 hover:bg-brand-50 border border-admin-200")">
+                       @i
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>

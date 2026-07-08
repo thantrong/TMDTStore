@@ -129,8 +129,7 @@
         <!-- Stock -->
         @if (hasStockInfo)
         {
-            <div
-                class="mt-1.5 text-xs @(totalStock > 0 ? "text-emerald-600" : "text-red-400")">
+            <div class="mt-1.5 text-xs @(totalStock > 0 ? "text-emerald-600" : "text-red-400")">
                 @(totalStock > 0 ? "Còn " + totalStock + " sản phẩm" : "Hết hàng")
             </div>
         }
