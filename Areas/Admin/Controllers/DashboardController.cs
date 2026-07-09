@@ -25,20 +25,22 @@ public class DashboardController : Controller
         var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var sevenDaysAgo = todayStart.AddDays(-6);
 
-        // ==== Chạy song song các query độc lập ====
-        var totalProductsTask = _context.Products.CountAsync();
-        var totalOrdersTask = _context.Orders.CountAsync();
-        var totalUsersTask = _context.Users.CountAsync();
-        var pendingOrdersTask = _context.Orders.CountAsync(o =>
+        // ---- Chạy tuần tự (DbContext không thread-safe) ----
+
+        // Các Count đơn giản
+        var totalProducts = await _context.Products.CountAsync();
+        var totalOrders = await _context.Orders.CountAsync();
+        var totalUsers = await _context.Users.CountAsync();
+        var pendingOrders = await _context.Orders.CountAsync(o =>
             o.Status == "Pending" || o.Status == "WaitingPayment");
 
-        var lowStockTask = _context.ProductVariants
+        var lowStockVariants = await _context.ProductVariants
             .CountAsync(v => v.StockQuantity > 0 && v.StockQuantity <= 5 && v.IsActive);
-        var outOfStockTask = _context.ProductVariants
+        var outOfStock = await _context.ProductVariants
             .CountAsync(v => v.StockQuantity <= 0 && v.IsActive);
 
-        // 1 query lấy đơn 7 ngày gần nhất — tính toán mọi thứ từ memory
-        var recentOrdersTask = _context.Orders
+        // 1 query lấy đơn 7 ngày gần nhất
+        var allRecentOrders = await _context.Orders
             .Where(o => o.CreatedAt >= sevenDaysAgo)
             .Select(o => new
             {
@@ -54,14 +56,14 @@ public class DashboardController : Controller
             .ToListAsync();
 
         // Thống kê trạng thái cho đơn cũ hơn 7 ngày
-        var olderStatusesTask = _context.Orders
+        var olderStatuses = await _context.Orders
             .Where(o => o.CreatedAt < sevenDaysAgo)
             .GroupBy(o => o.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync();
 
         // Top sản phẩm bán chạy
-        var topProductsTask = _context.OrderItems
+        var topProducts = await _context.OrderItems
             .GroupBy(oi => new { oi.ProductId, oi.Name, oi.ImageUrl })
             .Select(g => new
             {
@@ -75,29 +77,11 @@ public class DashboardController : Controller
             .ToListAsync();
 
         // Đơn chờ xử lý
-        var waitingOrdersTask = _context.Orders
+        var waitingOrders = await _context.Orders
             .Where(o => o.Status == "Pending" || o.Status == "WaitingPayment")
             .OrderByDescending(o => o.CreatedAt)
             .Take(5)
             .ToListAsync();
-
-        await Task.WhenAll(
-            totalProductsTask, totalOrdersTask, totalUsersTask, pendingOrdersTask,
-            lowStockTask, outOfStockTask, recentOrdersTask, olderStatusesTask,
-            topProductsTask, waitingOrdersTask
-        );
-
-        // ---- Lấy kết quả ----
-        var totalProducts = totalProductsTask.Result;
-        var totalOrders = totalOrdersTask.Result;
-        var totalUsers = totalUsersTask.Result;
-        var pendingOrders = pendingOrdersTask.Result;
-        var lowStockVariants = lowStockTask.Result;
-        var outOfStock = outOfStockTask.Result;
-        var allRecentOrders = recentOrdersTask.Result;
-        var olderStatuses = olderStatusesTask.Result;
-        var topProducts = topProductsTask.Result;
-        var waitingOrders = waitingOrdersTask.Result;
 
         // ---- Tính toán trên memory (0 query thêm) ----
 

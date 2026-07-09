@@ -20,21 +20,21 @@ public class HomeController : Controller
     [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> Index()
     {
-        // Chạy song song các query độc lập
-        var categoriesTask = _context.Categories
+        // Categories + Brands — chạy tuần tự (DbContext không thread-safe)
+        var categories = await _context.Categories
             .Where(c => c.ParentId == null)
             .Include(c => c.InverseParent)
             .OrderBy(c => c.Name)
             .Take(6)
             .ToListAsync();
 
-        var brandsTask = _context.Brands
+        var brands = await _context.Brands
             .Where(b => b.IsActive == true)
             .OrderBy(b => b.Name)
             .ToListAsync();
 
         // 1 query duy nhất lấy sản phẩm — dùng AsSplitQuery chống Cartesian Explosion
-        var allProductsTask = _context.Products
+        var allProducts = await _context.Products
             .AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.ProductBadges)
@@ -43,21 +43,17 @@ public class HomeController : Controller
             .ToListAsync();
 
         // 1 query nhẹ tính doanh số thực cho BestSellers
-        var salesTask = _context.OrderItems
+        var salesData = await _context.OrderItems
             .GroupBy(oi => oi.ProductId)
             .Select(g => new { ProductId = g.Key, TotalSold = g.Sum(oi => oi.Quantity) })
             .ToListAsync();
 
-        await Task.WhenAll(categoriesTask, brandsTask, allProductsTask, salesTask);
-
-        var allProducts = allProductsTask.Result;
-        var salesData = salesTask.Result
-            .ToDictionary(x => x.ProductId, x => x.TotalSold);
+        var salesDict = salesData.ToDictionary(x => x.ProductId, x => x.TotalSold);
 
         var model = new HomeViewModel
         {
-            Categories = categoriesTask.Result,
-            Brands = brandsTask.Result,
+            Categories = categories,
+            Brands = brands,
 
             // Sản phẩm nổi bật — top 8 theo RatingAvg
             FeaturedProducts = allProducts
@@ -73,7 +69,7 @@ public class HomeController : Controller
 
             // Bán chạy — top 8 theo doanh số thực (từ OrderItems)
             BestSellers = allProducts
-                .OrderByDescending(p => salesData.GetValueOrDefault(p.Id, 0))
+                .OrderByDescending(p => salesDict.GetValueOrDefault(p.Id, 0))
                 .Take(8)
                 .ToList(),
         };
