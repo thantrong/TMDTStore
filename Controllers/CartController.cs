@@ -51,6 +51,16 @@ public class CartController : Controller
         return RedirectToAction("Index");
     }
 
+    // POST: /Cart/BuyNow
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult BuyNow(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, decimal? listPrice, int quantity, int maxQuantity)
+    {
+        if (quantity <= 0) quantity = 1;
+        _cart.AddItem(productId, variantId, name, variantName, imageUrl, price, listPrice, quantity, maxQuantity);
+        return RedirectToAction("Index", "Checkout");
+    }
+
     // POST: /Cart/Clear
     [HttpPost]
     [ValidateAntiForgeryToken]

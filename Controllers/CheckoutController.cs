@@ -177,9 +177,10 @@ public class CheckoutController : Controller
             }
         }
 
+        var orderId = await GenerateOrderIdAsync();
         var order = new Order
         {
-            Id = null!,
+            Id = orderId,
             UserId = user?.Id,
             FullName = fullName,
             Phone = phone,
@@ -311,5 +312,22 @@ public class CheckoutController : Controller
         TempData["ToastType"] = "success";
         TempData["ToastMessage"] = "Đặt hàng thành công!";
         return RedirectToAction("Success", "Order", new { id = order.Id });
+    }
+
+    private async Task<string> GenerateOrderIdAsync()
+    {
+        // Tạo ID dạng ORD_ + timestamp (yyMMddHHmmss) + 3 số ngẫu nhiên
+        // Đảm bảo unique, không phụ thuộc DB sequence
+        const string prefix = "ORD_";
+        while (true)
+        {
+            var ts = DateTime.Now.ToString("yyMMddHHmmss");
+            var rand = Random.Shared.Next(1, 999).ToString("D3");
+            var id = prefix + ts + rand;
+
+            // Kiểm tra trùng trong DB
+            var exists = await _context.Orders.AnyAsync(o => o.Id == id);
+            if (!exists) return id;
+        }
     }
 }

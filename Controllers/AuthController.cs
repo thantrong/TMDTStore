@@ -83,8 +83,15 @@ public class AuthController : Controller
             try
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(NewUser);
+                // Tạo link xác nhận hoạt động cho cả local development và production
                 var confirmLink = Url.Action("ConfirmEmail", "Auth",
                     new { userId = NewUser.Id, token }, Request.Scheme);
+
+                // Nếu đang chạy local, sử dụng localhost:5001
+                if (Request.Scheme == "http" && Request.Host.Value.Contains("localhost"))
+                {
+                    confirmLink = $"http://localhost:5001/Auth/ConfirmEmail?userId={NewUser.Id}&token={token}";
+                }
 
                 await _emailService.SendEmailAsync(
                     model.Email,
@@ -99,7 +106,15 @@ public class AuthController : Controller
                     $"<p>Link này hết hạn sau 24 giờ.</p>" +
                     $"<p>Nếu bạn không đăng ký, vui lòng bỏ qua email này.</p>");
             }
-            catch { /* Email không gửi được không ảnh hưởng đến đăng ký */ }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi gửi email nhưng không ảnh hưởng đến đăng ký
+                System.Diagnostics.Debug.WriteLine($"Lỗi gửi email xác nhận: {ex.Message}");
+                // Hiển thị thông báo cho người dùng
+                TempData["ToastType"] = "warning";
+                TempData["ToastMessage"] = "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản. Nếu không nhận được email, vui lòng liên hệ hỗ trợ.";
+                return RedirectToAction("Login", "Auth", new { area = "" });
+            }
 
             TempData["ToastType"] = "success";
             TempData["ToastMessage"] = "Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.";
