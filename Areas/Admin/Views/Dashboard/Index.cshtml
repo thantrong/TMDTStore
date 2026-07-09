@@ -265,7 +265,7 @@
                         <div class="w-10 h-10 rounded-lg bg-admin-100 overflow-hidden flex-shrink-0 border border-admin-200">
                             @if (!string.IsNullOrEmpty(p.ImageUrl))
                             {
-                                <img src="@p.ImageUrl" alt="" class="w-full h-full object-cover" />
+                                <img src="@p.ImageUrl" alt="" loading="lazy" class="w-full h-full object-cover" />
                             }
                             else
                             {

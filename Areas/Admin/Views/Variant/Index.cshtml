@@ -71,7 +71,7 @@
                         <div class="flex items-center gap-3">
                             @if (!string.IsNullOrEmpty(variant.ImageUrl))
                             {
-                                <img src="@variant.ImageUrl" alt="" class="w-8 h-8 rounded object-cover" />
+                                <img src="@variant.ImageUrl" alt="" loading="lazy" class="w-8 h-8 rounded object-cover" />
                             }
                             <span class="font-medium text-admin-800">@variant.Name</span>
                         </div>

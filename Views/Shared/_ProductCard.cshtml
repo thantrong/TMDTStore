@@ -31,7 +31,7 @@
     <div class="aspect-square bg-brand-50 overflow-hidden relative">
         @if (!string.IsNullOrEmpty(Model.ImageUrl))
         {
-            <img src="@Model.ImageUrl" alt="@Model.Name"
+            <img src="@Model.ImageUrl" alt="@Model.Name" loading="lazy"
                  class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 @(isOutOfStock ? "opacity-40" : "")" />
         }
         else if (hasVariantsLoaded && Model.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
@@ -39,7 +39,7 @@
             var cheapest = Model.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v =>
         v.Price).First();
             var firstImg = cheapest.ImageUrl;
-            <img src="@firstImg" alt="@Model.Name"
+            <img src="@firstImg" alt="@Model.Name" loading="lazy"
                  class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300 @(isOutOfStock ? "opacity-40" : "")" />
         }
         else

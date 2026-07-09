@@ -118,7 +118,7 @@
                                 class="w-14 h-14 rounded-lg bg-brand-50 overflow-hidden flex-shrink-0 border border-brand-100">
                                 @if (!string.IsNullOrEmpty(item.ImageUrl))
                                 {
-                                    <img src="@item.ImageUrl" alt="" class="w-full h-full object-cover" />
+                                    <img src="@item.ImageUrl" alt="" loading="lazy" class="w-full h-full object-cover" />
                                 }
                             </div>
                             <div class="flex-1 min-w-0">

@@ -86,7 +86,7 @@
                     {
                         <button type="button" data-index="@i"
                                 class="slide-thumb w-14 h-14 rounded-lg overflow-hidden border border-admin-200 flex-shrink-0 @(i == 0 ? "ring-2 ring-brand-500" : "") hover:ring-2 hover:ring-brand-300 transition-all cursor-pointer">
-                            <img src="@imageList[i]" alt="" class="w-full h-full object-cover" />
+                            <img src="@imageList[i]" alt="" loading="lazy" class="w-full h-full object-cover" />
                         </button>
                     }
                 </div>
@@ -498,7 +498,7 @@
                                 <div class="flex items-center gap-3 p-3 bg-white cursor-pointer hover:bg-admin-50 transition-colors" onclick="toggleVariantDesc('@variant.Id')">
                                     @if (!string.IsNullOrEmpty(variant.ImageUrl))
                                     {
-                                        <img src="@variant.ImageUrl" alt="" class="w-10 h-10 rounded-lg object-cover border border-admin-100" />
+                                        <img src="@variant.ImageUrl" alt="" loading="lazy" class="w-10 h-10 rounded-lg object-cover border border-admin-100" />
                                     }
                                     else
                                     {

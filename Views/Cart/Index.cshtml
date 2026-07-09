@@ -67,7 +67,7 @@
                                    class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-brand-50 overflow-hidden flex-shrink-0 border border-brand-100">
                                     @if (!string.IsNullOrEmpty(item.ImageUrl))
                                     {
-                                        <img src="@item.ImageUrl" alt="@item.Name" class="w-full h-full object-cover" />
+                                        <img src="@item.ImageUrl" alt="@item.Name" loading="lazy" class="w-full h-full object-cover" />
                                     }
                                     else
                                     {
