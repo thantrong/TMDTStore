@@ -32,7 +32,11 @@ builder.Services.AddIdentity<User, Role>()
 
 var emailSetting = builder.Configuration.GetSection("EmailSettings").Get<EmailSetting>()
     ?? throw new InvalidOperationException("EmailSettings not configured");
-builder.Services.AddSingleton<IEmailService>(new EmailService(emailSetting));
+builder.Services.AddSingleton(emailSetting);
+builder.Services.AddHttpClient<IEmailService, EmailService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
 
 builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
