@@ -118,6 +118,31 @@ public class BrandController : Controller
         return View(brand);
     }
 
+    // POST: /Admin/Brand/Delete/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var brand = await _context.Brands
+            .Include(b => b.Products)
+            .FirstOrDefaultAsync(b => b.Id == id);
+        if (brand == null) return NotFound();
+
+        if (brand.Products.Count > 0)
+        {
+            TempData["ToastType"] = "error";
+            TempData["ToastMessage"] = "Không thể xoá thương hiệu này vì còn sản phẩm.";
+            return RedirectToAction("Index");
+        }
+
+        _context.Brands.Remove(brand);
+        await _context.SaveChangesAsync();
+
+        TempData["ToastType"] = "success";
+        TempData["ToastMessage"] = "Thương hiệu đã được xoá.";
+        return RedirectToAction("Index");
+    }
+
     // POST: /Admin/Brand/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]

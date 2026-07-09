@@ -3,7 +3,7 @@ namespace TMDTStore.Models.ViewModels.Product;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using TMDTStore.Models;
-public class ProductCreatViewModels
+public class ProductCreateViewModels
 {
     [Required(ErrorMessage = "Vui lòng nhập tên sản phẩm.")]
     [StringLength(200, ErrorMessage = "Tên sản phẩm không được vượt quá 200 ký tự.")]

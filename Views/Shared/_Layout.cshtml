@@ -62,7 +62,7 @@
     <!-- ====== HEADER ====== -->
     <header class="sticky top-0 z-50 pt-2 px-2 sm:px-4">
         <nav
-            class="max-w-screen-2xl mx-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 px-4 sm:px-6 lg:px-10 xl:px-16">
+            class="max-w-[1800px] mx-auto bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 px-4 sm:px-6 lg:px-8 xl:px-10">
             <div class="flex items-center justify-between h-16 lg:h-20">
 
                 <!-- Logo -->
@@ -330,7 +330,7 @@
                             </svg>
                             Đổi mật khẩu
                         </a>
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
                         {
                             <a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-brand-700 hover:text-brand-600 hover:bg-brand-50 font-medium transition-colors duration-150 cursor-pointer"
                                asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
@@ -342,16 +342,14 @@
                                 Quản trị
                             </a>
                         }
-                        <form asp-controller="Auth" asp-action="Logout" method="post">
-                            <button type="submit"
-                                    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors duration-150 cursor-pointer">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                                Đăng xuất
-                            </button>
-                        </form>
+                        <a asp-controller="Auth" asp-action="Logout"
+                           class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors duration-150 cursor-pointer">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Đăng xuất
+                        </a>
                     }
                     else
                     {
@@ -379,14 +377,14 @@
         </header>
 
         <!-- ====== MAIN CONTENT ====== -->
-        <main class="flex-1 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-10">
+        <main class="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8 lg:py-10">
             @RenderBody()
         </main>
 
         <!-- ====== FOOTER ====== -->
         <footer class="bg-brand-900 text-slate-300">
             <!-- Main footer -->
-            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 lg:py-16">
+            <div class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-12 lg:py-16">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
 
                     <!-- Column 1: About -->
@@ -543,7 +541,7 @@
                                             <!-- Bottom bar -->
                                             <div class="border-t border-brand-800">
                                                 <div
-                                                    class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                                    class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
                                                     <p class="text-brand-400 text-xs text-center sm:text-left">
                                                         &copy; 2026 TVT PC. All rights reserved. GPĐKKD số 0123456789 do Sở KH&ĐT TP.HCM cấp.
                                                     </p>

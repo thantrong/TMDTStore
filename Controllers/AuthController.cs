@@ -149,8 +149,7 @@ public class AuthController : Controller
         return RedirectToAction("Login");
     }
 
-    [HttpPost]
-    [IgnoreAntiforgeryToken]
+    [HttpGet]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
@@ -159,18 +158,12 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Home", new { area = "" });
     }
 
-    [HttpGet]
-    public IActionResult LogoutGet()
-    {
-        return RedirectToAction("Login", "Auth", new { area = "" });
-    }
-
     public IActionResult ForgotPassword() => View();
     [HttpPost]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModels model)
     {
         if (!ModelState.IsValid) return View(model);
-        var CheckUser = _userManager.FindByEmailAsync(model.Email).Result;
+        var CheckUser = await _userManager.FindByEmailAsync(model.Email);
         if (CheckUser != null)
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(CheckUser);

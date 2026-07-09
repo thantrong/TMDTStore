@@ -72,7 +72,7 @@ public class ProductController : Controller
     [Authorize(Roles = "Admin")] // Chỉ Admin
     public async Task<IActionResult> Create()
     {
-        var model = new ProductCreatViewModels
+        var model = new ProductCreateViewModels
         {
             Categories = await _context.Categories.ToListAsync(),
             Brands = await _context.Brands.ToListAsync(),
@@ -105,7 +105,7 @@ public class ProductController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(ProductCreatViewModels model)
+    public async Task<IActionResult> Create(ProductCreateViewModels model)
     {
         if (!ModelState.IsValid)
         {
