@@ -165,9 +165,14 @@ public class AuthController : Controller
     }
 
     [HttpGet]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
+        HttpContext.Session.Clear();
+        Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+        Response.Headers["Pragma"] = "no-cache";
+        Response.Headers["Expires"] = "0";
         TempData["ToastType"] = "info";
         TempData["ToastMessage"] = "Bạn đã đăng xuất thành công.";
         return RedirectToAction("Index", "Home", new { area = "" });
