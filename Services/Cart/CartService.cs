@@ -18,6 +18,7 @@ public class CartService : ICartService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private const string SessionKey = "Cart";
+    private const string CartCountKey = "CartCount";
 
     public CartService(IHttpContextAccessor httpContextAccessor)
     {
@@ -38,6 +39,7 @@ public class CartService : ICartService
     private void SaveCart(List<CartItem> items)
     {
         Session.SetString(SessionKey, JsonSerializer.Serialize(items));
+        Session.SetInt32(CartCountKey, items.Sum(i => i.Quantity));
     }
 
     public CartItem? AddItem(string productId, string? variantId, string name, string? variantName, string? imageUrl, decimal price, decimal? listPrice, int quantity, int maxQuantity)
@@ -102,7 +104,7 @@ public class CartService : ICartService
 
     public int GetCartCount()
     {
-        return GetCart().Sum(i => i.Quantity);
+        return Session.GetInt32(CartCountKey) ?? 0;
     }
 
     public decimal GetCartTotal()
@@ -113,5 +115,6 @@ public class CartService : ICartService
     public void Clear()
     {
         Session.Remove(SessionKey);
+        Session.Remove(CartCountKey);
     }
 }
