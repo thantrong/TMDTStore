@@ -1,0 +1,215 @@
+@model List<TMDTStore.Models.Review>
+@{
+    ViewData["Title"] = "Quản lý đánh giá";
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var search = ViewBag.Search as string ?? "";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-admin-800">Quản lý đánh giá</h1>
+            <p class="text-sm text-admin-500 mt-1">Xem và phản hồi đánh giá sản phẩm</p>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white rounded-2xl border border-admin-200 p-4 mb-6">
+        <form method="get" class="flex gap-3">
+            <div class="flex-1">
+                <input type="text" name="search" value="@search"
+                       class="w-full px-4 py-2.5 border border-admin-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                       placeholder="Tìm kiếm theo nội dung, tên người dùng, tên sản phẩm..." />
+            </div>
+            <button type="submit"
+                    class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-all duration-200 cursor-pointer">
+                Tìm kiếm
+            </button>
+            @if (!string.IsNullOrEmpty(search))
+            {
+                <a asp-action="Index"
+                   class="px-5 py-2.5 border border-admin-300 text-admin-600 rounded-xl text-sm font-semibold hover:bg-admin-50 transition-all duration-200 inline-flex items-center">
+                    Xoá lọc
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Review List -->
+    @if (Model.Count == 0)
+    {
+        <div class="bg-white rounded-2xl border border-admin-200 p-12 text-center">
+            <svg class="w-16 h-16 mx-auto text-admin-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <p class="text-admin-500 font-medium">Chưa có đánh giá nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="space-y-4">
+            @foreach (var review in Model)
+            {
+                <div class="bg-white rounded-2xl border border-admin-200 p-5">
+                    <div class="flex items-start gap-4">
+                        <!-- Avatar -->
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center text-brand-700 font-bold text-sm flex-shrink-0 overflow-hidden">
+                            @if (!string.IsNullOrEmpty(review.User?.AvatarUrl))
+                            {
+                                <img src="@review.User.AvatarUrl" alt="" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                @(review.User?.FullName?[..1].ToUpper() ?? "?")
+                            }
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <!-- Header -->
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <span class="text-sm font-semibold text-admin-800">@(review.User?.FullName ?? "Người dùng")</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 font-medium">@(review.Product?.Name ?? "Đã xoá")</span>
+                                <span class="text-xs text-admin-400">@review.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+
+                            <!-- Rating -->
+                            @if (review.Rating.HasValue)
+                            {
+                                <div class="flex items-center gap-0.5 mt-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <span class="text-base @(i <= review.Rating.Value ? "text-yellow-400" : "text-admin-200")">★</span>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Comment -->
+                            <p class="text-sm text-admin-700 mt-2 leading-relaxed">@review.Comment</p>
+
+                            <!-- Replies -->
+                            @if (review.InverseParent.Any())
+                            {
+                                <div class="mt-3 ml-4 pl-4 border-l-2 border-brand-200 space-y-2">
+                                    @foreach (var reply in review.InverseParent.OrderBy(r => r.CreatedAt))
+                                    {
+                                        <div class="bg-brand-50 rounded-xl p-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs font-semibold text-brand-700">
+                                                    @(reply.User?.FullName ?? "Nhân viên")
+                                                </span>
+                                                @if (reply.IsStaffReply == true)
+                                                {
+                                                    <span class="text-xs px-1.5 py-0.5 rounded bg-brand-600 text-white font-medium">Staff</span>
+                                                }
+                                                <span class="text-xs text-admin-400">@reply.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                                            </div>
+                                            <p class="text-sm text-admin-700 mt-1">@reply.Comment</p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Reply Form -->
+                            <div class="mt-3">
+                                <button type="button"
+                                        class="reply-toggle-btn text-sm text-brand-600 font-semibold hover:text-brand-700 transition-colors cursor-pointer"
+                                        data-target="reply-form-@review.Id">
+                                    Phản hồi
+                                </button>
+
+                                <form id="reply-form-@review.Id" method="post" asp-action="Reply" class="hidden mt-3">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="reviewId" value="@review.Id" />
+                                    <textarea name="comment" rows="2" required
+                                              class="w-full px-4 py-2.5 border border-admin-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                                              placeholder="Nhập phản hồi..."></textarea>
+                                    <div class="flex items-center gap-2 mt-2">
+                                        <button type="submit"
+                                                class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 transition-all duration-200 cursor-pointer">
+                                            Gửi phản hồi
+                                        </button>
+                                        <button type="button"
+                                                class="reply-cancel-btn px-4 py-2 border border-admin-300 text-admin-600 rounded-lg text-sm font-semibold hover:bg-admin-50 transition-all duration-200 cursor-pointer">
+                                            Huỷ
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Delete -->
+                        <form method="post" asp-action="Delete"
+                              onsubmit="return confirm('Xoá đánh giá này? Các phản hồi liên quan cũng sẽ bị xoá.')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@review.Id" />
+                            <button type="submit"
+                                    class="p-2 text-admin-400 hover:text-red-500 transition-colors cursor-pointer"
+                                    title="Xoá đánh giá">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <div class="flex items-center justify-center gap-2 mt-8">
+                @if (currentPage > 1)
+                {
+                    <a asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@search"
+                       class="px-4 py-2 border border-admin-300 rounded-xl text-sm text-admin-600 hover:bg-admin-50 transition-all duration-200">
+                        Trước
+                    </a>
+                }
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <a asp-action="Index" asp-route-page="@i" asp-route-search="@search"
+                       class="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200
+                        @(i == currentPage ? "bg-brand-600 text-white shadow-sm" : "border border-admin-300 text-admin-600 hover:bg-admin-50")">
+                        @i
+                    </a>
+                }
+                @if (currentPage < totalPages)
+                {
+                    <a asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@search"
+                       class="px-4 py-2 border border-admin-300 rounded-xl text-sm text-admin-600 hover:bg-admin-50 transition-all duration-200">
+                        Sau
+                    </a>
+                }
+            </div>
+        }
+    }
+</div>
+
+<script>
+    // Toggle reply form
+    document.querySelectorAll('.reply-toggle-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var targetId = this.getAttribute('data-target');
+            var form = document.getElementById(targetId);
+            if (form) {
+                form.classList.toggle('hidden');
+                if (!form.classList.contains('hidden')) {
+                    form.querySelector('textarea').focus();
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.reply-cancel-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var form = this.closest('form');
+            if (form) {
+                form.classList.add('hidden');
+                form.querySelector('textarea').value = '';
+            }
+        });
+    });
+</script>

@@ -52,7 +52,6 @@ public partial class StoreDbContext : IdentityDbContext<User>
 
         modelBuilder
             .HasPostgresEnum("discount_type", new[] { "fixed", "percentage" })
-            .HasPostgresEnum("order_status", new[] { "pending", "paid", "shipping", "completed", "cancelled_auto", "cancelled_by_user" })
             .HasPostgresExtension("vector");
 
         modelBuilder.Entity<Category>(entity =>
