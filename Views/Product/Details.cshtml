@@ -430,7 +430,7 @@ string>>>(Model.ProductVariants!.First().Attributes) ?? new();
                                     Thêm vào giỏ hàng
                                 </button>
                             </form>
-                            <button
+                            <button type="button" onclick="buyNow(this)"
                                 class="flex-1 bg-orange-500 text-white py-3.5 rounded-xl font-bold text-base hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25 active:scale-[0.98] transition-all duration-200 cursor-pointer">
                                 Mua ngay
                             </button>
@@ -1154,5 +1154,29 @@ string>>>(Model.ProductVariants!.First().Attributes) ?? new();
                             if (specRows.length > 0) {
                                 updateSpecsFromVariant(0);
                             }
+                        }
+
+                        // ====== MUA NGAY (BUY NOW) ======
+                        function buyNow(btn) {
+                            var form = btn.parentElement.querySelector('form');
+                            if (!form) return;
+                            var formData = new FormData(form);
+                            var antiForgery = form.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                            var hiddenForm = document.createElement('form');
+                            hiddenForm.method = 'post';
+                            hiddenForm.action = '/Cart/BuyNow';
+                            hiddenForm.style.display = 'none';
+
+                            formData.forEach(function (value, key) {
+                                var input = document.createElement('input');
+                                input.type = 'hidden';
+                                input.name = key;
+                                input.value = value;
+                                hiddenForm.appendChild(input);
+                            });
+
+                            document.body.appendChild(hiddenForm);
+                            hiddenForm.submit();
                         }
                     </script>

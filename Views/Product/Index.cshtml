@@ -242,39 +242,93 @@
                                 }
 
                                 <!-- Giá -->
-                                <div class="flex items-baseline gap-2">
-                                    <span class="text-lg font-bold text-red-500">
-                                        @(product.Price.HasValue ? product.Price.Value.ToString("#,###") + "₫" : "Liên hệ")
-                                    </span>
-                                    @if (product.Price.HasValue && product.ListPrice > product.Price.Value)
+                                <div class="flex items-baseline gap-2 flex-wrap">
+                                    @if (product.Price.HasValue)
                                     {
-                                        <span class="text-sm text-brand-400 line-through">
-                                            @product.ListPrice?.ToString("#,###")₫
-                                        </span>
+                                        <span class="text-lg font-bold text-red-500">@product.Price.Value.ToString("#,###")₫</span>
+                                        if (product.ListPrice > product.Price.Value)
+                                        {
+                                            <span
+                                            class="text-sm text-brand-400 line-through">@product.ListPrice?.ToString("#,###")₫</span>
+                                        }
                                     }
+                                    else if (product.ProductVariants != null && product.ProductVariants.Count > 0)
+                                    {
+                                        var minPrice = product.ProductVariants.Min(v => v.Price);
+                                        var maxPrice = product.ProductVariants.Max(v => v.Price);
+                                        <span class="text-lg font-bold text-red-500">
+                                            @(minPrice.ToString("#,###"))₫
+                                            @if (maxPrice > minPrice)
+                                            {
+                                                <span class="text-sm font-normal text-brand-400"> -
+                                                    @(maxPrice.ToString("#,###"))₫</span>
+                                                }
+                                            </span>
+                                        }
+                                    else
+                                        {
+                                            <span class="text-lg font-semibold text-brand-400">Liên hệ</span>
+                                        }
+                                    </div>
                                 </div>
+                            </a>
+
+                            <!-- Nút thêm giỏ hàng & Mua ngay -->
+                            <div class="px-4 pb-4 flex gap-2">
+                                @{
+                                    var cartImgUrl = product.ImageUrl;
+                                    if (string.IsNullOrEmpty(cartImgUrl) && product.ProductVariants != null &&
+                        product.ProductVariants.Any(v => !string.IsNullOrEmpty(v.ImageUrl)))
+                                    {
+                                        cartImgUrl = product.ProductVariants.Where(v => !string.IsNullOrEmpty(v.ImageUrl)).OrderBy(v =>
+                        v.Price).First().ImageUrl;
+                                    }
+                                    var cartPrice = product.Price ?? product.ProductVariants?.FirstOrDefault()?.Price ?? 0m;
+                                    var cartListPrice = product.ListPrice ?? product.ProductVariants?.FirstOrDefault()?.ListPrice;
+                                    var cartMaxQty = product.Inventory?.StockQuantity ??
+                        product.ProductVariants?.FirstOrDefault()?.StockQuantity ?? 0;
+                                }
+                                <form asp-controller="Cart" asp-action="Add" method="post" class="flex-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <input type="hidden" name="name" value="@product.Name" />
+                                    <input type="hidden" name="imageUrl" value="@cartImgUrl" />
+                                    <input type="hidden" name="price" value="@cartPrice" />
+                                    <input type="hidden" name="listPrice" value="@cartListPrice" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <input type="hidden" name="maxQuantity" value="@cartMaxQty" />
+                                    <button type="submit"
+                                            class="w-full py-2 bg-brand-600 text-white text-sm font-semibold rounded-lg hover:bg-brand-700 transition-all duration-200 cursor-pointer active:scale-[0.98]">
+                                        Thêm vào giỏ
+                                    </button>
+                                </form>
+                                <form asp-controller="Cart" asp-action="BuyNow" method="post" class="flex-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <input type="hidden" name="name" value="@product.Name" />
+                                    <input type="hidden" name="imageUrl" value="@cartImgUrl" />
+                                    <input type="hidden" name="price" value="@cartPrice" />
+                                    <input type="hidden" name="listPrice" value="@cartListPrice" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <input type="hidden" name="maxQuantity" value="@cartMaxQty" />
+                                    <button type="submit"
+                                            class="w-full py-2 bg-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-orange-600 transition-all duration-200 cursor-pointer active:scale-[0.98]">
+                                        Mua ngay
+                                    </button>
+                                </form>
                             </div>
-                        </a>
-
-                        <!-- Nút thêm giỏ hàng -->
-                        <div class="px-4 pb-4">
-                            <button
-                                class="w-full py-2 bg-brand-600 text-white text-sm font-semibold rounded-lg hover:bg-brand-700 transition-all duration-200 cursor-pointer active:scale-[0.98]">
-                                Thêm vào giỏ
-                            </button>
                         </div>
-                    </div>
-                }
-            </div>
-        }
+                    }
+                </div>
+            }
 
-        <!-- ====== PHÂN TRANG ====== -->
-        @if (Model.PagingInfo.TotalPages > 1)
-        {
-            <div page-model="@Model.PagingInfo" page-action="Index" page-url-category="@Model.CategorySlug"
-                 page-url-sortBy="@Model.SortBy" page-url-searchQuery="@Model.SearchQuery">
-            </div>
-        }
+            <!-- ====== PHÂN TRANG ====== -->
+            @if (Model.PagingInfo.TotalPages > 1)
+            {
+                <div page-model="@Model.PagingInfo" page-action="Index" page-url-category="@Model.CategorySlug"
+                     page-url-sortBy="@Model.SortBy" page-url-searchQuery="@Model.SearchQuery">
+                </div>
+            }
 
+        </div>
     </div>
-</div>
