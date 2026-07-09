@@ -11,6 +11,7 @@
     <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
     rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
     <script>
@@ -121,7 +122,7 @@
                     <button type="button" id="mobile-search-btn"
                             class="sm:hidden p-2 text-brand-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all duration-200 cursor-pointer"
                             aria-label="Mở tìm kiếm"
-                            onclick="document.getElementById('mobile-search').classList.toggle('hidden'); document.getElementById('mobile-search-input').focus();">
+                            onclick="document.getElementById('mobile-menu').classList.remove('hidden'); document.getElementById('mobile-search-input')?.focus();">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -144,7 +145,7 @@
                                 </span>
                                 <span
                                     class="text-sm font-medium max-w-[100px] truncate hidden sm:inline">@(User.Identity?.Name
-                                                                                                                                                                                                                    ?? "User")</span>
+                                                                                                                                                                                                                                                        ?? "User")</span>
                                     <svg class="w-4 h-4 text-brand-400 hidden sm:block" fill="none" viewBox="0 0 24 24"
                                          stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
