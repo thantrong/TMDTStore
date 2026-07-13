@@ -100,6 +100,18 @@ public class ProductController : Controller
         {
             query = query.Where(p => p.Price.HasValue && p.Price.Value <= model.MaxPrice.Value);
         }
+        if (model.OnSale)
+        {
+            // Khuyến mãi thực tế trên store: Price < ListPrice (badge giảm giá trên card).
+            // SalePrice dự phòng nếu sau này admin điền field này.
+            query = query.Where(p =>
+                (p.Price != null && p.ListPrice != null && p.Price < p.ListPrice)
+                || (p.SalePrice != null && p.SalePrice > 0
+                    && (
+                        (p.Price != null && p.SalePrice < p.Price)
+                        || (p.ListPrice != null && p.SalePrice < p.ListPrice)
+                    )));
+        }
 
         query = model.SortBy switch
         {

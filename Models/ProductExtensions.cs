@@ -14,25 +14,86 @@ public class ProductSpecGroup
 public static class ProductExtensions
 {
     /// <summary>
+    /// Parse TechnicalSpecs JSON ở cả 2 dạng:
+    /// 1) [{ "key": "...", "value": "..." }, ...] — editor Admin
+    /// 2) ["CPU: Intel...", "RAM: 16GB", ...] — sync Phong Vũ / import
+    /// </summary>
+    public static List<Dictionary<string, string>> ParseTechnicalSpecsJson(string? json)
+    {
+        var specs = new List<Dictionary<string, string>>();
+        if (string.IsNullOrWhiteSpace(json))
+            return specs;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+                return specs;
+
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                if (el.ValueKind == JsonValueKind.Object)
+                {
+                    var key = el.TryGetProperty("key", out var k) ? k.GetString()
+                        : el.TryGetProperty("name", out var n) ? n.GetString()
+                        : null;
+                    var value = el.TryGetProperty("value", out var v) ? v.GetString() : null;
+                    if (!string.IsNullOrWhiteSpace(key) && value != null)
+                    {
+                        specs.Add(new Dictionary<string, string>
+                        {
+                            ["key"] = key.Trim(),
+                            ["value"] = value.Trim()
+                        });
+                    }
+                    continue;
+                }
+
+                if (el.ValueKind == JsonValueKind.String)
+                {
+                    var line = el.GetString()?.Trim();
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    var sep = line.IndexOf(':');
+                    if (sep < 0)
+                        sep = line.IndexOf('：'); // fullwidth colon
+
+                    if (sep > 0)
+                    {
+                        specs.Add(new Dictionary<string, string>
+                        {
+                            ["key"] = line[..sep].Trim(),
+                            ["value"] = line[(sep + 1)..].Trim()
+                        });
+                    }
+                    else
+                    {
+                        specs.Add(new Dictionary<string, string>
+                        {
+                            ["key"] = "Thông số",
+                            ["value"] = line
+                        });
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // ignore malformed JSON
+        }
+
+        return specs;
+    }
+
+    /// <summary>
     /// Lấy danh sách thông số kỹ thuật đã được gộp tự động từ thông tin sản phẩm
     /// (thương hiệu, bảo hành, ...) cùng với thông số do người dùng nhập trong TechnicalSpecs.
     /// Tránh trùng lặp — nếu người dùng đã tự nhập thì không thêm tự động.
     /// </summary>
     public static List<Dictionary<string, string>> GetMergedTechnicalSpecs(this Product product)
     {
-        var specs = new List<Dictionary<string, string>>();
-
-        // 1. Đọc thông số do người dùng nhập (TechnicalSpecs JSON)
-        if (!string.IsNullOrEmpty(product.TechnicalSpecs))
-        {
-            try
-            {
-                var userSpecs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(product.TechnicalSpecs);
-                if (userSpecs != null)
-                    specs = userSpecs;
-            }
-            catch { }
-        }
+        var specs = ParseTechnicalSpecsJson(product.TechnicalSpecs);
 
         // Xây tập key đã có (để tránh trùng lặp)
         var existingKeys = new HashSet<string>(
@@ -142,30 +203,23 @@ public static class ProductExtensions
         }
 
         // 2b. Thông số cấu hình chung từ TechnicalSpecs (bỏ qua key đã có từ biến thể)
-        if (!string.IsNullOrEmpty(product.TechnicalSpecs))
+        var userSpecs = ParseTechnicalSpecsJson(product.TechnicalSpecs);
+        if (userSpecs.Count > 0)
         {
-            try
-            {
-                var userSpecs = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(product.TechnicalSpecs);
-                if (userSpecs != null)
-                {
-                    // Bỏ qua các thông số đã thuộc nhóm chung
-                    var skipKeys = new HashSet<string> { "thương hiệu", "bảo hành", "tên sản phẩm", "product name" };
+            // Bỏ qua các thông số đã thuộc nhóm chung
+            var skipKeys = new HashSet<string> { "thương hiệu", "bảo hành", "tên sản phẩm", "product name" };
 
-                    foreach (var spec in userSpecs)
-                    {
-                        var key = spec.GetValueOrDefault("key", "").Trim();
-                        if (string.IsNullOrEmpty(key)) continue;
-                        if (skipKeys.Contains(key.ToLowerInvariant())) continue;
-                        if (!detailKeys.Contains(key))
-                        {
-                            detailSpecs.Add(spec);
-                            detailKeys.Add(key);
-                        }
-                    }
+            foreach (var spec in userSpecs)
+            {
+                var key = spec.GetValueOrDefault("key", "").Trim();
+                if (string.IsNullOrEmpty(key)) continue;
+                if (skipKeys.Contains(key.ToLowerInvariant())) continue;
+                if (!detailKeys.Contains(key))
+                {
+                    detailSpecs.Add(spec);
+                    detailKeys.Add(key);
                 }
             }
-            catch { }
         }
 
         if (detailSpecs.Count > 0)

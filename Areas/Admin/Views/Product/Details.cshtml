@@ -29,7 +29,7 @@
     <div class="xl:col-span-1 space-y-4">
 
         <!-- Image Gallery with Auto Slideshow -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+        <div class="admin-panel overflow-hidden">
             <div class="aspect-square bg-admin-50 relative group">
                 @if (imageList.Count > 0)
                 {
@@ -62,7 +62,7 @@
                         <!-- Pause indicator -->
                         <div id="slide-pause-indicator"
                              class="absolute bottom-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm hidden">
-                            ⏸ Đã tạm dừng
+                            Tạm dừng
                         </div>
                     }
                 }
@@ -172,7 +172,7 @@
         }
 
         <!-- Quick Actions -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 space-y-3">
+        <div class="admin-panel p-4 space-y-3">
             <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider">Thao tác</h3>
             <a asp-action="Edit" asp-route-id="@Model.Id"
                class="flex items-center gap-3 w-full px-4 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200 cursor-pointer">
@@ -220,7 +220,7 @@
     <div class="xl:col-span-2 space-y-4">
 
         <!-- Header Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-6">
+        <div class="admin-panel p-6">
             <div class="flex items-start justify-between gap-4 mb-4">
                 <div>
                     <h1 class="text-xl font-bold text-admin-800 leading-tight">@Model.Name</h1>
@@ -277,7 +277,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <!-- Basic Info -->
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+            <div class="admin-panel p-5">
                 <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -307,10 +307,23 @@
                             <dt class="text-admin-500">Ngày tạo</dt>
                             <dd class="font-medium text-admin-800">
                                 @{
-                                    var vnTime = Model.CreatedAt.HasValue
-                                        ? TimeZoneInfo.ConvertTimeFromUtc(Model.CreatedAt.Value,
-                                TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("dd/MM/yyyy HH:mm")
-                                        : "---";
+                                    string vnTime = "---";
+                                    if (Model.CreatedAt.HasValue)
+                                    {
+                                        try
+                                        {
+                                            TimeZoneInfo tz;
+                                            try { tz = TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh"); }
+                                            catch { tz = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"); }
+                                            var local = TimeZoneInfo.ConvertTimeFromUtc(
+                                                DateTime.SpecifyKind(Model.CreatedAt.Value, DateTimeKind.Utc), tz);
+                                            vnTime = local.ToString("dd/MM/yyyy HH:mm");
+                                        }
+                                        catch
+                                        {
+                                            vnTime = Model.CreatedAt.Value.ToString("dd/MM/yyyy HH:mm");
+                                        }
+                                    }
                                 }
                                 @vnTime
                             </dd>
@@ -319,7 +332,7 @@
                 </div>
 
                 <!-- Inventory & Rating -->
-                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                <div class="admin-panel p-5">
                     <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -368,7 +381,7 @@
                         <div class="flex justify-between py-1 border-b border-admin-100 last:border-0">
                             <dt class="text-admin-500">Badge</dt>
                             <dd>
-                                @if (Model.ProductBadges.Count > 0)
+                                @if (Model.ProductBadges != null && Model.ProductBadges.Count > 0)
                                 {
                                     <div class="flex flex-wrap gap-1 justify-end">
                                         @foreach (var badge in Model.ProductBadges)
@@ -392,7 +405,7 @@
             <!-- Short Description -->
             @if (!string.IsNullOrEmpty(Model.ShortDescription))
             {
-                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                <div class="admin-panel p-5">
                     <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -405,9 +418,12 @@
             }
 
             <!-- Technical Specs -->
-            @if (!string.IsNullOrEmpty(Model.TechnicalSpecs))
+            @{
+                var specs = TMDTStore.Models.ProductExtensions.ParseTechnicalSpecsJson(Model.TechnicalSpecs);
+            }
+            @if (specs.Count > 0)
             {
-                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                <div class="admin-panel p-5">
                     <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -415,37 +431,33 @@
                         </svg>
                         Thông số kỹ thuật
                     </h3>
-                    @{
-                        var specs = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string,
-                string>>>(Model.TechnicalSpecs);
-                    }
-                    @if (specs != null && specs.Count > 0)
-                    {
-                        <div class="bg-admin-50 rounded-xl overflow-hidden">
-                            <table class="w-full text-sm">
-                                <tbody>
-                                    @foreach (var item in specs)
-                                    {
-                                        <tr class="border-b border-admin-200 last:border-0 hover:bg-admin-100/50 transition-colors">
-                                            <td class="py-2.5 px-4 font-medium text-admin-500 w-1/3 bg-admin-50/50">@item["key"]</td>
-                                            <td class="py-2.5 px-4 text-admin-800">@item["value"]</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <p class="text-sm text-admin-600 whitespace-pre-line">@Model.TechnicalSpecs</p>
-                    }
+                    <div class="bg-admin-50 rounded-xl overflow-hidden">
+                        <table class="w-full text-sm">
+                            <tbody>
+                                @foreach (var item in specs)
+                                {
+                                    <tr class="border-b border-admin-200 last:border-0 hover:bg-admin-100/50 transition-colors">
+                                        <td class="py-2.5 px-4 font-medium text-admin-500 w-1/3 bg-admin-50/50 align-top">@item.GetValueOrDefault("key")</td>
+                                        <td class="py-2.5 px-4 text-admin-800">@item.GetValueOrDefault("value")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(Model.TechnicalSpecs))
+            {
+                <div class="admin-panel p-5">
+                    <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3">Thông số kỹ thuật</h3>
+                    <p class="text-sm text-admin-600 whitespace-pre-line">@Model.TechnicalSpecs</p>
                 </div>
             }
 
             <!-- Description with Xem thêm -->
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                <div class="admin-panel p-5">
                     <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
@@ -484,7 +496,7 @@
             <!-- Variants List -->
             @if (Model.ProductVariants != null && Model.ProductVariants.Count > 0)
             {
-                <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+                <div class="admin-panel p-5">
                     <h3 class="text-xs font-semibold text-admin-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />

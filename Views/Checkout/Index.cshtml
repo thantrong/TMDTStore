@@ -6,8 +6,8 @@
     var count = CartService.GetCartCount();
 }
 
-<div class="max-w-4xl mx-auto">
-    <nav class="text-sm text-brand-500 mb-6 flex items-center gap-2 flex-wrap">
+<div class="w-full">
+    <nav class="text-sm text-brand-500 mb-5 flex items-center gap-2 flex-wrap">
         <a asp-controller="Home" asp-action="Index" class="hover:text-brand-600">Trang chủ</a>
         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -19,10 +19,10 @@
         <span class="text-brand-700 font-medium">Thanh toán</span>
     </nav>
 
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- FORM -->
-        <div class="lg:col-span-3">
-            <div class="bg-white rounded-2xl border border-brand-100 p-6">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl border border-brand-100 p-6 sm:p-8">
                 <h1 class="text-xl font-heading font-bold text-brand-800 mb-6">Thông tin giao hàng</h1>
 
                 <form asp-action="PlaceOrder" method="post" id="checkout-form">
@@ -62,12 +62,17 @@
                         <h2 class="text-base font-bold text-brand-800 mb-3">Mã giảm giá</h2>
                         <div class="flex items-center gap-2">
                             <input type="text" id="voucher-input"
-                                   class="flex-1 px-4 py-2.5 border border-brand-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition uppercase"
+                                   class="flex-1 px-4 py-2.5 border border-brand-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition uppercase disabled:bg-brand-50 disabled:text-brand-600"
                                    placeholder="Nhập mã giảm giá..." />
                             <button type="button" id="voucher-apply-btn"
                                     class="px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     onclick="applyVoucher()">
                                 Áp dụng
+                            </button>
+                            <button type="button" id="voucher-remove-btn"
+                                    class="hidden px-4 py-2.5 border border-red-200 text-red-600 rounded-xl font-semibold text-sm hover:bg-red-50 transition-all duration-200 cursor-pointer whitespace-nowrap"
+                                    onclick="removeVoucher()">
+                                Gỡ mã
                             </button>
                         </div>
                         <div id="voucher-message" class="text-sm mt-2 hidden"></div>
@@ -105,9 +110,9 @@
         </div>
 
         <!-- SUMMARY -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl border border-brand-100 p-6 sticky top-24">
-                <h2 class="text-base font-bold text-brand-800 mb-4">Đơn hàng (@count sản phẩm)</h2>
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl border border-brand-100 p-6 sticky top-24 space-y-5">
+                <h2 class="text-base font-bold text-brand-800">Đơn hàng (@count sản phẩm)</h2>
                 <div class="space-y-3">
                     @foreach (var item in items)
                     {
@@ -143,7 +148,7 @@
                         }
                     </div>
 
-                    <div class="border-t border-brand-100 pt-4 mt-4">
+                    <div class="border-t border-brand-100 pt-4">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm text-brand-500">Tạm tính</span>
                             <span class="text-sm font-semibold text-brand-800">@total.ToString("#,###")₫</span>
@@ -161,6 +166,22 @@
                             <span class="text-lg font-bold text-red-500" id="order-total-display">@((total + 30000).ToString("#,###"))₫</span>
                         </div>
                     </div>
+
+                    <div class="rounded-xl bg-brand-50 border border-brand-100 p-4 space-y-2.5 text-xs text-brand-600">
+                        <p class="font-semibold text-brand-800 text-sm">Cam kết khi đặt hàng</p>
+                        <p class="flex items-start gap-2">
+                            <svg class="size-4 text-brand-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Sản phẩm chính hãng, hoá đơn VAT đầy đủ
+                        </p>
+                        <p class="flex items-start gap-2">
+                            <svg class="size-4 text-brand-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Đổi trả trong 30 ngày nếu lỗi nhà sản xuất
+                        </p>
+                        <p class="flex items-start gap-2">
+                            <svg class="size-4 text-brand-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Hỗ trợ kỹ thuật trước và sau bán
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -172,6 +193,71 @@
         var checkoutTotal = @(total + 30000);
         var checkoutCount = @count;
         var checkoutSubtotal = @total;
+        var applyBtnClass = 'px-5 py-2.5 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap';
+        var appliedBtnClass = 'px-5 py-2.5 bg-green-600 text-white rounded-xl font-semibold text-sm cursor-not-allowed whitespace-nowrap';
+
+        function formatVnd(amount) {
+            return Math.round(amount).toLocaleString('vi-VN') + '₫';
+        }
+
+        function setOrderTotals(discountAmount) {
+            var discount = discountAmount || 0;
+            var newTotal = checkoutSubtotal + 30000 - discount;
+            if (newTotal < 0) newTotal = 0;
+            document.getElementById('order-total-display').textContent = formatVnd(newTotal);
+            document.getElementById('place-order-btn').textContent = 'Đặt hàng (' + formatVnd(newTotal) + ')';
+        }
+
+        function setAppliedState(code, discountAmount, discountFormatted, message) {
+            var input = document.getElementById('voucher-input');
+            var btn = document.getElementById('voucher-apply-btn');
+            var removeBtn = document.getElementById('voucher-remove-btn');
+            var msg = document.getElementById('voucher-message');
+            var discountRow = document.getElementById('voucher-discount-row');
+
+            input.value = code;
+            input.disabled = true;
+            document.getElementById('voucher-code-input').value = code;
+
+            btn.textContent = 'Đã áp dụng';
+            btn.disabled = true;
+            btn.className = appliedBtnClass;
+            removeBtn.classList.remove('hidden');
+
+            discountRow.classList.remove('hidden');
+            document.getElementById('voucher-discount-amount').textContent = '-' + discountFormatted;
+            setOrderTotals(discountAmount);
+
+            msg.className = 'text-sm mt-2 text-green-600 font-medium';
+            msg.textContent = message || ('Đã áp dụng mã ' + code + '. Bạn có thể gỡ mã để nhập mã khác.');
+            msg.classList.remove('hidden');
+        }
+
+        function removeVoucher() {
+            var input = document.getElementById('voucher-input');
+            var btn = document.getElementById('voucher-apply-btn');
+            var removeBtn = document.getElementById('voucher-remove-btn');
+            var msg = document.getElementById('voucher-message');
+            var discountRow = document.getElementById('voucher-discount-row');
+
+            document.getElementById('voucher-code-input').value = '';
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+
+            btn.textContent = 'Áp dụng';
+            btn.disabled = false;
+            btn.className = applyBtnClass;
+            removeBtn.classList.add('hidden');
+
+            discountRow.classList.add('hidden');
+            document.getElementById('voucher-discount-amount').textContent = '-0₫';
+            setOrderTotals(0);
+
+            msg.className = 'text-sm mt-2 text-brand-500';
+            msg.textContent = 'Đã gỡ mã giảm giá. Bạn có thể nhập mã khác.';
+            msg.classList.remove('hidden');
+        }
 
         function applyVoucher() {
             var input = document.getElementById('voucher-input');
@@ -200,36 +286,12 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                btn.disabled = false;
-                btn.textContent = 'Áp dụng';
-
                 if (data.success) {
-                    msg.className = 'text-sm mt-2 text-green-600 font-medium';
-                    msg.textContent = data.message;
-
-                    // Hiển thị dòng giảm giá
-                    var discountRow = document.getElementById('voucher-discount-row');
-                    discountRow.classList.remove('hidden');
-                    document.getElementById('voucher-discount-amount').textContent = '-' + data.discountFormatted;
-
-                    // Cập nhật tổng
-                    // Shipping fee 30,000
-                    var newTotal = checkoutSubtotal + 30000 - data.discountAmount;
-                    var totalDisplay = document.getElementById('order-total-display');
-                    totalDisplay.textContent = newTotal.toLocaleString('vi-VN') + '₫';
-
-                    // Cập nhật nút đặt hàng
-                    document.getElementById('place-order-btn').textContent = 'Đặt hàng (' + newTotal.toLocaleString('vi-VN') + '₫)';
-
-                    // Lưu mã vào hidden input
-                    document.getElementById('voucher-code-input').value = code;
-                    input.disabled = true;
-
-                    // Đổi nút thành "Đã áp dụng"
-                    btn.textContent = 'Đã áp dụng';
-                    btn.disabled = true;
-                    btn.className = 'px-5 py-2.5 bg-green-600 text-white rounded-xl font-semibold text-sm cursor-not-allowed whitespace-nowrap';
+                    setAppliedState(code, data.discountAmount, data.discountFormatted, data.message);
                 } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Áp dụng';
+                    btn.className = applyBtnClass;
                     msg.className = 'text-sm mt-2 text-red-500';
                     msg.textContent = data.message;
                     msg.classList.remove('hidden');
@@ -239,17 +301,17 @@
             .catch(function() {
                 btn.disabled = false;
                 btn.textContent = 'Áp dụng';
+                btn.className = applyBtnClass;
                 msg.className = 'text-sm mt-2 text-red-500';
                 msg.textContent = 'Lỗi kết nối, vui lòng thử lại.';
                 msg.classList.remove('hidden');
             });
         }
 
-        // Enter key support
         document.getElementById('voucher-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                applyVoucher();
+                if (!this.disabled) applyVoucher();
             }
         });
     </script>

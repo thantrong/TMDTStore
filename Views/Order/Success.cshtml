@@ -6,105 +6,126 @@
         "Pending" => ("bg-yellow-50 text-yellow-700 border-yellow-200", "Chờ xác nhận"),
         "WaitingPayment" => ("bg-orange-50 text-orange-700 border-orange-200", "Chờ thanh toán"),
         "Confirmed" => ("bg-green-50 text-green-700 border-green-200", "Đã xác nhận"),
+        "Shipping" => ("bg-sky-50 text-sky-700 border-sky-200", "Đang giao"),
+        "Delivered" => ("bg-emerald-50 text-emerald-700 border-emerald-200", "Đã giao"),
         "Cancelled" => ("bg-red-50 text-red-700 border-red-200", "Đã hủy"),
         _ => ("bg-gray-50 text-gray-700 border-gray-200", Model.Status)
     };
 }
 
-<div class="max-w-2xl mx-auto text-center py-12">
-    @if (Model.Status == "Cancelled")
-    {
-        <div class="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center">
-            <svg class="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </div>
-        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Đơn hàng đã hủy</h1>
-    }
-    else if (Model.Status == "Confirmed")
-    {
-        <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-full flex items-center justify-center">
-            <svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Thanh toán thành công!</h1>
-    }
-    else
-    {
-        <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-full flex items-center justify-center">
-            <svg class="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-        </div>
-        <h1 class="text-2xl font-heading font-bold text-brand-800 mb-2">Đặt hàng thành công!</h1>
-    }
-    <p class="text-brand-500 mb-6">Mã đơn hàng: <strong class="text-brand-700">@Model.Id</strong></p>
+<div class="max-w-3xl mx-auto py-4 sm:py-6">
+    <div class="text-center mb-6">
+        @if (Model.Status == "Cancelled")
+        {
+            <div class="w-16 h-16 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-heading font-bold text-brand-800 mb-1">Đơn hàng đã hủy</h1>
+        }
+        else if (Model.Status == "Confirmed")
+        {
+            <div class="w-16 h-16 mx-auto mb-4 bg-green-50 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-heading font-bold text-brand-800 mb-1">Thanh toán thành công!</h1>
+        }
+        else
+        {
+            <div class="w-16 h-16 mx-auto mb-4 bg-green-50 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-heading font-bold text-brand-800 mb-1">Đặt hàng thành công!</h1>
+        }
+        <p class="text-brand-500 text-sm">Mã đơn hàng: <strong class="text-brand-700 font-mono">@Model.Id</strong></p>
+    </div>
 
-    <div class="bg-white rounded-2xl border border-brand-100 p-6 text-left mb-8">
-        <div class="space-y-3 text-sm">
-            <div class="flex justify-between">
-                <span class="text-brand-400">Người nhận</span>
-                <span class="font-medium text-brand-800">@Model.FullName</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-brand-400">SĐT</span>
-                <span class="font-medium text-brand-800">@Model.Phone</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-brand-400">Địa chỉ</span>
-                <span class="font-medium text-brand-800 text-right max-w-[60%]">@Model.Address</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-brand-400">Phương thức</span>
-                <span class="font-medium text-brand-800">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" :
-                                                  "Chuyển khoản VietQR")</span>
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
+        <div class="lg:col-span-3 bg-white rounded-2xl border border-brand-100 p-5 sm:p-6">
+            <h2 class="text-sm font-bold text-brand-800 mb-4">Thông tin đơn hàng</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between gap-4">
+                    <span class="text-brand-400 shrink-0">Người nhận</span>
+                    <span class="font-medium text-brand-800 text-right">@Model.FullName</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-brand-400">Tình trạng</span>
-                    <span
-                        class="font-medium @statusBadge.Item1 px-2.5 py-0.5 rounded-full text-xs border inline-flex items-center gap-1.5">
-                        <span
-                        class="w-1.5 h-1.5 rounded-full @(Model.Status == "Pending" ? "bg-yellow-500" : Model.Status == "WaitingPayment" ? "bg-orange-500" : Model.Status == "Confirmed" ? "bg-green-500" : "bg-red-500")"></span>
+                <div class="flex justify-between gap-4">
+                    <span class="text-brand-400 shrink-0">SĐT</span>
+                    <span class="font-medium text-brand-800">@Model.Phone</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span class="text-brand-400 shrink-0">Địa chỉ</span>
+                    <span class="font-medium text-brand-800 text-right max-w-[65%]">@Model.Address</span>
+                </div>
+                <div class="flex justify-between gap-4">
+                    <span class="text-brand-400 shrink-0">Phương thức</span>
+                    <span class="font-medium text-brand-800 text-right">@(Model.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : "Chuyển khoản VietQR")</span>
+                </div>
+                <div class="flex justify-between items-center gap-4">
+                    <span class="text-brand-400 shrink-0">Tình trạng</span>
+                    <span class="font-medium @statusBadge.Item1 px-2.5 py-0.5 rounded-full text-xs border inline-flex items-center gap-1.5">
                         @statusBadge.Item2
                     </span>
                 </div>
-                <div class="flex justify-between border-t border-brand-100 pt-3 mt-3">
+                <div class="flex justify-between border-t border-brand-100 pt-3 mt-1">
                     <span class="font-semibold text-brand-800">Tổng tiền</span>
                     <span class="text-lg font-bold text-red-500">@Model.TotalPrice.ToString("#,###")₫</span>
                 </div>
                 @if (Model.ShippingFee.HasValue && Model.ShippingFee > 0)
                 {
-                    <div class="flex justify-between pt-2">
+                    <div class="flex justify-between">
                         <span class="text-sm text-brand-500">Phí vận chuyển</span>
                         <span class="text-sm font-semibold text-brand-800">@Model.ShippingFee?.ToString("#,###")₫</span>
                     </div>
                 }
                 @if (Model.DiscountAmount.HasValue && Model.DiscountAmount > 0)
                 {
-                    <div class="flex justify-between pt-2 mt-2 border-t border-dashed border-brand-100">
-                        <span class="text-sm text-brand-500">Mã giảm giá</span>
-                        <span class="text-sm font-medium text-green-600">@(Model.Voucher?.Code ?? "")</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-sm text-brand-500">Giảm giá</span>
+                    <div class="flex justify-between pt-2 mt-1 border-t border-dashed border-brand-100">
+                        <span class="text-sm text-brand-500">Giảm giá @(Model.Voucher?.Code)</span>
                         <span class="text-sm font-semibold text-red-500">-@Model.DiscountAmount?.ToString("#,###")₫</span>
                     </div>
                 }
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <a asp-controller="Product" asp-action="Index"
-               class="px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all duration-200">
-                Tiếp tục mua sắm
-            </a>
-            @if (Model.PaymentMethod == "Banking" && Model.Status == "WaitingPayment")
-            {
-                <a asp-action="Payment" asp-route-id="@Model.Id"
-                   class="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 transition-all duration-200">
-                    Thanh toán ngay
-                </a>
-            }
+        <div class="lg:col-span-2 bg-brand-50 rounded-2xl border border-brand-100 p-5 sm:p-6">
+            <h2 class="text-sm font-bold text-brand-800 mb-3">Bước tiếp theo</h2>
+            <ul class="space-y-3 text-sm text-brand-600">
+                <li class="flex gap-2">
+                    <span class="size-6 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                    TVT PC sẽ gọi xác nhận đơn trong giờ làm việc
+                </li>
+                <li class="flex gap-2">
+                    <span class="size-6 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                    Đóng gói và bàn giao vận chuyển
+                </li>
+                <li class="flex gap-2">
+                    <span class="size-6 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                    Theo dõi trạng thái trong mục đơn hàng của bạn
+                </li>
+            </ul>
         </div>
     </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a asp-controller="Order" asp-action="History"
+           class="px-6 py-3 border border-brand-200 text-brand-700 rounded-xl font-semibold text-sm hover:bg-brand-50 transition-all duration-200 text-center cursor-pointer">
+            Xem đơn hàng của tôi
+        </a>
+        <a asp-controller="Product" asp-action="Index"
+           class="px-6 py-3 bg-brand-600 text-white rounded-xl font-semibold text-sm hover:bg-brand-700 transition-all duration-200 text-center cursor-pointer">
+            Tiếp tục mua sắm
+        </a>
+        @if (Model.PaymentMethod == "Banking" && Model.Status == "WaitingPayment")
+        {
+            <a asp-action="Payment" asp-route-id="@Model.Id"
+               class="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold text-sm hover:bg-orange-600 transition-all duration-200 text-center cursor-pointer">
+                Thanh toán ngay
+            </a>
+        }
+    </div>
+</div>

@@ -206,7 +206,7 @@ public class CheckoutController : Controller
             {
                 OrderId = order.Id,
                 ProductId = item.ProductId,
-                VariantId = item.VariantId,
+                VariantId = item.VariantId ?? "",
                 Name = item.Name,
                 VariantName = item.VariantName,
                 ImageUrl = item.ImageUrl,

@@ -4,15 +4,12 @@
     var userRoles = ViewBag.UserRoles as Dictionary<string, List<string>> ?? new();
 }
 
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-admin-800">Người dùng</h1>
-        <p class="text-sm text-admin-500 mt-1">Quản lý tất cả tài khoản người dùng</p>
-    </div>
+<div class="flex items-center justify-between mb-5 gap-3">
+    <p class="text-sm text-admin-500">Quản lý tất cả tài khoản người dùng</p>
 </div>
 
 <!-- Search & Filter -->
-<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 mb-6">
+<div class="admin-panel p-4 mb-6">
     <form method="get" class="flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-medium text-admin-500 mb-1">Tìm kiếm</label>
@@ -42,7 +39,7 @@
 </div>
 
 <!-- Users Table -->
-<div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+<div class="admin-panel overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-admin-50 border-b border-admin-200">

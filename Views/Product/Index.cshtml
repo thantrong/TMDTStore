@@ -1,7 +1,7 @@
 @model TMDTStore.Models.ViewModels.Product.ProductListViewModels
 
 @{
-    ViewData["Title"] = "Sản phẩm";
+    ViewData["Title"] = Model.OnSale ? "Khuyến mãi" : "Sản phẩm";
 
     var allCats = Model.Categories;
     var selectedCat = allCats.FirstOrDefault(c => c.Id == Model.CategoryId);
@@ -38,7 +38,7 @@
     }
     else
     {
-        <span class="text-brand-700 font-medium">Tất cả sản phẩm</span>
+        <span class="text-brand-700 font-medium">@(Model.OnSale ? "Khuyến mãi" : "Tất cả sản phẩm")</span>
     }
 </div>
 
@@ -158,6 +158,7 @@
                 @foreach (var (key, label) in sorts)
                 {
                     <a asp-action="Index" asp-route-sortBy="@key" asp-route-category="@Model.CategorySlug"
+                       asp-route-OnSale="@(Model.OnSale ? "true" : null)"
                        class="block text-sm text-brand-600 hover:text-brand-700 @(Model.SortBy == key || (string.IsNullOrEmpty(Model.SortBy) && key == "newest") ? "font-semibold text-brand-700" : "")">
                         @label
                     </a>
@@ -173,6 +174,10 @@
         <div class="flex items-center justify-between mb-6">
             <p class="text-sm text-brand-500">
                 @Model.TotalItems sản phẩm
+                @if (Model.OnSale)
+                {
+                    <span>đang <strong class="text-brand-700">khuyến mãi</strong></span>
+                }
                 @if (!string.IsNullOrEmpty(Model.SearchQuery))
                 {
                     <span>cho "<strong class="text-brand-700">@Model.SearchQuery</strong>"</span>
@@ -194,8 +199,8 @@
                 {
                     <!-- Product Card -->
                     <div
-                        class="bg-white rounded-xl shadow-sm border border-brand-100 overflow-hidden hover:shadow-lg hover:border-brand-200 transition-all duration-200 group">
-                        <a asp-controller="Product" asp-action="Details" asp-route-slug="@product.Slug" class="block">
+                        class="bg-white rounded-xl shadow-sm border border-brand-100 overflow-hidden hover:shadow-lg hover:border-brand-200 transition-all duration-200 group flex flex-col h-full">
+                        <a asp-controller="Product" asp-action="Details" asp-route-slug="@product.Slug" class="block flex-1 flex flex-col">
                             <!-- Ảnh -->
                             <div class="aspect-square bg-brand-50 overflow-hidden">
                                 @{
@@ -225,24 +230,24 @@
                             </div>
 
                             <!-- Thông tin -->
-                            <div class="p-4">
+                            <div class="p-4 flex flex-col flex-1">
                                 <p class="text-xs text-brand-400 mb-1">@(product.Brand?.Name ?? "")</p>
                                 <h3 class="text-sm font-medium text-brand-800 line-clamp-2 mb-2 min-h-[2.5rem]">
                                     @product.Name
                                 </h3>
 
-                                <!-- Rating -->
-                                @if (product.RatingCount > 0)
-                                {
-                                    <div class="flex items-center gap-1 mb-2">
+                                <!-- Rating: giữ chiều cao cố định để nút các card thẳng hàng -->
+                                <div class="flex items-center gap-1 mb-2 min-h-[1.25rem]">
+                                    @if (product.RatingCount > 0)
+                                    {
                                         <span class="text-yellow-400 text-sm">★</span>
                                         <span class="text-sm font-medium text-brand-700">@product.RatingAvg.ToString("F1")</span>
                                         <span class="text-xs text-brand-400">(@product.RatingCount)</span>
-                                    </div>
-                                }
+                                    }
+                                </div>
 
                                 <!-- Giá -->
-                                <div class="flex items-baseline gap-2 flex-wrap">
+                                <div class="flex items-baseline gap-2 flex-wrap mt-auto">
                                     @if (product.Price.HasValue)
                                     {
                                         <span class="text-lg font-bold text-red-500">@product.Price.Value.ToString("#,###")₫</span>
@@ -274,7 +279,7 @@
                             </a>
 
                             <!-- Nút thêm giỏ hàng & Mua ngay -->
-                            <div class="px-4 pb-4 flex gap-2">
+                            <div class="px-4 pb-4 flex gap-2 mt-auto">
                                 @{
                                     var cartImgUrl = product.ImageUrl;
                                     if (string.IsNullOrEmpty(cartImgUrl) && product.ProductVariants != null &&
@@ -326,7 +331,8 @@
             @if (Model.PagingInfo.TotalPages > 1)
             {
                 <div page-model="@Model.PagingInfo" page-action="Index" page-url-category="@Model.CategorySlug"
-                     page-url-sortBy="@Model.SortBy" page-url-searchQuery="@Model.SearchQuery">
+                     page-url-sortBy="@Model.SortBy" page-url-searchQuery="@Model.SearchQuery"
+                     page-url-OnSale="@(Model.OnSale ? "true" : null)">
                 </div>
             }
 

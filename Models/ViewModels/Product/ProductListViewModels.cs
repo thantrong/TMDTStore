@@ -12,6 +12,8 @@ public class ProductListViewModels
     public decimal? MaxPrice { get; set; } // Lọc theo giá tối đa
     public string? BrandName { get; set; } // Lọc theo tên thương hiệu
     public string? SortBy { get; set; } // "price_asc", "price_desc", "newest", "rating"
+    /// <summary>true = chỉ sản phẩm đang khuyến mãi (có SalePrice hợp lệ).</summary>
+    public bool OnSale { get; set; }
 
     // Danh sách danh mục cho sidebar filter
     public List<Category> Categories { get; set; } = new();
@@ -21,7 +23,7 @@ public class ProductListViewModels
 
     // Phân trang
     public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 12;
+    public int PageSize { get; set; } = 20;
     public int TotalItems { get; set; }
 
     public PagingInfo PagingInfo => new()

@@ -1,0 +1,191 @@
+/* TVT PC Admin — data-dense shell */
+:root {
+  --admin-ink: #0b1220;
+  --admin-muted: #64748b;
+  --admin-line: #e2e8f0;
+  --admin-surface: #ffffff;
+  --admin-canvas: #f1f5f9;
+  --admin-accent: #0891b2;
+  --admin-accent-strong: #0e7490;
+  --admin-ok: #059669;
+  --admin-warn: #d97706;
+  --admin-danger: #dc2626;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body.admin-body {
+  font-feature-settings: "ss01" on, "kern" on;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars in sidebar / tables */
+.admin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.admin-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+.admin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-main-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  transition: color 160ms ease, background-color 160ms ease;
+  cursor: pointer;
+}
+.admin-nav-link:hover {
+  color: #f8fafc;
+  background: rgba(148, 163, 184, 0.12);
+}
+.admin-nav-link.is-active {
+  color: #ecfeff;
+  background: linear-gradient(90deg, rgba(8, 145, 178, 0.35), rgba(8, 145, 178, 0.12));
+  box-shadow: inset 3px 0 0 #22d3ee;
+}
+.admin-nav-link svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.admin-section-label {
+  padding: 0.75rem 0.75rem 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.admin-kpi {
+  position: relative;
+  overflow: hidden;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: 0.875rem;
+  padding: 1rem 1.1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.admin-kpi:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px -18px rgba(15, 23, 42, 0.35);
+}
+.admin-kpi::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -40% auto;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(8, 145, 178, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.admin-panel {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+
+/* Full-bleed content: don't shrink admin pages on ultrawide */
+.admin-body main > div {
+  max-width: none !important;
+}
+
+.admin-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-table th {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #64748b;
+}
+.admin-table tbody tr {
+  transition: background-color 140ms ease;
+}
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.admin-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.7rem;
+  background: #0891b2;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.admin-btn-primary:hover {
+  background: #0e7490;
+  box-shadow: 0 10px 20px -12px rgba(8, 145, 178, 0.8);
+}
+
+.admin-input,
+.admin-select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.admin-input:focus,
+.admin-select:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+.admin-topbar {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.86);
+}

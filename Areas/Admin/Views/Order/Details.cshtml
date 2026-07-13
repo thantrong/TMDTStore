@@ -63,7 +63,7 @@
     <div class="xl:col-span-2 space-y-6">
 
         <!-- Customer Info -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+        <div class="admin-panel p-5">
             <h2 class="font-bold text-admin-800 mb-4">Thông tin giao hàng</h2>
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Payment Info -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+        <div class="admin-panel p-5">
             <h2 class="font-bold text-admin-800 mb-4">Thông tin thanh toán</h2>
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -124,7 +124,7 @@
         <!-- Customer Link -->
         @if (Model.User != null)
         {
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+            <div class="admin-panel p-5">
                 <h2 class="font-bold text-admin-800 mb-4">Thông tin tài khoản</h2>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -140,7 +140,7 @@
         }
 
         <!-- Order Items -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+        <div class="admin-panel overflow-hidden">
             <div class="px-5 py-4 border-b border-admin-100">
                 <h2 class="font-bold text-admin-800">Sản phẩm đã đặt</h2>
             </div>
@@ -204,7 +204,7 @@
         <!-- Actions -->
         @if (currentTransitions.Count > 0)
         {
-            <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+            <div class="admin-panel p-5">
                 <h2 class="font-bold text-admin-800 mb-4">Thao tác</h2>
                 <div class="space-y-3">
                     @foreach (var t in currentTransitions)
@@ -228,7 +228,7 @@
         }
 
         <!-- Status History -->
-        <div class="bg-white rounded-xl shadow-sm border border-admin-200 p-5">
+        <div class="admin-panel p-5">
             <h2 class="font-bold text-admin-800 mb-4">Lịch sử trạng thái</h2>
             @if (Model.OrderStatusHistories.Count == 0)
             {

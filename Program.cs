@@ -30,6 +30,14 @@ builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<StoreDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // App dùng AuthController, không phải Identity scaffold /Account/*
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/Login";
+    options.LogoutPath = "/Auth/Logout";
+});
+
 var emailSetting = builder.Configuration.GetSection("EmailSettings").Get<EmailSetting>()
     ?? throw new InvalidOperationException("EmailSettings not configured");
 builder.Services.AddSingleton(emailSetting);

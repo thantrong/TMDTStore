@@ -6,25 +6,23 @@
     var search = ViewBag.Search as string ?? "";
 }
 
-<div class="max-w-7xl mx-auto">
+<div>
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-admin-800">Quản lý đánh giá</h1>
-            <p class="text-sm text-admin-500 mt-1">Xem và phản hồi đánh giá sản phẩm</p>
+            <p class="text-sm text-admin-500">Xem và phản hồi đánh giá sản phẩm</p>
         </div>
     </div>
 
     <!-- Search -->
-    <div class="bg-white rounded-2xl border border-admin-200 p-4 mb-6">
+    <div class="admin-panel p-4 mb-6">
         <form method="get" class="flex gap-3">
             <div class="flex-1">
-                <input type="text" name="search" value="@search"
-                       class="w-full px-4 py-2.5 border border-admin-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
-                       placeholder="Tìm kiếm theo nội dung, tên người dùng, tên sản phẩm..." />
+                <label class="sr-only" for="review-search">Tìm đánh giá</label>
+                <input id="review-search" type="text" name="search" value="@search"
+                       class="admin-input" placeholder="Nội dung, user, sản phẩm..." />
             </div>
-            <button type="submit"
-                    class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-all duration-200 cursor-pointer">
+            <button type="submit" class="admin-btn-primary">
                 Tìm kiếm
             </button>
             @if (!string.IsNullOrEmpty(search))

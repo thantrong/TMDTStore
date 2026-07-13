@@ -5,6 +5,7 @@
 
 @{
     ViewData["Title"] = Model.Name;
+    ViewBag.ChatBotProductId = Model.Id;
 
     var jsonOpts = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     var hasVariants = Model.ProductVariants != null && Model.ProductVariants.Count > 0;

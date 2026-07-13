@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TMDTStore.Models;
 using TMDTStore.Services.Cart;
 
 namespace TMDTStore.Controllers;
@@ -6,16 +8,26 @@ namespace TMDTStore.Controllers;
 public class CartController : Controller
 {
     private readonly ICartService _cart;
+    private readonly StoreDbContext _context;
 
-    public CartController(ICartService cart)
+    public CartController(ICartService cart, StoreDbContext context)
     {
         _cart = cart;
+        _context = context;
     }
 
     // GET: /Cart
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        ViewBag.SuggestedProducts = await _context.Products
+            .AsNoTracking()
+            .Include(p => p.Brand)
+            .Include(p => p.ProductVariants)
+            .Where(p => p.IsActive == true)
+            .OrderByDescending(p => p.RatingAvg)
+            .Take(8)
+            .ToListAsync();
         return View();
     }
 

@@ -13,26 +13,20 @@
     };
 }
 
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-admin-800">Đơn hàng</h1>
-        <p class="text-sm text-admin-500 mt-1">Quản lý tất cả đơn hàng trong cửa hàng</p>
-    </div>
+<div class="mb-5">
+    <p class="text-sm text-admin-500">Theo dõi và cập nhật trạng thái đơn hàng.</p>
 </div>
 
-<!-- Search & Filter -->
-<div class="bg-white rounded-xl shadow-sm border border-admin-200 p-4 mb-6">
+<div class="admin-panel p-4 mb-5">
     <form method="get" class="flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-medium text-admin-500 mb-1">Tìm kiếm</label>
-            <input type="text" name="SearchQuery" value="@Model.SearchQuery"
-                   class="w-full px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
-                   placeholder="Tên khách hàng, SĐT, mã đơn..." />
+            <label class="block text-xs font-medium text-admin-500 mb-1" for="OrderSearch">Tìm kiếm</label>
+            <input id="OrderSearch" type="text" name="SearchQuery" value="@Model.SearchQuery"
+                   class="admin-input" placeholder="Tên khách, SĐT, mã đơn..." />
         </div>
         <div class="w-44">
-            <label class="block text-xs font-medium text-admin-500 mb-1">Trạng thái</label>
-            <select name="StatusFilter"
-                    class="w-full px-3 py-2 border border-admin-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition">
+            <label class="block text-xs font-medium text-admin-500 mb-1" for="StatusFilter">Trạng thái</label>
+            <select id="StatusFilter" name="StatusFilter" class="admin-select">
                 @foreach (var (val, label) in statuses)
                 {
                     <option value="@val" selected="@(Model.StatusFilter == val || (string.IsNullOrEmpty(Model.StatusFilter) && string.IsNullOrEmpty(val)))">@label</option>
@@ -40,30 +34,29 @@
             </select>
         </div>
         <button type="submit"
-                class="px-4 py-2 bg-admin-800 text-white rounded-lg text-sm font-semibold hover:bg-admin-700 transition-all duration-200 cursor-pointer">
+                class="px-4 py-2.5 bg-admin-900 text-white rounded-lg text-sm font-semibold hover:bg-admin-800 transition-colors cursor-pointer">
             Lọc
         </button>
         <a asp-action="Index"
-           class="px-4 py-2 border border-admin-200 text-admin-600 rounded-lg text-sm font-semibold hover:bg-admin-50 transition-all duration-200 cursor-pointer">
+           class="px-4 py-2.5 border border-admin-200 text-admin-600 rounded-lg text-sm font-semibold hover:bg-admin-50 transition-colors cursor-pointer">
             Xoá lọc
         </a>
     </form>
 </div>
 
-<!-- Orders Table -->
-<div class="bg-white rounded-xl shadow-sm border border-admin-200 overflow-hidden">
+<div class="admin-panel">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm admin-table">
             <thead class="bg-admin-50 border-b border-admin-200">
                 <tr>
-                    <th class="text-left px-4 py-3 font-semibold text-admin-600">Mã đơn</th>
-                    <th class="text-left px-4 py-3 font-semibold text-admin-600">Khách hàng</th>
-                    <th class="text-left px-4 py-3 font-semibold text-admin-600">SĐT</th>
-                    <th class="text-right px-4 py-3 font-semibold text-admin-600">Tổng tiền</th>
-                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Phương thức</th>
-                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Trạng thái</th>
-                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Ngày đặt</th>
-                    <th class="text-center px-4 py-3 font-semibold text-admin-600">Hành động</th>
+                    <th class="text-left px-4 py-3">Mã đơn</th>
+                    <th class="text-left px-4 py-3">Khách hàng</th>
+                    <th class="text-left px-4 py-3">SĐT</th>
+                    <th class="text-right px-4 py-3">Tổng tiền</th>
+                    <th class="text-center px-4 py-3">Phương thức</th>
+                    <th class="text-center px-4 py-3">Trạng thái</th>
+                    <th class="text-center px-4 py-3">Ngày đặt</th>
+                    <th class="text-center px-4 py-3">Hành động</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-admin-100">

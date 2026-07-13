@@ -166,7 +166,10 @@ public partial class StoreDbContext : IdentityDbContext<User>
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => new { e.OrderId, e.ProductId }).HasName("pk_order_items");
+            // PK gồm VariantId để 1 đơn có thể chứa nhiều biến thể cùng sản phẩm
+            // (VariantId rỗng "" khi sản phẩm không có biến thể)
+            entity.HasKey(e => new { e.OrderId, e.ProductId, e.VariantId })
+                .HasName("pk_order_items");
 
             entity.ToTable("order_items");
 
@@ -184,6 +187,7 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasColumnName("unit_price");
             entity.Property(e => e.VariantId)
                 .HasMaxLength(20)
+                .HasDefaultValue("")
                 .HasColumnName("variant_id");
             entity.Property(e => e.Name)
                 .HasMaxLength(500)
@@ -409,6 +413,15 @@ public partial class StoreDbContext : IdentityDbContext<User>
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+
+            // Cột PascalCase trên PostgreSQL (không phải snake_case)
+            entity.Property(e => e.Description).HasColumnName("Description");
+            entity.Property(e => e.Barcode).HasColumnName("Barcode");
+            entity.Property(e => e.ManufacturerCode).HasColumnName("ManufacturerCode");
+            entity.Property(e => e.SalePrice)
+                .HasPrecision(18, 2)
+                .HasColumnName("SalePrice");
+            entity.Property(e => e.Weight).HasColumnName("Weight");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProductVariants)
                 .HasForeignKey(d => d.ProductId)
