@@ -15,9 +15,9 @@ public class ChatBotViewComponent : ViewComponent
     public IViewComponentResult Invoke(string? productId = null)
     {
         ViewBag.ProductId = productId ?? "";
-        // SSE streaming endpoint — đọc từ appsettings.json, fallback localhost:8001
-        var ragBaseUrl = _configuration.GetValue<string>("RagSettings:BaseUrl") ?? "http://localhost:8001";
-        ViewBag.RagEndpoint = $"{ragBaseUrl.TrimEnd('/')}/api/rag/chat/stream";
+        // SSE streaming endpoint — relative URL trên cùng domain
+        // Web server proxy request đến RAG nội bộ (tránh CORS + internal DNS)
+        ViewBag.RagEndpoint = "/api/rag/chat/stream";
         return View();
     }
 }

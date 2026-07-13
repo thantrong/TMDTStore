@@ -52,6 +52,12 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.Configure<VietQrSetting>(builder.Configuration.GetSection("VietQr"));
 builder.Services.AddScoped<IVietQrService, VietQrService>();
 
+builder.Services.Configure<RagSettings>(builder.Configuration.GetSection("RagSettings"));
+builder.Services.AddHttpClient("RagProxy", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(60);
+});
+
 builder.Services.AddHostedService<OrderCleanupService>();
 
 var app = builder.Build();
