@@ -22,6 +22,7 @@ public class HomeController : Controller
     {
         // Categories + Brands — chạy tuần tự (DbContext không thread-safe)
         var categories = await _context.Categories
+            .AsNoTracking()
             .Where(c => c.ParentId == null)
             .Include(c => c.InverseParent)
             .OrderBy(c => c.Name)
@@ -29,12 +30,14 @@ public class HomeController : Controller
             .ToListAsync();
 
         var brands = await _context.Brands
+            .AsNoTracking()
             .Where(b => b.IsActive == true)
             .OrderBy(b => b.Name)
             .ToListAsync();
 
         // 1 query duy nhất lấy sản phẩm — dùng AsSplitQuery chống Cartesian Explosion
         var allProducts = await _context.Products
+            .AsNoTracking()
             .AsSplitQuery()
             .Include(p => p.Brand)
             .Include(p => p.ProductBadges)
@@ -44,6 +47,7 @@ public class HomeController : Controller
 
         // 1 query nhẹ tính doanh số thực cho BestSellers
         var salesData = await _context.OrderItems
+            .AsNoTracking()
             .GroupBy(oi => oi.ProductId)
             .Select(g => new { ProductId = g.Key, TotalSold = g.Sum(oi => oi.Quantity) })
             .ToListAsync();

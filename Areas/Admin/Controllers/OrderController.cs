@@ -22,6 +22,7 @@ public class OrderController : Controller
     public async Task<IActionResult> Index(OrderListViewModel model)
     {
         var query = _context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .AsQueryable();
 
@@ -57,6 +58,7 @@ public class OrderController : Controller
     public async Task<IActionResult> Details(string id)
     {
         var order = await _context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .Include(o => o.Voucher)
             .Include(o => o.OrderStatusHistories.OrderByDescending(h => h.ChangedAtUtc))

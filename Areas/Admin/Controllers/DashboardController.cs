@@ -71,11 +71,13 @@ public class DashboardController : Controller
 
         // Doanh thu tháng: query riêng toàn tháng (không lấy từ cửa sổ 7 ngày)
         var monthRevenue = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.Status == "Delivered" && o.CreatedAt >= monthStartUtc)
             .SumAsync(o => (decimal?)o.TotalPrice) ?? 0m;
 
         // Đơn 7 ngày gần nhất (theo giờ VN)
         var allRecentOrders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.CreatedAt >= sevenDaysAgoUtc)
             .Select(o => new
             {
@@ -91,6 +93,7 @@ public class DashboardController : Controller
             .ToListAsync();
 
         var olderStatuses = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.CreatedAt < sevenDaysAgoUtc)
             .GroupBy(o => o.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
@@ -98,8 +101,8 @@ public class DashboardController : Controller
 
         // Top bán chạy: chỉ đơn đã giao
         var topProducts = await (
-            from oi in _context.OrderItems
-            join o in _context.Orders on oi.OrderId equals o.Id
+            from oi in _context.OrderItems.AsNoTracking()
+            join o in _context.Orders.AsNoTracking() on oi.OrderId equals o.Id
             where o.Status == "Delivered"
             group oi by new { oi.ProductId, oi.Name, oi.ImageUrl } into g
             select new TopProductItem
@@ -114,6 +117,7 @@ public class DashboardController : Controller
             .ToListAsync();
 
         var waitingOrders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.Status == "Pending" || o.Status == "WaitingPayment")
             .OrderByDescending(o => o.CreatedAt)
             .Take(5)
@@ -121,6 +125,7 @@ public class DashboardController : Controller
 
         // Đơn gần đây: không giới hạn 7 ngày
         var recentOrders = await _context.Orders
+            .AsNoTracking()
             .OrderByDescending(o => o.CreatedAt)
             .Take(8)
             .ToListAsync();

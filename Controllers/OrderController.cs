@@ -25,6 +25,7 @@ public class OrderController : Controller
     public async Task<IActionResult> Success(string id)
     {
         var order = await _context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .Include(o => o.Voucher)
             .FirstOrDefaultAsync(o => o.Id == id);
@@ -40,6 +41,7 @@ public class OrderController : Controller
         if (user == null) return NotFound();
 
         var orders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.UserId == user.Id)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync();
@@ -54,6 +56,7 @@ public class OrderController : Controller
         if (user == null) return NotFound();
 
         var order = await _context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .Include(o => o.Voucher)
             .Include(o => o.OrderStatusHistories.OrderByDescending(h => h.ChangedAtUtc))
@@ -67,6 +70,7 @@ public class OrderController : Controller
     public async Task<IActionResult> Payment(string id)
     {
         var order = await _context.Orders
+            .AsNoTracking()
             .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == id);
 

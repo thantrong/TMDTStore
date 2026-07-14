@@ -24,10 +24,11 @@ public class ProductController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(ProductListViewModels model)
     {
-        model.Categories = await _context.Categories.ToListAsync();
-        ViewBag.Brands = await _context.Brands.OrderBy(b => b.Name).ToListAsync();
+        model.Categories = await _context.Categories.AsNoTracking().ToListAsync();
+        ViewBag.Brands = await _context.Brands.AsNoTracking().OrderBy(b => b.Name).ToListAsync();
 
         var query = _context.Products
+        .AsNoTracking()
         .Include(p => p.Category)
         .Include(p => p.Brand)
         .Include(p => p.Inventory)
@@ -74,9 +75,9 @@ public class ProductController : Controller
     {
         var model = new ProductCreateViewModels
         {
-            Categories = await _context.Categories.ToListAsync(),
-            Brands = await _context.Brands.ToListAsync(),
-            ProductBadges = (await _context.ProductBadges.ToListAsync())
+            Categories = await _context.Categories.AsNoTracking().ToListAsync(),
+            Brands = await _context.Brands.AsNoTracking().ToListAsync(),
+            ProductBadges = (await _context.ProductBadges.AsNoTracking().ToListAsync())
                 .GroupBy(b => b.Label).Select(g => g.First()).ToList()
         };
         return View(model);

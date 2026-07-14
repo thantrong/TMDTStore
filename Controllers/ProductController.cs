@@ -24,6 +24,7 @@ public class ProductController : Controller
     public async Task<IActionResult> Index(ProductListViewModels model, string? category)
     {
         model.Categories = await _context.Categories
+            .AsNoTracking()
             .Include(c => c.Parent)
             .Include(c => c.InverseParent)
             .ToListAsync();
@@ -54,6 +55,7 @@ public class ProductController : Controller
         ViewBag.CategoryTree = flatTree;
 
         var query = _context.Products
+        .AsNoTracking()
         .Include(p => p.Category)
         .Include(p => p.Brand)
         .Include(p => p.Inventory)
@@ -137,6 +139,7 @@ public class ProductController : Controller
         if (!string.IsNullOrEmpty(slug))
         {
             product = await _context.Products
+                .AsNoTracking()
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Inventory)
@@ -149,6 +152,7 @@ public class ProductController : Controller
         else
         {
             product = await _context.Products
+                .AsNoTracking()
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Inventory)

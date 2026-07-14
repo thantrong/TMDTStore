@@ -37,6 +37,7 @@ public class AccountController : Controller
 
         // Đơn hàng gần đây (5 đơn)
         ViewBag.RecentOrders = await _context.Orders
+            .AsNoTracking()
             .Where(o => o.UserId == userId)
             .OrderByDescending(o => o.CreatedAt)
             .Take(5)
@@ -44,6 +45,7 @@ public class AccountController : Controller
 
         // Đánh giá gần đây (5 đánh giá)
         ViewBag.RecentReviews = await _context.Reviews
+            .AsNoTracking()
             .Include(r => r.Product)
             .Where(r => r.UserId == userId && r.ParentId == null)
             .OrderByDescending(r => r.CreatedAt)
