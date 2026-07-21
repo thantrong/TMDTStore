@@ -127,7 +127,6 @@ public class AuthController : Controller
         return View(model);
     }
 
-    // GET: /Auth/ConfirmEmail
     [HttpGet]
     public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {

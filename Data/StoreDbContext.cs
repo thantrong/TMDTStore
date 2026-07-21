@@ -127,7 +127,6 @@ public partial class StoreDbContext : IdentityDbContext<User>
             entity.Property(e => e.PaymentMethod)
                 .HasMaxLength(50)
                 .HasColumnName("payment_method");
-            entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.TotalPrice)
                 .HasPrecision(18, 2)
                 .HasColumnName("total_price");

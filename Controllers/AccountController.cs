@@ -23,19 +23,16 @@ public class AccountController : Controller
         _context = context;
     }
 
-    // GET: /Account
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return RedirectToAction("Login", "Auth");
 
-        // Thống kê
         var userId = user.Id;
         ViewBag.TotalOrders = await _context.Orders.CountAsync(o => o.UserId == userId && o.Status != "Cancelled");
         ViewBag.TotalReviews = await _context.Reviews.CountAsync(r => r.UserId == userId);
 
-        // Đơn hàng gần đây (5 đơn)
         ViewBag.RecentOrders = await _context.Orders
             .AsNoTracking()
             .Where(o => o.UserId == userId)
@@ -43,7 +40,6 @@ public class AccountController : Controller
             .Take(5)
             .ToListAsync();
 
-        // Đánh giá gần đây (5 đánh giá)
         ViewBag.RecentReviews = await _context.Reviews
             .AsNoTracking()
             .Include(r => r.Product)
@@ -126,7 +122,6 @@ public class AccountController : Controller
         return View(model);
     }
 
-    // GET: /Account/ChangePassword
     [HttpGet]
     public IActionResult ChangePassword()
     {

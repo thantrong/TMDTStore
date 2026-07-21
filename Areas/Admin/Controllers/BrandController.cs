@@ -20,7 +20,6 @@ public class BrandController : Controller
         _cloudinaryService = cloudinaryService;
     }
 
-    // GET: /Admin/Brand
     [HttpGet]
     public async Task<IActionResult> Index(BrandListViewModel model)
     {
@@ -48,14 +47,12 @@ public class BrandController : Controller
         return View(model);
     }
 
-    // GET: /Admin/Brand/Create
     [HttpGet]
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: /Admin/Brand/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Brand model, IFormFile? LogoFile)
@@ -71,7 +68,6 @@ public class BrandController : Controller
         model.Slug = model.Name.ToLower().Replace(" ", "-");
         model.CreatedAt = DateTime.UtcNow;
 
-        // Upload logo nếu có
         if (LogoFile != null && LogoFile.Length > 0)
         {
             try
@@ -98,7 +94,6 @@ public class BrandController : Controller
         return RedirectToAction("Index");
     }
 
-    // GET: /Admin/Brand/Details/{id}
     [HttpGet]
     public async Task<IActionResult> Details(string id)
     {
@@ -110,7 +105,6 @@ public class BrandController : Controller
     }
 
     // GET: /Admin/Brand/Edit/{id}
-    [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
         var brand = await _context.Brands.FindAsync(id);
@@ -119,7 +113,6 @@ public class BrandController : Controller
     }
 
     // POST: /Admin/Brand/Delete/{id}
-    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string id)
     {
@@ -145,7 +138,6 @@ public class BrandController : Controller
 
     // POST: /Admin/Brand/Edit/{id}
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string id, Brand model, IFormFile? LogoFile)
     {
         ModelState.Remove("Slug");
@@ -163,7 +155,6 @@ public class BrandController : Controller
         brand.Description = model.Description;
         brand.IsActive = model.IsActive;
 
-        // Upload logo mới nếu có (giữ logo cũ nếu không upload)
         if (LogoFile != null && LogoFile.Length > 0)
         {
             try

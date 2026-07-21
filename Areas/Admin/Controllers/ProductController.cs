@@ -20,7 +20,6 @@ public class ProductController : Controller
         _context = context;
     }
 
-    // GET: /Admin/Product
     [HttpGet]
     public async Task<IActionResult> Index(ProductListViewModels model)
     {
@@ -68,7 +67,6 @@ public class ProductController : Controller
         return View(model);
     }
 
-    // GET: /Admin/Product/Create
     [HttpGet]
     [Authorize(Roles = "Admin")] // Chỉ Admin
     public async Task<IActionResult> Create()
@@ -103,7 +101,6 @@ public class ProductController : Controller
             .Trim('-');
     }
     // POST: /Admin/Product/Create
-    [HttpPost]
     [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProductCreateViewModels model)
@@ -135,7 +132,6 @@ public class ProductController : Controller
             IsActive = true
         };
 
-        // Tạo Inventory
         product.Inventory = new Inventory
         {
             StockQuantity = model.Quantity,
@@ -181,7 +177,6 @@ public class ProductController : Controller
     }
 
     // GET: /Admin/Product/Details/{id}
-    [HttpGet]
     public async Task<IActionResult> Details(string id)
     {
         var product = await _context.Products
@@ -202,7 +197,6 @@ public class ProductController : Controller
 
     // GET: /Admin/Product/Edit/{id}
     [HttpGet]
-    [Authorize(Roles = "Admin")] // Chỉ Admin
     public async Task<IActionResult> Edit(string id)
     {
         var product = await _context.Products
@@ -277,7 +271,6 @@ public class ProductController : Controller
         product.BrandId = model.BrandId;
         product.CategoryId = model.CategoryId;
 
-        // Cập nhật tồn kho
         var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.ProductId == id);
         if (inventory != null)
         {
@@ -304,13 +297,11 @@ public class ProductController : Controller
                 try { existingUrls = System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.ImageUrls) ?? new(); } catch { }
             }
 
-            // Xoá ảnh nếu người dùng yêu cầu
             if (model.DeleteImageUrls != null && model.DeleteImageUrls.Count > 0)
             {
                 foreach (var deleteUrl in model.DeleteImageUrls)
                 {
                     existingUrls.Remove(deleteUrl);
-                    // Xoá trên Cloudinary (nếu có)
                     try
                     {
                         // Trích xuất public ID từ URL Cloudinary
@@ -360,12 +351,10 @@ public class ProductController : Controller
                 }
             }
 
-            // Lưu danh sách ảnh (cũ + mới)
             product.ImageUrls = System.Text.Json.JsonSerializer.Serialize(existingUrls);
             product.ImageUrl = existingUrls.FirstOrDefault();
         }
 
-        // Cập nhật badges
         product.ProductBadges.Clear();
         if (model.SelectedBadgeIds != null)
         {
@@ -384,7 +373,6 @@ public class ProductController : Controller
         return RedirectToAction("Index");
     }
 
-    // POST: /Admin/Product/ToggleStatus/{id}
     [HttpPost]
     [Authorize(Roles = "Admin")] // Chỉ Admin
     [ValidateAntiForgeryToken]

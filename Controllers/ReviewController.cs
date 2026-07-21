@@ -43,7 +43,6 @@ public class ReviewController : Controller
             return RedirectToAction("Details", "Product", new { id = productId });
         }
 
-        // Check if already reviewed
         var existing = await _context.Reviews
             .FirstOrDefaultAsync(r => r.ProductId == productId && r.UserId == user.Id && r.ParentId == null);
 

@@ -17,7 +17,6 @@ public class OrderController : Controller
         _context = context;
     }
 
-    // GET: /Admin/Order
     [HttpGet]
     public async Task<IActionResult> Index(OrderListViewModel model)
     {
@@ -53,7 +52,6 @@ public class OrderController : Controller
         return View(model);
     }
 
-    // GET: /Admin/Order/Details/{id}
     [HttpGet]
     public async Task<IActionResult> Details(string id)
     {

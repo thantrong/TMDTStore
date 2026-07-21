@@ -20,7 +20,6 @@ public class HomeController : Controller
     [ResponseCache(Duration = 120, Location = ResponseCacheLocation.Client)]
     public async Task<IActionResult> Index()
     {
-        // Categories + Brands — chạy tuần tự (DbContext không thread-safe)
         var categories = await _context.Categories
             .AsNoTracking()
             .Where(c => c.ParentId == null)
@@ -35,7 +34,6 @@ public class HomeController : Controller
             .OrderBy(b => b.Name)
             .ToListAsync();
 
-        // 1 query duy nhất lấy sản phẩm — dùng AsSplitQuery chống Cartesian Explosion
         var allProducts = await _context.Products
             .AsNoTracking()
             .AsSplitQuery()

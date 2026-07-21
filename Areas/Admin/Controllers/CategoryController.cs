@@ -18,7 +18,6 @@ public class CategoryController : Controller
         _context = context;
     }
 
-    // GET: /Admin/Category
     [HttpGet]
     public async Task<IActionResult> Index(string? search)
     {
@@ -101,7 +100,6 @@ public class CategoryController : Controller
         return breadcrumb;
     }
 
-    // GET: /Admin/Category/Create
     [HttpGet]
     public async Task<IActionResult> Create()
     {
@@ -157,7 +155,6 @@ public class CategoryController : Controller
         return RedirectToAction("Index");
     }
 
-    // GET: /Admin/Category/Edit/{id}
     [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
@@ -183,7 +180,6 @@ public class CategoryController : Controller
         return View(model);
     }
 
-    // POST: /Admin/Category/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string id, CategoryEditViewModels model)

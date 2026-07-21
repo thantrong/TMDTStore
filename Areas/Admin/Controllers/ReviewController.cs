@@ -19,7 +19,6 @@ public class ReviewController : Controller
         _userManager = userManager;
     }
 
-    // GET: /Admin/Review
     [HttpGet]
     public async Task<IActionResult> Index(string? search, int page = 1)
     {
@@ -98,7 +97,6 @@ public class ReviewController : Controller
         return RedirectToAction("Index");
     }
 
-    // POST: /Admin/Review/Delete
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string id)
@@ -114,7 +112,6 @@ public class ReviewController : Controller
             return RedirectToAction("Index");
         }
 
-        // Xoá cả reply con
         if (review.InverseParent.Any())
         {
             _context.Reviews.RemoveRange(review.InverseParent);
@@ -122,7 +119,6 @@ public class ReviewController : Controller
 
         _context.Reviews.Remove(review);
 
-        // Cập nhật lại RatingAvg/RatingCount nếu là review gốc
         if (review.ParentId == null && review.ProductId != null)
         {
             var product = await _context.Products

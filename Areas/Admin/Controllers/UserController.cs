@@ -21,7 +21,6 @@ public class UserController : Controller
         _context = context;
     }
 
-    // GET: /Admin/User
     [HttpGet]
     public async Task<IActionResult> Index(string? search, string? role, int page = 1)
     {
@@ -77,7 +76,6 @@ public class UserController : Controller
         return View(users);
     }
 
-    // GET: /Admin/User/Details/{id}
     [HttpGet]
     public async Task<IActionResult> Details(string id)
     {

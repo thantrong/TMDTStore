@@ -16,7 +16,6 @@ public class CartController : Controller
         _context = context;
     }
 
-    // GET: /Cart
     [HttpGet]
     public async Task<IActionResult> Index()
     {

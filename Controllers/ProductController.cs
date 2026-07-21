@@ -5,8 +5,6 @@ using TMDTStore.Models;
 using TMDTStore.Models.ViewModels.Product;
 using TMDTStore.Services.Cloudinary;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 public class ProductController : Controller
 {
@@ -19,7 +17,6 @@ public class ProductController : Controller
         _context = context;
     }
 
-    // GET: /Product
     [HttpGet]
     public async Task<IActionResult> Index(ProductListViewModels model, string? category)
     {
@@ -29,7 +26,6 @@ public class ProductController : Controller
             .Include(c => c.InverseParent)
             .ToListAsync();
 
-        // Nếu có slug từ route {category}, lookup CategoryId từ slug
         if (!string.IsNullOrEmpty(category))
         {
             var catBySlug = model.Categories.FirstOrDefault(c => c.Slug == category);
@@ -64,10 +60,8 @@ public class ProductController : Controller
         .Where(p => p.IsActive == true)
         .AsQueryable();
 
-        // Filter theo CategoryId
         if (!string.IsNullOrEmpty(model.CategoryId))
         {
-            // Lấy tất cả ID danh mục con (đệ quy)
             var categoryIds = new List<string> { model.CategoryId };
             void GetChildIds(string parentId)
             {

@@ -20,7 +20,6 @@ public class VariantController : Controller
         _cloudinaryService = cloudinaryService;
     }
 
-    // GET: /Admin/Variant/Index/{productId}
     [HttpGet]
     public async Task<IActionResult> Index(string productId, string? search, int page = 1)
     {
@@ -53,7 +52,6 @@ public class VariantController : Controller
         return View(variants);
     }
 
-    // GET: /Admin/Variant/Create/{productId}
     [HttpGet]
     public async Task<IActionResult> Create(string productId)
     {
@@ -64,7 +62,6 @@ public class VariantController : Controller
         return View(new VariantCreateViewModel { ProductId = productId });
     }
 
-    // POST: /Admin/Variant/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(VariantCreateViewModel model)
@@ -144,7 +141,6 @@ public class VariantController : Controller
         return RedirectToAction("Index", new { productId = model.ProductId });
     }
 
-    // GET: /Admin/Variant/Edit/{id}
     [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {

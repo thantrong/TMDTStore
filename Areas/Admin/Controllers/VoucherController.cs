@@ -16,7 +16,6 @@ public class VoucherController : Controller
         _context = context;
     }
 
-    // GET: /Admin/Voucher
     [HttpGet]
     public async Task<IActionResult> Index(string? search, int page = 1)
     {
@@ -44,7 +43,6 @@ public class VoucherController : Controller
         return View(vouchers);
     }
 
-    // GET: /Admin/Voucher/Create
     [HttpGet]
     public IActionResult Create()
     {
@@ -56,7 +54,6 @@ public class VoucherController : Controller
         });
     }
 
-    // POST: /Admin/Voucher/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Voucher model)
@@ -70,7 +67,6 @@ public class VoucherController : Controller
             return View(model);
         }
 
-        // Kiểm tra code trùng
         var exists = await _context.Vouchers.AnyAsync(v => v.Code == model.Code);
         if (exists)
         {
@@ -91,7 +87,6 @@ public class VoucherController : Controller
     }
 
     // GET: /Admin/Voucher/Edit/{id}
-    [HttpGet]
     public async Task<IActionResult> Edit(string id)
     {
         var voucher = await _context.Vouchers.FindAsync(id);
@@ -101,7 +96,6 @@ public class VoucherController : Controller
 
     // POST: /Admin/Voucher/Edit/{id}
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string id, Voucher model)
     {
         if (id != model.Id) return NotFound();
@@ -112,7 +106,6 @@ public class VoucherController : Controller
         var voucher = await _context.Vouchers.FindAsync(id);
         if (voucher == null) return NotFound();
 
-        // Kiểm tra code trùng (trừ chính nó)
         var exists = await _context.Vouchers.AnyAsync(v => v.Code == model.Code && v.Id != id);
         if (exists)
         {
