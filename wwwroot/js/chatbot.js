@@ -175,6 +175,8 @@
     html = html.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-100 text-slate-800 text-[12px]">$1</code>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>');
     html = html.replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+    html = html.replace(/\*\*/g, "");
+    html = html.replace(/(^|[\s(])\*(?=\S)/g, "$1");
     return html;
   }
 
