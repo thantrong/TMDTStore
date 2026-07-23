@@ -17,7 +17,7 @@
   const CONV_KEY = "tvt_chat_conv";
   const OPEN_KEY = "tvt_chat_open";
   const VERSION_KEY = "tvt_chat_ui_ver";
-  const UI_VERSION = "2026-07-10-v5";
+  const UI_VERSION = "2026-07-23-v6";
 
   const store = window.localStorage;
 
@@ -167,9 +167,165 @@
 
   function formatBotHtml(text) {
     const cleaned = cleanAnswerText(text);
-    let html = escapeHtml(cleaned);
-    html = html.replace(/\n/g, "<br>");
+    return markdownToHtml(cleaned);
+  }
+
+  function formatInlineMarkdown(text) {
+    let html = escapeHtml(text || "");
+    html = html.replace(/`([^`]+)`/g, '<code class="px-1 py-0.5 rounded bg-slate-100 text-slate-800 text-[12px]">$1</code>');
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>');
+    html = html.replace(/(^|[\s(])\*([^*\n]+)\*/g, '$1<em>$2</em>');
     return html;
+  }
+
+  function isTableSeparator(line) {
+    return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line || "");
+  }
+
+  function parseTableRow(line) {
+    let value = (line || "").trim();
+    if (value.startsWith("|")) value = value.slice(1);
+    if (value.endsWith("|")) value = value.slice(0, -1);
+    return value.split("|").map(function (cell) {
+      return cell.trim();
+    });
+  }
+
+  function renderTable(lines, startIndex) {
+    const headers = parseTableRow(lines[startIndex]);
+    const rows = [];
+    let i = startIndex + 2;
+    while (i < lines.length && /\|/.test(lines[i]) && lines[i].trim()) {
+      rows.push(parseTableRow(lines[i]));
+      i++;
+    }
+
+    const headHtml = headers
+      .map(function (h) {
+        return '<th class="px-2 py-1.5 text-left font-semibold text-slate-700 border-b border-slate-200">' + formatInlineMarkdown(h) + "</th>";
+      })
+      .join("");
+
+    const bodyHtml = rows
+      .map(function (row) {
+        return (
+          "<tr>" +
+          headers
+            .map(function (_, idx) {
+              return '<td class="px-2 py-1.5 align-top border-b border-slate-100">' + formatInlineMarkdown(row[idx] || "") + "</td>";
+            })
+            .join("") +
+          "</tr>"
+        );
+      })
+      .join("");
+
+    return {
+      html:
+        '<div class="my-2 overflow-x-auto rounded-lg border border-slate-200 bg-white">' +
+        '<table class="min-w-full text-[12px] leading-snug">' +
+        "<thead><tr>" +
+        headHtml +
+        "</tr></thead><tbody>" +
+        bodyHtml +
+        "</tbody></table></div>",
+      nextIndex: i,
+    };
+  }
+
+  function flushParagraph(parts, paragraph) {
+    if (!paragraph.length) return;
+    parts.push(
+      '<p class="my-1.5">' +
+        formatInlineMarkdown(paragraph.join(" ").trim()) +
+        "</p>"
+    );
+    paragraph.length = 0;
+  }
+
+  function markdownToHtml(text) {
+    const lines = (text || "").replace(/\r\n/g, "\n").split("\n");
+    const parts = [];
+    const paragraph = [];
+    let listItems = [];
+    let listType = "";
+
+    function flushList() {
+      if (!listItems.length) return;
+      const tag = listType === "ol" ? "ol" : "ul";
+      const cls = tag === "ol" ? "list-decimal" : "list-disc";
+      parts.push(
+        '<' + tag + ' class="' + cls + ' pl-4 my-1.5 space-y-1">' +
+          listItems
+            .map(function (item) {
+              return "<li>" + formatInlineMarkdown(item) + "</li>";
+            })
+            .join("") +
+          "</" + tag + ">"
+      );
+      listItems = [];
+      listType = "";
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        flushParagraph(parts, paragraph);
+        flushList();
+        continue;
+      }
+
+      if (/\|/.test(trimmed) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+        flushParagraph(parts, paragraph);
+        flushList();
+        const table = renderTable(lines, i);
+        parts.push(table.html);
+        i = table.nextIndex - 1;
+        continue;
+      }
+
+      const heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
+      if (heading) {
+        flushParagraph(parts, paragraph);
+        flushList();
+        const sizeClass = heading[1].length <= 2 ? "text-[14px]" : "text-[13px]";
+        parts.push(
+          '<p class="mt-2 mb-1 font-semibold text-slate-900 ' +
+            sizeClass +
+            '">' +
+            formatInlineMarkdown(heading[2]) +
+            "</p>"
+        );
+        continue;
+      }
+
+      if (/^[-*_]{3,}$/.test(trimmed)) {
+        flushParagraph(parts, paragraph);
+        flushList();
+        parts.push('<hr class="my-2 border-slate-200">');
+        continue;
+      }
+
+      const unordered = trimmed.match(/^[-*•]\s+(.+)$/);
+      const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+      if (unordered || ordered) {
+        flushParagraph(parts, paragraph);
+        const nextType = ordered ? "ol" : "ul";
+        if (listType && listType !== nextType) flushList();
+        listType = nextType;
+        listItems.push((unordered || ordered)[1]);
+        continue;
+      }
+
+      flushList();
+      paragraph.push(trimmed);
+    }
+
+    flushParagraph(parts, paragraph);
+    flushList();
+    return parts.join("");
   }
 
   function formatPrice(price) {
@@ -331,6 +487,7 @@
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let streamDone = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -343,7 +500,10 @@
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           const raw = line.slice(6);
-          if (raw === "[DONE]") continue;
+          if (raw === "[DONE]") {
+            streamDone = true;
+            break;
+          }
 
           try {
             const data = JSON.parse(raw);
@@ -369,6 +529,8 @@
             /* ignore bad SSE chunk */
           }
         }
+
+        if (streamDone) break;
       }
     } catch (err) {
       console.error("ChatBot error:", err);
