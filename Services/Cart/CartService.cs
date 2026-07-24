@@ -46,7 +46,6 @@ public class CartService : ICartService
     {
         var cart = GetCart();
         var key = variantId ?? productId;
-
         var existing = cart.FirstOrDefault(i => (i.VariantId ?? i.ProductId) == key);
         if (existing != null)
         {

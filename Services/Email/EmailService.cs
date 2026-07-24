@@ -40,7 +40,6 @@ public class EmailService : IEmailService
         );
 
         var response = await _httpClient.SendAsync(request);
-
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync();

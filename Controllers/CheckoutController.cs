@@ -165,7 +165,7 @@ public class CheckoutController : Controller
                     {
                         discountAmount = appliedVoucher.DiscountValue;
                     }
-                    else // percentage
+                    else 
                     {
                         discountAmount = cartTotal * appliedVoucher.DiscountValue / 100;
                         if (appliedVoucher.MaxDiscountAmount.HasValue && discountAmount > appliedVoucher.MaxDiscountAmount.Value)

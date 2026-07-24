@@ -22,10 +22,6 @@ public class RagProxyController : Controller
         _logger = logger;
     }
 
-    /// <summary>
-    /// Proxy SSE streaming từ RAG service.
-    /// Browser gọi endpoint này (cùng domain), web server forward nội bộ đến RAG.
-    /// </summary>
     [HttpPost("stream")]
     public async Task Stream()
     {

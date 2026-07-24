@@ -38,8 +38,10 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Auth/Logout";
 });
 
-var emailSetting = builder.Configuration.GetSection("EmailSettings").Get<EmailSetting>()
-    ?? throw new InvalidOperationException("EmailSettings not configured");
+var emailSetting = builder
+        .Configuration
+        .GetSection("EmailSettings").Get<EmailSetting>()
+        ?? throw new InvalidOperationException("EmailSettings not configured");
 builder.Services.AddSingleton(emailSetting);
 builder.Services.AddHttpClient<IEmailService, EmailService>(client =>
 {
@@ -71,11 +73,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
